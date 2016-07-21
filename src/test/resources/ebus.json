@@ -1,0 +1,46 @@
+{
+	"busClassName": "net.segoia.event.eventbus.FilteringEventBus",
+	"defaultEventConfig": {
+		"loggingOn": true,
+		"loggingLevel": "INFO"
+	},
+	"eventRightsManager": {
+		"eventAllowedCondition": {
+			"id": "eventsAllowedCond",
+			"ctype": "not",
+			"conditions": [
+				{
+					"id": "bannedEventsCond",
+					"ctype": "or",
+					"conditions": [
+						{
+							"id": "bannedEvent1",
+							"et": "BANNED::"
+						},
+						{
+							"id": "bannedEvent2",
+							"et": ":EXECUTING:"
+						}
+					]
+				}
+			]
+		}
+	},
+	"conditions": {
+		"cond1": {
+			"id": "cond1",
+			"et": "app:message:user-login"
+		}
+	},
+	"listeners": {
+		"list1": {
+			"instance": {
+				"className": "net.segoia.event.eventbus.listeners.logging.LoggingEventListener",
+				"loggerFactory": {
+					"className": "net.segoia.util.logging.Log4jLoggerFactory"
+				}
+			},
+			"priority": 99
+		}
+	}
+}
