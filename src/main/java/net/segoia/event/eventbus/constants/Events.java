@@ -18,6 +18,8 @@ public class Events {
 	public static final String ALERT="ALERT";
 	public static final String EVENT="EVENT";
 	public static final String ACTION="ACTION";
+	public static final String REQUEST="REQUEST";
+	public static final String SESSION="SESSION";
 	public static final String EXECUTING="EXECUTING";
 	public static final String EXECUTED="EXECUTED";
     }
@@ -29,6 +31,7 @@ public class Events {
 	public static final String TERMINATED="TERMINATED";
 	public static final String EXECUTING="EXECUTING";
 	public static final String EXECUTED="EXECUTED";
+	public static final String AUTHENTICATED = "AUTHENTICATED";
     }
       
     public static DefaultEventBuilder builder() {

@@ -95,7 +95,7 @@ public class EventTest {
 	
 	Event e2 = Events.builder().spawnFrom(new EventContext(e1, null)).app().message().name("test2").build();
 	
-	Assert.assertEquals(e1.getId(), e2.getCauseEventId());
+	Assert.assertEquals(e1.getId(), e2.causeEventId());
 	
 	Assert.assertTrue(e1.getSpawnedEventsIds().contains(e2.getId()));
     }

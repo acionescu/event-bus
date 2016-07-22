@@ -5,6 +5,14 @@ public class CustomEventBuilder extends EventBuilder {
     public CustomEventBuilder() {
 	super(new EventBuilderContext());
     }
+    
+    
+
+    public CustomEventBuilder(EventBuilderContext context) {
+	super(context);
+    }
+
+
 
     /*
      * (non-Javadoc)

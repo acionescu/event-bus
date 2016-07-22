@@ -19,4 +19,8 @@ public class AppEventBuilder extends ScopeRestrictedEventBuilder {
     public CategoryRestrictedEventBuilder alert() {
 	return category(Events.CATEGORY.ALERT);
     }
+    
+    public DefaultComponentCategory session() {
+	return new DefaultComponentCategory(context, Events.CATEGORY.SESSION);
+    }
 }

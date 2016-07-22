@@ -32,4 +32,9 @@ public class EventHandle {
     public Event event() {
 	return eventContext.event();
     }
+    
+    public EventHandle addParam(String key, Object value) {
+	eventContext.event().addParam(key, value);
+	return this;
+    }
 }

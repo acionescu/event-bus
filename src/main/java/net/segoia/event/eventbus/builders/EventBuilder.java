@@ -1,6 +1,8 @@
 package net.segoia.event.eventbus.builders;
 
 import net.segoia.event.eventbus.Event;
+import net.segoia.event.eventbus.EventHandle;
+import net.segoia.event.eventbus.util.EBus;
 
 public abstract class EventBuilder {
 
@@ -30,6 +32,14 @@ public abstract class EventBuilder {
 	context.setTopic(topic);
 	return this;
     }
+    
+    protected EventBuilderContext newContext(int thresholdDepth) {
+	/* this prevents overwriting the template context, and also unnecessary duplication */
+	if(context.getDepth()>=thresholdDepth) {
+	    return context;
+	}
+	return context.copy();
+    }
 
     public Event build() {
 
@@ -57,5 +67,9 @@ public abstract class EventBuilder {
 
     private Event build(String scope, String category, String name, Event cause, String topic) {
 	return new Event(scope, category, name, cause, topic);
+    }
+    
+    public EventHandle getHandle() {
+	return EBus.getHandle(build());
     }
 }

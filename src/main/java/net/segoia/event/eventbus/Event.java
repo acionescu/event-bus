@@ -220,7 +220,7 @@ public class Event extends AbstractEvent {
 	return category;
     }
 
-    public String getCauseEventId() {
+    public String causeEventId() {
 	return header.getCauseEventId();
     }
 
@@ -288,8 +288,8 @@ public class Event extends AbstractEvent {
 	    builder.append("id=").append(id).append(", ");
 	if (et != null)
 	    builder.append("et=").append(et).append(", ");
-	if (getCauseEventId() != null)
-	    builder.append("getCauseEventId()=").append(getCauseEventId()).append(", ");
+	if (causeEventId() != null)
+	    builder.append("causeEventId=").append(causeEventId()).append(", ");
 	if (topic != null)
 	    builder.append("topic=").append(topic).append(", ");
 	builder.append("ts=").append(ts).append(", ");
