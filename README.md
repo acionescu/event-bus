@@ -134,7 +134,7 @@ With the above structure at hand, we can do this :
 * logging can be done via a specialized EventListener that will log events according to the configuration file
 * we can control the logging level of a particular event type by setting in the configuration file a parameter "logLevel:INFO" for that event
 * we can also control the logging of all events marked with a certain tag, or in a specific category
-* this kind of system allows to selectively enable logging and logging level for certain kinds of events, so its very flexible
+* this kind of system allows to selectively enable logging and logging level for certain kinds of events, so it's very flexible
 * it may further be used with a standard logging system or on its own
 
 
