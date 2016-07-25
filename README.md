@@ -117,7 +117,7 @@ In order to allow for this feature, we may structure an event like this :
    * to mark and event. Then these marks/tags can by associated with a certain functionality
    * to easily filter an event
    * to provide a way to handle security, for example tags may only be writable from code providing the developer the
-   ability to ensure that certain functionality and data is no exposed to unprivileged users ( e.g. we can mark an event
+   ability to ensure that certain functionality and data is not exposed to unprivileged users ( e.g. we can mark an event
    as private and thus we prevent outside modification of header params ) 
    
 
@@ -129,7 +129,7 @@ With the above structure at hand, we can do this :
 
 * logging can be done via a specialized EventListener that will log events according to the configuration file
 * we can control the logging level of a particular event type by setting in the configuration file a parameter "logLevel:INFO" for that event
-* we can also control the logging of all events marked with a certain tag
+* we can also control the logging of all events marked with a certain tag, or in a specific category
 * this kind of system allows to selectively enable logging and logging level for certain kinds of events, so its very flexible
 * it may further be used with a standard logging system or on its own
 
@@ -192,7 +192,7 @@ EventHandle eh = Events.builder().spawnFrom(causeEvent).scope("my event scope").
 	}
 ```
 
-Where `causeEvent` is a previous event that logically, was the cause of the current event being triggered.
+Where `causeEvent` is a previous event that, logically, was the cause of the current event being triggered.
 
 
 #How would the configuration look like ? 
