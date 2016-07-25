@@ -24,7 +24,7 @@ the system, even how the system itself is running :
 
 * If you spend some time capturing information in a relevant point of the application, make sure you're doing it in the most generic and useful way possible
 
-* You can always generated logs from events then the other way around
+* You can always generate logs from events then the other way around
 
 * The system gets to be more decoupled when using an event driven approach
 
