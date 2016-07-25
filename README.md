@@ -22,8 +22,10 @@ the system, event how the system itself is running :
 	
 * Events are structured, actionable, storable, distributable, generally more *able then logs 
 
+* If you spend some time capturing information in a relevant point of the application, make sure you're doing it in the most generic and useful way possible
+
 * You can always generated logs from events then the other way around
-	
+
 * The system gets to be more decoupled when using an event driven approach
 
 * More flexibility and control without altering the existing code ( just add more listeners on your events, or tweak the configuration file ) 
@@ -262,4 +264,4 @@ This also disallows some events from being propagated through the bus.
 }
 ```
 
-Of course many more listeners doing different stuff can be added. We may add a listener that stores the events in a database, or that sends an email when a particular event happens, or who knows.
+Of course, many more listeners doing different stuff can be added. We may add a listener that stores the events in a database, or that sends an email when a particular event happens, or who knows.
