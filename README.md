@@ -15,7 +15,7 @@ Then, any party concerned can register one or more generic or specialized listen
 #Why
 
 * We live in the age of big data, when we want to collect events about everything, to better understand certain aspects of
-the system, event how the system itself is running : 
+the system, even how the system itself is running : 
 
 	* tech driven stuff ( monitoring, performance analysis, debugging, etc )
 	* business driven stuff ( analytics )
@@ -31,6 +31,8 @@ the system, event how the system itself is running :
 * More flexibility and control without altering the existing code ( just add more listeners on your events, or tweak the configuration file ) 
 
 * Be prepared for scaling ( an event driven architecture is easier to scale )
+
+* It simply is much more elegant 
  
  #How does an event needs to look like ? 
  
