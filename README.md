@@ -32,6 +32,18 @@ the system, even how the system itself is running :
 
 * Be prepared for scaling ( an event driven architecture is easier to scale )
 
+* In many cases it makes testing much more easier - make sure you fire the right events in the right places, and then simply listen for the expected events, and then just fire a TEST:PASSED event if you like :)  
+
+* To recap: with the events in place you can: 
+	*  test
+	*  log
+	*  extend
+	*  distribute
+	*  scale
+	*  control
+	*  analyze
+	*  be happier
+
 * It simply is much more elegant 
  
  #How does an event needs to look like ? 
@@ -250,7 +262,7 @@ This also disallows some events from being propagated through the bus.
 			"priority": 0   /* it helps to call the logging listener first so we can see the events in the order in which they are triggered */
 		},
 		"list2" : {
-			"instance" : {
+			"instance" : { /* a test listener */
 				"className" : "net.segoia.event.eventbus.test.TestEventListener",
 				"echoOn":true,
 				"listenerKey" : "userLoginEchoKey"
