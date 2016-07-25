@@ -243,6 +243,15 @@ public class Event extends AbstractEvent {
     public String getName() {
 	return name;
     }
+    
+    
+
+    /**
+     * @return the topic
+     */
+    public String getTopic() {
+        return topic;
+    }
 
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()

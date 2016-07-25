@@ -16,25 +16,28 @@
  */
 package net.segoia.event.eventbus.config.json;
 
-import java.util.List;
-
-import com.google.gson.JsonObject;
-
+import net.segoia.event.conditions.Condition;
 import net.segoia.event.eventbus.EventListener;
+import net.segoia.event.eventbus.FilteringEventBus;
 
 public class EventListenerJsonConfig{
     
     private EventListener instance;
-    private List<String> conditions;
-    private int priority;
-    
-    
+    private Condition condition;
     /**
-     * @return the conditions
+     * The priority of the condition filter among other event bus top level listeners
+     * @see FilteringEventBus#registerListener(Condition, int, EventListener, int)
      */
-    public List<String> getConditions() {
-        return conditions;
-    }
+    private int condPriority=-1;
+    /**
+     * The priority of this listener among other listeners registered for this condition, or among other top level 
+     * listeners in case no condition was specified
+     * @see FilteringEventBus#registerListener(Condition, int, EventListener, int)
+     */
+    private int priority=-1;
+    
+    
+    
     /**
      * @return the priority
      */
@@ -42,12 +45,7 @@ public class EventListenerJsonConfig{
         return priority;
     }
     
-    /**
-     * @param conditions the conditions to set
-     */
-    public void setConditions(List<String> conditions) {
-        this.conditions = conditions;
-    }
+    
     /**
      * @param priority the priority to set
      */
@@ -65,6 +63,38 @@ public class EventListenerJsonConfig{
      */
     public void setInstance(EventListener instance) {
         this.instance = instance;
+    }
+
+
+    /**
+     * @return the condition
+     */
+    public Condition getCondition() {
+        return condition;
+    }
+
+
+    /**
+     * @param condition the condition to set
+     */
+    public void setCondition(Condition condition) {
+        this.condition = condition;
+    }
+
+
+    /**
+     * @return the condPriority
+     */
+    public int getCondPriority() {
+        return condPriority;
+    }
+
+
+    /**
+     * @param condPriority the condPriority to set
+     */
+    public void setCondPriority(int condPriority) {
+        this.condPriority = condPriority;
     }
     
     

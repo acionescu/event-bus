@@ -26,6 +26,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
+import net.segoia.event.conditions.Condition;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventHandle;
 import net.segoia.event.eventbus.EventListener;
@@ -61,8 +62,12 @@ public class EBus {
 			EventListener listenerInstance = lc.getInstance();
 			listenerInstance.init();
 			
-			if(lc.getConditions() == null) {
+			Condition lcond = lc.getCondition();
+			if(lcond == null) {
 			    bus.registerListener(listenerInstance, lc.getPriority());
+			}
+			else {
+			    bus.registerListener(lcond, lc.getCondPriority(), listenerInstance, lc.getPriority());
 			}
 			
 		    }

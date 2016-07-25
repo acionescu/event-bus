@@ -35,6 +35,14 @@ public class StrictEventMatchCondition extends LooseEventMatchCondition {
     public StrictEventMatchCondition(String id) {
 	super(id);
     }
+    
+    
+
+    public StrictEventMatchCondition(String id, String et) {
+	super(id);
+	this.et = et;
+    }
+
 
     @Override
     public boolean test(EventContext input) {

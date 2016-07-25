@@ -68,20 +68,20 @@ public abstract class EventBuilder {
 	return build(context.getScope(), context.getCategory(), context.getName(), topic);
     }
 
-    private Event build(String scope, String category, String name) {
+    protected Event build(String scope, String category, String name) {
 
 	return build(scope, category, name, null, null);
     }
 
-    private Event build(String scope, String category, String name, Event cause) {
+    protected Event build(String scope, String category, String name, Event cause) {
 	return build(scope, category, name, cause, null);
     }
 
-    private Event build(String scope, String category, String name, String topic) {
+    protected Event build(String scope, String category, String name, String topic) {
 	return build(scope, category, name, null, topic);
     }
 
-    private Event build(String scope, String category, String name, Event cause, String topic) {
+    protected Event build(String scope, String category, String name, Event cause, String topic) {
 	return new Event(scope, category, name, cause, topic);
     }
     

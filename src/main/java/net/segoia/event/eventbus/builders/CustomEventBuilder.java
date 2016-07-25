@@ -16,6 +16,8 @@
  */
 package net.segoia.event.eventbus.builders;
 
+import net.segoia.event.eventbus.Event;
+
 public class CustomEventBuilder extends EventBuilder {
 
     public CustomEventBuilder() {
@@ -40,6 +42,15 @@ public class CustomEventBuilder extends EventBuilder {
 	return new ScopeRestrictedEventBuilder(context, scope);
     }
 
-    
+    /* (non-Javadoc)
+     * @see net.segoia.event.eventbus.builders.EventBuilder#build(java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public Event build(String scope, String category, String name) {
+	// TODO Auto-generated method stub
+	return super.build(scope, category, name);
+    }
+
+   
 
 }

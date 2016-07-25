@@ -19,8 +19,11 @@ package net.segoia.event.eventbus.test;
 import org.junit.Test;
 
 import junit.framework.Assert;
+import net.segoia.event.conditions.Condition;
+import net.segoia.event.conditions.StrictEventMatchCondition;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventBusConfig;
+import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.EventHandle;
 import net.segoia.event.eventbus.EventTypeConfig;
 import net.segoia.event.eventbus.FilteringEventBus;
@@ -81,4 +84,60 @@ public class EventBusLoaderTest {
 
     }
 
+    @Test
+    public void testCondListenerLoad() {
+	
+	EventHandle eh1 = Events.builder().app().user().login().getHandle();
+	
+	
+	
+	EventHandle eh2 = Events.builder().app().user().logout().getHandle();
+	
+	
+	
+	final Event trackedEvent = eh1.event();
+	
+	String echoListenerKey ="userLoginEchoKey";
+	
+	
+	TestEventListener tl = new TestEventListener();
+	
+	tl.setTestCondition(new Condition("tc") {
+
+	    @Override
+	    public boolean test(EventContext input) {
+		Event ce = input.event();
+		if(!ce.causeEventId().equals(trackedEvent.getId())) {
+		    return false;
+		}
+		if(!ce.getEt().equals("TEST:TEST:ECHO")) {
+		    return false;
+		}
+		if(!ce.getTopic().equals(echoListenerKey)) {
+		    return false;
+		}
+		
+		return true;
+	    }
+	    
+	    
+	});
+	
+	EBus.instance().registerListener(new StrictEventMatchCondition("tlc","TEST:TEST:ECHO"), tl);
+	
+	
+	eh1.post();
+	eh2.post();
+	
+	
+	
+	/* check that our listener actually received an echo from the listener registered for APP:USER:LOGIN event */
+	Assert.assertTrue(tl.isConditionSatisfied());
+	
+	/* check that no echo was received for the other event type */
+	Assert.assertEquals(1,tl.getEventsForType("TEST:TEST:ECHO").size());
+	
+	
+    }
+    
 }

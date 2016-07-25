@@ -49,9 +49,9 @@ public class FilteringEventBus extends SimpleEventBus {
     /**
      * Registers a listener for a particular condition with a given priority for the condition listener and the final listener 
      * @param condition
-     * @param cPriority - condition listener priority
+     * @param cPriority - the priority of the condition filter among other event bus top level listeners
      * @param listener
-     * @param lPriority - final listener priority
+     * @param lPriority - final listener priority, among other listeners registered for this condition
      */
     public void registerListener(Condition condition, int cPriority, EventListener listener, int lPriority) {
 	getListenerForCondition(condition, cPriority).registerListener(listener, lPriority);

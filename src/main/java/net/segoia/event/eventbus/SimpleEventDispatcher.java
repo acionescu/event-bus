@@ -86,7 +86,11 @@ public class SimpleEventDispatcher implements EventDispatcher {
     public void registerListener(EventListener listener, int priority) {
 	WriteLock writeLock = lock.writeLock();
 	writeLock.lock();
-	listeners.add(priority, listener);
+	if (priority >= 0) {
+	    listeners.add(priority, listener);
+	} else {
+	    listeners.add(listeners.size(), listener);
+	}
 	writeLock.unlock();
 
     }

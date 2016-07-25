@@ -20,16 +20,14 @@
 						{
 							"id": "bannedEvent2",
 							"et": ":EXECUTING:"
+						},
+						{
+							"id": "bannedEvent3",
+							"et": "COMP1:OPERATION:OPERATION_X"
 						}
 					]
 				}
 			]
-		}
-	},
-	"conditions": {
-		"cond1": {
-			"id": "cond1",
-			"et": "app:message:user-login"
 		}
 	},
 	"listeners": {
@@ -40,7 +38,20 @@
 					"className": "net.segoia.util.logging.Log4jLoggerFactory"
 				}
 			},
-			"priority": 99
+			"priority": 0
+		},
+		"list2" : {
+			"instance" : {
+				"className" : "net.segoia.event.eventbus.test.TestEventListener",
+				"echoOn":true,
+				"listenerKey" : "userLoginEchoKey"
+			},
+			"priority" : 10,
+			"condition" : {
+				"id" : "userLoginCond",
+				"et" :"APP:USER:LOGIN"
+				},
+			"condPriority" : 50
 		}
 	}
 }

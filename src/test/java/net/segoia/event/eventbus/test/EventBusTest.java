@@ -119,44 +119,6 @@ public class EventBusTest {
 
     }
 
-    class TestEventListener implements EventListener {
-
-	private Map<Event, Long> events = new HashMap<>();
-
-	@Override
-	public void onEvent(EventContext ec) {
-	    synchronized (events) {
-		events.put(ec.getEvent(), System.currentTimeMillis());
-	    }
-	    try {
-		Thread.sleep(1);
-	    } catch (InterruptedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	    }
-	}
-
-	public boolean hasReceivedEvent(Event e) {
-	    return events.containsKey(e);
-	}
-
-	public Long getReceivedTs(Event e) {
-	    return events.get(e);
-	}
-
-	@Override
-	public void init() {
-	    // TODO Auto-generated method stub
-	    
-	}
-
-	@Override
-	public void terminate() {
-	    // TODO Auto-generated method stub
-	    
-	}
-    }
-
     @Test
     @Ignore // takes too long
     public void testConcurrentPosts() {
