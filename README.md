@@ -187,7 +187,7 @@ EventHandle eh = Events.builder().app().user().login().getHandle();
 	    }
 ```
 
-You could also spawn an event from another event, which will allow later to inspect a certain sequence of events: 
+You could also spawn an event from another event, which will allow later inspection of a certain sequence of events: 
 
 ```
 EventHandle eh = Events.builder().spawnFrom(causeEvent).scope("my event scope").category(" a category ").name("an event").getHandle();
