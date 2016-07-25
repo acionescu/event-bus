@@ -24,7 +24,7 @@ the system, event how the system itself is running :
 
 * You can always generated logs from events then the other way around
 	
-* Allows you more decoupling through event driven programming
+* The system gets to be more decoupled when using an event driven approach
 
 * More flexibility and control without altering the existing code ( just add more listeners on your events, or tweak the configuration file ) 
 
@@ -42,8 +42,9 @@ the system, event how the system itself is running :
  * easy to be distributed in a cluster / easy to be transmitted over the network
  * persistable 
  * restorable 
- * trackable - it would be very useful to track an event's passing through the system
- * correlation - it would also be useful to see what generated an event ( maybe another event ) and what events were generated from one event
+ * trackable 
+ 	* it would be very useful to track an event's passing through the system
+ 	* it would also be useful to see what generated an event ( maybe another event ) and what events were generated from one event
  * immutable once posted to the bus or restored from storage
  
  
@@ -66,7 +67,7 @@ the system, event how the system itself is running :
  
  * The application itself - maybe one component needs to notify another component of a certain event
  * A developer, for debugging and verification purposes
- * A sysadmin to monitor the correct functioning and performance of the application, or to detect security issues
+ * A sysadmin, to monitor the correct functioning and performance of the application, or to detect security issues
  * A product manager, in order to draw insight from user's behavior and the success of a certain feature or the app as a whole
  
  
@@ -97,19 +98,17 @@ the system, event how the system itself is running :
 - The whole bus configuration 
 
 
-So by now, it's clear that we need an external, static configuration that offers a certain level of control.
-The limitation of this is that it's static, and will remain the same for the whole operation of the application.
+So by now, it's clear that we need an external, static configuration, that offers a certain level of control.
+The limitation is that it's static, and will remain the same for the whole operation of the application.
 
 We may want a dynamic mechanism as well, through which some components can alter the way in which an event is processed during runtime.
 
-
-In order to allow for this feature as well, we may structure an event like this :  
+In order to allow for this feature, we may structure an event like this :  
  
- * the main body which bears the main information and which is closed for modification after posting to the bus
+ * the main body, which bears the main information and which is closed for modification after posting to the bus
  * a header, that would hold the meta information which controls how an event should be treated by various components in 
- a system
- * the header may also be used to track the passing of an event through the system and its correlation with other events
- 
+ a system, and that can be altered by various listeners
+ * it may also be used to track the passing of an event through the system and its correlation with other events
  
  The header may consist of :
  
@@ -119,14 +118,14 @@ In order to allow for this feature as well, we may structure an event like this 
    * to easily filter an event
    * to provide a way to handle security, for example tags may only be writable from code providing the developer the
    ability to ensure that certain functionality and data is no exposed to unprivileged users ( e.g. we can mark an event
-   as private and thus we prevent outside modification of header params via a configuration file ) 
+   as private and thus we prevent outside modification of header params ) 
    
 
 ## Now coming back to the original question :  
 
 How would we control logging of an event ? 
 
-With the above structure at hand we can do this : 
+With the above structure at hand, we can do this : 
 
 * logging can be done via a specialized EventListener that will log events according to the configuration file
 * we can control the logging level of a particular event type by setting in the configuration file a parameter "logLevel:INFO" for that event
@@ -164,7 +163,7 @@ if(logger.isDebugEnabled()){
 }
 ```
 
-you will have : 
+you can use : 
 
 ```
  EventHandle eh = EBus.getHandle(eventBuilder.executing().name("some operation").build());
@@ -173,7 +172,7 @@ you will have :
 	}
 ```
 
-or something like this : 
+or, in a more generic way : 
 
 ```
 EventHandle eh = Events.builder().app().user().login().getHandle();
@@ -237,14 +236,14 @@ This also disallows some events from being propagated through the bus.
 		}
 	},
 	"listeners": {
-		"list1": {
+		"list1": { /* the logging listener */
 			"instance": {
 				"className": "net.segoia.event.eventbus.listeners.logging.LoggingEventListener",
-				"loggerFactory": {
+				"loggerFactory": {  /* we delegate logging to log4j */
 					"className": "net.segoia.util.logging.Log4jLoggerFactory"
 				}
 			},
-			"priority": 0   /* it helps to call the logging listener first so we can see the events in the order they are triggered */
+			"priority": 0   /* it helps to call the logging listener first so we can see the events in the order in which they are triggered */
 		},
 		"list2" : {
 			"instance" : {
@@ -255,7 +254,7 @@ This also disallows some events from being propagated through the bus.
 			"priority" : 10,
 			"condition" : {    /* we can register a listener to be called only for events satisfying a certain condition */
 				"id" : "userLoginCond",
-				"et" :"APP:USER:LOGIN"
+				"et" :"APP:USER:LOGIN"  
 				},
 			"condPriority" : 50
 		}
