@@ -56,15 +56,15 @@ the system, even how the system itself is running :
  
  * unique event type, maybe built as a combination of a `scope`, `category`, `name`
  * current process information ( meant for technical staff ) 
-  * what component
-  * what thread
-  * process context parameters ( id, agent ( who is running the process ), others )
-  * system resources allocation/availability
+	  * what component
+	  * what thread
+	  * process context parameters ( id, agent ( who is running the process ), others )
+	  * system resources allocation/availability
  * app context information ( meant for app logic and product team )
-  * client/user info
-  * session
-  * user agent
-  * current app state
+	  * client/user info
+	  * session
+	  * user agent
+	  * current app state
  
  
  ##Who would be interested in a certain event ? 
