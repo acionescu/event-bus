@@ -40,9 +40,9 @@ the system, event how the system itself is running :
  * easy to be filtered from multiple perspectives: logging, analytics, processing, security
  * support for security : we probably want to have a way to control access of different parties to our events
  * easy to be distributed in a cluster / easy to be transmitted over the network
- * persistable - easy to persist
- * restorable - easy to restore from a persisted form
- * tracking - it would be very useful to track an event's passing through the system
+ * persistable 
+ * restorable 
+ * trackable - it would be very useful to track an event's passing through the system
  * correlation - it would also be useful to see what generated an event ( maybe another event ) and what events were generated from one event
  * immutable once posted to the bus or restored from storage
  
