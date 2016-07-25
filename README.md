@@ -59,8 +59,7 @@ Posting events and registering listeners can be done via the EBus instance, whic
  Well, the main event information can only be controlled by the developer, from the code. Only there this kind of info 
  is available and can be added to the event. So this cannot be debated. 
  
- However, the meta information, which specifies how an event should be treated and further processed through the system,
- can and should be configurable from outside the code ( e.g. from a configuration file ) 
+ However, the meta information, which specifies how an event should be treated and further processed through the system, or if an event should be fired at all, can and should be configurable from outside the code ( e.g. from a configuration file ). 
  
  I also see the usefulness of a sysadmin being able to request for a particular event more informations about the state of the system when this event was generated. The way in which this could be done should be further discussed, however I see two possible approaches: either adding more info to the original event, or generate another event with additional data that can be directly linked with the original one.
  
@@ -79,17 +78,18 @@ But, let's make a list with the aspects that we want to control from an external
 
 - The whole bus configuration 
 
+
+
+So by now, it's clear that we need an external, static configuration that offers a certain level of control.
+The limitation of this is that it's static, and will remain the same for the whole operation of the application.
+
+We may want a dynamic mechanism as well, through which some components can alter the way in which an event is processed during runtime.
+
+
+In order to allowe for this feature as well, we may structure an event like this :  
  
- 
- 
- 
- 
- 
- 
- By now it's probably evident that for an event we want basically to internal structures : 
- 
- * the main body which bears the main information
- * a header that would hold the meta information which controls how an event should be treated by various components in 
+ * the main body which bears the main information and which is closed for modification after posting to the bus
+ * a header, that would hold the meta information which controls how an event should be treated by various components in 
  a system
  * the header may also be used to track the passing of an event through the system and its correlation with other events
  
@@ -104,9 +104,6 @@ But, let's make a list with the aspects that we want to control from an external
    ability to ensure that certain functionality and data is no exposed to unprivileged users ( e.g. we can mark an event
    as private and thus we prevent outside modification of header params via a configuration file ) 
    
-   
-The header parameters for each event type can be configured, if allowed, from outside the app via a configuration file. 
-This way we provide a flexible mechanism to control different behaviors.
 
 Now coming back to the original question :  
 
@@ -123,37 +120,3 @@ With the above structure at hand we can do this :
 
 
 
-   
-   
-TODO:
-
-we have scope - system, app, ...
-we may have category : for example for scope system we may have category error or message, or alert
-   
-
-
-Should the header be set on Event or on the EventContext ? 
-
-
-    
-
- 
- 
- 
-Make postEvent return on EventTracker that allows the poster to track the event
-
-add method on EventContext that gets an EventListener as parameter an let it call the onEvent on the listener
-this allows the EventContext to track its passage through the system 
- 
- 
-Configuring the Event Bus from a json file
- 
- 
- 
- 
- 
- 
-Ability to control what events could be posted from the configuration file
- 
- 
- 

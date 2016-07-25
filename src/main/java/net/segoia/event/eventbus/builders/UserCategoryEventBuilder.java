@@ -14,21 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus;
+package net.segoia.event.eventbus.builders;
 
-/**
- * Dispatches an event to the registered listeners
- * 
- * @author adi
- *
- */
-public interface EventDispatcher {
+import net.segoia.event.eventbus.constants.Events;
 
-    boolean dispatchEvent(EventContext ec);
+public class UserCategoryEventBuilder extends CategoryRestrictedEventBuilder{
 
-    void registerListener(EventListener listener);
+    public UserCategoryEventBuilder(EventBuilderContext context) {
+	super(context, Events.CATEGORY.USER);
+    }
 
-    void registerListener(EventListener listener, int priority);
-
-    void removeListener(EventListener listener);
+    
+    public EventBuilder login() {
+	return name(Events.ACTIONS.LOGIN);
+    }
+    
+    public EventBuilder logout() {
+	return name(Events.ACTIONS.LOGOUT);
+    }
+    
 }
