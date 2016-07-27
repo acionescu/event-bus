@@ -252,6 +252,25 @@ public class Event extends AbstractEvent {
     public String getTopic() {
         return topic;
     }
+    
+    
+    
+    public void addRelay(String busNodeId) {
+	header.addRelay(busNodeId);
+    }
+
+    /**
+     * @return the sourceBusId
+     */
+    public String getSourceBusId() {
+       return header.getSourceBusId();
+    }
+    
+    public boolean wasRelayedBy(String busNodeId) {
+	return header.wasRelayedBy(busNodeId);
+    }
+    
+    
 
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()

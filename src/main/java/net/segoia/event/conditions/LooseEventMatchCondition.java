@@ -24,6 +24,35 @@ public class LooseEventMatchCondition extends Condition{
     public LooseEventMatchCondition(String id) {
 	super(id);
     }
+    
+    public LooseEventMatchCondition(String id, boolean extract) {
+	super(id);
+	if(extract) {
+	    String scope = null;
+		String category = null;
+		String name = null;
+		
+		String[] etArray = id.split(":");
+		int alen = etArray.length;
+
+		if (alen > 0) {
+		    scope = (etArray[0].isEmpty()) ? null : etArray[0];
+		}
+		if (alen > 1) {
+		    category = (etArray[1].isEmpty()) ? null : etArray[1];
+		}
+		if (alen > 2) {
+		    name = (etArray[2].isEmpty()) ? null : etArray[2];
+		}
+
+		
+		    setScope(scope);
+		    setCategory(category);
+		    setName(name);
+
+	}
+    }
+
 
 
     private String scope;

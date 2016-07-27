@@ -33,7 +33,7 @@ public class StrictEventMatchCondition extends LooseEventMatchCondition {
     private Map<String, Object> params;
 
     public StrictEventMatchCondition(String id) {
-	super(id);
+	this(id,id);
     }
     
     

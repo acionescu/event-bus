@@ -25,6 +25,8 @@ public class Events {
     public static final class SCOPE {
 	public static String SYSTEM="SYSTEM";
 	public static String APP="APP";
+	/* events concerning the bus itself */
+	public static String EBUS="EBUS";
     }
     
     
@@ -39,6 +41,7 @@ public class Events {
 	public static final String EXECUTING="EXECUTING";
 	public static final String EXECUTED="EXECUTED";
 	public static final String USER="USER";
+	public static final String RESPONSE="RESPONSE";
     }
     
     public static final class ACTIONS {
@@ -51,6 +54,8 @@ public class Events {
 	public static final String AUTHENTICATED = "AUTHENTICATED";
 	public static final String LOGIN="LOGIN";
 	public static final String LOGOUT="LOGOUT";
+	public static final String VISIT="VISIT";
+	public static final String CHANGED="CHANGED";
     }
       
     public static DefaultEventBuilder builder() {

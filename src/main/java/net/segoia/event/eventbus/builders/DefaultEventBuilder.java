@@ -39,6 +39,10 @@ public class DefaultEventBuilder extends CustomEventBuilder{
 	return new AppEventBuilder(newContext(1));
     }
     
+    public EbusEventsBuilder ebus() {
+	return new EbusEventsBuilder(newContext(1));
+    }
+    
     public DefaultEventBuilder spawnFrom( EventContext ec) {
 	return spawnFrom(ec.event());
     }

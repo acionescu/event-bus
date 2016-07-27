@@ -49,6 +49,9 @@ public class DefaultComponentCategory extends EventBuilder {
 	return super.name(Events.ACTIONS.EXECUTED);
     }
     
+    public EventBuilder changed() {
+	return super.name(Events.ACTIONS.CHANGED);
+    }
     
     /* (non-Javadoc)
      * @see net.segoia.event.eventbus.builders.EventBuilder#name(java.lang.String)

@@ -20,7 +20,6 @@ public class EventTracker {
     private EventContext eventContext;
     private boolean posted;
     
-    
     public EventTracker(EventContext eventContext, boolean posted) {
 	super();
 	this.eventContext = eventContext;
@@ -36,5 +35,11 @@ public class EventTracker {
     }
     
     
+    public boolean hasErrors() {
+	return eventContext.hasErrors();
+    }
     
+    public Exception getFirstError() {
+	return eventContext.getErrorStack().pop();
+    }
 }

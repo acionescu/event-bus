@@ -16,8 +16,10 @@
  */
 package net.segoia.event.eventbus;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,6 +44,14 @@ public class EventHeader {
      * Holds the ids of the events that were triggered by this event
      */
     private Set<String> spawnedEventsIds = new HashSet<>();
+    
+    
+    private String sourceBusId;
+    
+    /**
+     * Each time this event is forwarded to another bus, the relaying bus id is added here
+     */
+    private List<String> relayedBy = new ArrayList<>();
     
     public EventHeader() {
 	params = new HashMap<>();
@@ -116,4 +126,21 @@ public class EventHeader {
         return spawnedEventsIds;
     }
     
+    public void addRelay(String busNodeId) {
+	relayedBy.add(busNodeId);
+	if(sourceBusId == null) {
+	    sourceBusId = busNodeId;
+	}
+    }
+
+    /**
+     * @return the sourceBusId
+     */
+    public String getSourceBusId() {
+        return sourceBusId;
+    }
+    
+    public boolean wasRelayedBy(String busNodeId) {
+	return relayedBy.contains(busNodeId);
+    }
 }

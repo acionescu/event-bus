@@ -25,9 +25,9 @@ import net.segoia.util.data.ListMap;
 import net.segoia.util.data.ListTreeMapFactory;
 
 /**
- * This dispatcher will call the {@link EventListener#onEvent(EventContext)} method sequentially on all the registered
+ * This dispatcher will call the {@link EventContext#visitListener(EventListener)} method sequentially for all the registered
  * listeners </br>
- * All processing will be done in a single Thread, so each on onEvent call will block execution until finished
+ * All processing will be done in a single Thread, so each visitListener call will block execution until finished
  * 
  * @author adi
  *

@@ -16,8 +16,6 @@
  */
 package net.segoia.event.eventbus;
 
-import net.segoia.event.eventbus.constants.Events;
-
 /**
  * This is a simple {@link EventBus} implementation that will process the posted events sequentially, by delegating to
  * the registered {@link EventListener}(s). </br>

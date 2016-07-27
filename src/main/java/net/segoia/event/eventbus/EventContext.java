@@ -60,6 +60,7 @@ public class EventContext {
 	    listener.onEvent(this);
 	} catch (Exception e) {
 	    pushError(e);
+	    e.printStackTrace();
 	}
     }
     
@@ -80,6 +81,10 @@ public class EventContext {
     
     public boolean hasErrors() {
 	return (errorStack != null);
+    }
+    
+    public Deque<Exception> getErrorStack(){
+	return errorStack;
     }
 
     public Event event() {
