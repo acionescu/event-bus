@@ -21,45 +21,44 @@ import net.segoia.event.eventbus.EventContext;
 
 public class LooseEventMatchCondition extends Condition{
     
-    public LooseEventMatchCondition(String id) {
-	super(id);
-    }
-    
-    public LooseEventMatchCondition(String id, boolean extract) {
-	super(id);
-	if(extract) {
-	    String scope = null;
-		String category = null;
-		String name = null;
-		
-		String[] etArray = id.split(":");
-		int alen = etArray.length;
-
-		if (alen > 0) {
-		    scope = (etArray[0].isEmpty()) ? null : etArray[0];
-		}
-		if (alen > 1) {
-		    category = (etArray[1].isEmpty()) ? null : etArray[1];
-		}
-		if (alen > 2) {
-		    name = (etArray[2].isEmpty()) ? null : etArray[2];
-		}
-
-		
-		    setScope(scope);
-		    setCategory(category);
-		    setName(name);
-
-	}
-    }
-
 
 
     private String scope;
     private String category;
     private String name;
     
+    public LooseEventMatchCondition(String id) {
+	super(id);
+    }
     
+
+    public static LooseEventMatchCondition build(String scope, String category, String name) {
+	StringBuffer idSb = new StringBuffer();
+	if(scope != null) {
+	    idSb.append(scope);
+	}
+	idSb.append(Event.etSep);
+	if(category != null) {
+	    idSb.append(category);
+	}
+	idSb.append(Event.etSep);
+	if(name != null) {
+	    idSb.append(name);
+	}
+	
+	LooseEventMatchCondition c = new LooseEventMatchCondition(idSb.toString());
+	c.scope = scope;
+	c.category=category;
+	c.name = name;
+	
+	return c;
+    }
+    
+    public static LooseEventMatchCondition build(String scope, String category) {
+	return build(scope,category,null);
+    }
+    
+
     @Override
     public boolean test(EventContext input) {
 	Event e = input.getEvent();

@@ -158,7 +158,12 @@ public class TestEventListener implements EventListener {
     public boolean isConditionSatisfied() {
         return conditionSatisfied;
     }
-    
-    
+
+    /**
+     * @return the events
+     */
+    public Map<Event, Long> getEvents() {
+        return events;
+    }
 
 }

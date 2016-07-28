@@ -1,8 +1,5 @@
 package net.segoia.event.eventbus.peers;
 
-import net.segoia.event.conditions.Condition;
-import net.segoia.event.conditions.LooseEventMatchCondition;
-import net.segoia.event.conditions.StrictEventMatchCondition;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.EventListener;
@@ -33,19 +30,13 @@ public class LocalEventBusRelay extends EventBusRelay implements EventListener{
 
     @Override
     public void init() {
-	registerForCondition(new LooseEventMatchCondition("EBUS:CLUSTER:",true));
+	bus.registerListener(this,999);
     }
 
 
     @Override
     public void terminate() {
-	// TODO Auto-generated method stub
-	
-    }
-
-    @Override
-    public void registerForCondition(Condition condition) {
-	bus.registerListener(condition,this);
+	bus.removeListener(this);
 	
     }
     

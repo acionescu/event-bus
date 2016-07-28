@@ -9,8 +9,8 @@ public class EbusEventsBuilder extends ScopeRestrictedEventBuilder{
     }
     
     
-    public ClusterCategoryEventBuilder cluster() {
-	return new ClusterCategoryEventBuilder(context);
+    public EbusPeerCategoryEventBuilder peer() {
+	return new EbusPeerCategoryEventBuilder(context);
     }
 
 }

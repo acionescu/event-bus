@@ -9,6 +9,8 @@ public abstract class EventBusRelay {
     private String id;
     
     private EventBusNode parentNode;
+    
+    private Condition forwardingCondition;
 
     public EventBusRelay(String id, EventBusNode parentNode) {
 	this.id=id;
@@ -33,28 +35,45 @@ public abstract class EventBusRelay {
 	this.peerRelay = peerRelay;
 	peerRelay.peerRelay = this;
     }
-
-
+    
+    
     protected void onLocalEvent(EventContext ec) {
 	forwardEvent(ec);
     }
     
     protected void forwardEvent(EventContext ec) {
-	if(parentNode.isEventForwardingAllowed(ec, peerRelay.getId())) {
-	    Event event = ec.event();
-	    event.addRelay(getId());
-	    peerRelay.onRemoteEvent(event);
+	if(parentNode.isEventForwardingAllowed(ec, peerRelay.getParentNodeId()) && isForwardingAllowed(ec)) {
+	    sendEvent(ec.event());
 	}
     }
     
+    protected boolean isForwardingAllowed(EventContext ec) {
+	return (forwardingCondition != null && forwardingCondition.test(ec));
+    }
+    
+    protected void sendEvent(Event event) {
+	    event.addRelay(getParentNodeId());
+	    peerRelay.onRemoteEvent(event);
+    }
+    
     protected void onRemoteEvent(Event event) {
+	receiveEvent(event);
+    }
+    
+    protected void receiveEvent(Event event) {
 	postInternally(event);
     }
     
     protected abstract void postInternally(Event event);
     
-    protected abstract void registerForCondition(Condition condition);
-
+    protected void setForwardingCondition(Condition condition) {
+	forwardingCondition = condition;
+    }
+    
+    public String getParentNodeId() {
+	return parentNode.getId();
+    }
+    
     protected abstract void init();
     
     protected abstract void terminate();

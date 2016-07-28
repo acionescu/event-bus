@@ -19,7 +19,7 @@ import net.segoia.event.eventbus.constants.Events;
 public abstract class EventBusNode {
     private String id;
     private EventBusNodeConfig config = new EventBusNodeConfig();
-    
+
     private Map<String, EventBusRelay> peers = new HashMap<>();
 
     public EventBusNode() {
@@ -33,32 +33,60 @@ public abstract class EventBusNode {
     }
 
     public void registerPeer(EventBusNode peerNode) {
-	getRelayForPeer(peerNode, true);
+	registerPeer(new PeeringRequest(peerNode));
     }
-    
+
     public void registerPeer(EventBusNode peerNode, Condition condition) {
-	EventBusRelay localRelay = getRelayForPeer(peerNode, true);
-	localRelay.registerForCondition(condition);	
+	registerPeer(new PeeringRequest(peerNode,condition));
+    }
+
+    public void registerPeer(PeeringRequest request) {
+	 getRelayForPeer(request, true);
     }
     
-    protected EventBusRelay getRelayForPeer(EventBusNode peerNode, boolean create) {
+    protected boolean setRelayForwardingCondition(EventBusRelay relay, Condition condition) {
+	//TODO: check if the condition is allowed by this node
+	 relay.setForwardingCondition(condition);
+	 return true;
+    }
+
+    protected EventBusRelay getRelayForPeer(PeeringRequest req, boolean create) {
+	EventBusNode peerNode = req.getRequestingNode();
 	EventBusRelay localRelay = getPeer(peerNode.getId());
 
 	if (localRelay == null && create) {
-	    localRelay = addPeer(peerNode);
-	    EventBusRelay remoteRelay = peerNode.addPeer(this);
+	    localRelay = addPeer(req);
+	    EventBusRelay remoteRelay = peerNode.addPeer(new PeeringRequest(this));
 	    localRelay.bind(remoteRelay);
-	    
-	    Event nne = Events.builder().ebus().cluster().newNode().topic(getId()).build();
-	    
+
+	    Event nne = Events.builder().ebus().peer().newPeer().topic(getId()).build();
+
 	    nne.addParam("peerId", peerNode.getId());
-	    
+
 	    postInternally(nne);
 	}
-	
+	else {
+	    /* if the relay exists, check it the condition has changed */
+	    setRelayForwardingCondition(localRelay, req.getEventsCondition());
+	}
+
 	return localRelay;
     }
     
+    
+
+    protected EventBusRelay addPeer(PeeringRequest req) {
+	EventBusNode peerNode = req.getRequestingNode();
+	String peerId = generatePeerId();
+	EventBusRelay localRelay = buildLocalRelay(peerId);
+	peers.put(peerNode.getId(), localRelay);
+	localRelay.init();
+	
+	setRelayForwardingCondition(localRelay, req.getEventsCondition());
+
+	return localRelay;
+    }
+
     protected abstract EventTracker postInternally(Event event);
 
     protected String generatePeerId() {
@@ -69,29 +97,22 @@ public abstract class EventBusNode {
 	return peers.get(id);
     }
 
-    protected EventBusRelay addPeer(EventBusNode peerNode) {
-	String peerId = generatePeerId();
-	EventBusRelay localRelay = buildLocalRelay(peerId, peerNode);
-	peers.put(peerNode.getId(), localRelay);
-	localRelay.init();
-	
-	return localRelay;
-    }
-    
     public boolean isEventForwardingAllowed(EventContext ec, String peerId) {
 	Event event = ec.event();
 	/* if this wasn't forwarded allow it */
-	if(event.getSourceBusId() == null ) {
+	String sourceBusId = event.sourceBusId();
+	if (sourceBusId == null || sourceBusId.equals(id)) {
 	    return true;
 	}
-	else if(config.isAutoRelayEanbled() && !event.wasRelayedBy(peerId)) {
+	/* don't forward an event to a peer that already relayed that event */
+	else if (config.isAutoRelayEanbled() && !event.wasRelayedBy(peerId)) {
 	    return true;
 	}
-	
+
 	return false;
     }
 
-    protected abstract EventBusRelay buildLocalRelay(String peerId, EventBusNode peerNode);
+    protected abstract EventBusRelay buildLocalRelay(String peerId);
 
     /**
      * @return the id

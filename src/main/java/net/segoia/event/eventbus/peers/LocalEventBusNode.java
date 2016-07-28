@@ -17,8 +17,8 @@ public class LocalEventBusNode extends EventBusNode{
     }
 
     @Override
-    protected EventBusRelay buildLocalRelay(String peerId, EventBusNode peerNode) {
-	return new LocalEventBusRelay(peerId, this, bus);
+    protected EventBusRelay buildLocalRelay(String peerId) {
+	return new LocalEventBusRelay(peerId, this, bus );
     }
 
     @Override

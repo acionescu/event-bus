@@ -4,7 +4,9 @@ import org.junit.Test;
 
 import junit.framework.Assert;
 import net.segoia.event.conditions.StrictEventMatchCondition;
+import net.segoia.event.conditions.TrueCondition;
 import net.segoia.event.eventbus.Event;
+import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.FilteringEventBus;
 import net.segoia.event.eventbus.constants.Events;
 import net.segoia.event.eventbus.peers.LocalEventBusNode;
@@ -28,8 +30,9 @@ public class DistributionTest {
 	
 	LocalEventBusNode mainNode = new LocalEventBusNode(EBus.instance());
 	
-	node1.registerPeer(mainNode);
-	node2.registerPeer(mainNode);
+	/* register main node on all events */
+	node1.registerPeer(mainNode, new TrueCondition());
+	node2.registerPeer(mainNode , new TrueCondition());
 	
 	node1.registerPeer(node2);
 	
@@ -49,7 +52,8 @@ public class DistributionTest {
 	
 	
 	/* register node2 for the type of event e1 */
-	node1.registerPeer(node2,new StrictEventMatchCondition(e1.getEt()));
+	StrictEventMatchCondition tec = new StrictEventMatchCondition(e1.getEt());
+	node1.registerPeer(node2,tec);
 	
 	Event e2 = Events.builder().system().message().name("test").build();
 	
@@ -64,7 +68,7 @@ public class DistributionTest {
 	
 	Assert.assertFalse(tl1.hasReceivedEvent(e3));
 	
-	node2.registerPeer(node1, new StrictEventMatchCondition(e1.getEt()));
+	node2.registerPeer(node1, tec);
 	
 	b2.postEvent(e3);
 	

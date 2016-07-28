@@ -279,3 +279,23 @@ This also disallows some events from being propagated through the bus.
 ```
 
 Of course, many more listeners doing different stuff can be added. We may add a listener that stores the events in a database, or that sends an email when a particular event happens, or who knows.
+
+
+#Distributing events
+
+
+## What is it that we want to achieve ?
+
+	* Distribute events between any number of bus instances organized as nodes
+	* The distribution has to work regardless of the medium separating the instances (same machine, same network, the internet )
+	* Transmission and reception of events has to be controlled by security rules
+	* The network should be decentralized
+
+
+###Security: 
+	- what kind of messages should be forwarded to a peer
+	- should a peer be accepted at all
+	
+
+
+

@@ -167,6 +167,10 @@ public class Event extends AbstractEvent {
     public Object getHeaderParam(String key) {
 	return header.getParam(key);
     }
+    
+    public void addHeaderParam(String key, Object value) {
+	header.addParam(key, value);
+    }
 
     public Event tag(String tag) {
 	header.addTag(tag);
@@ -262,12 +266,20 @@ public class Event extends AbstractEvent {
     /**
      * @return the sourceBusId
      */
-    public String getSourceBusId() {
+    public String sourceBusId() {
        return header.getSourceBusId();
     }
     
     public boolean wasRelayedBy(String busNodeId) {
 	return header.wasRelayedBy(busNodeId);
+    }
+    
+    public String lastRelay() {
+	return header.lastRelay();
+    }
+    
+    public int relayHops() {
+	return header.relayHops();
     }
     
     
@@ -327,6 +339,15 @@ public class Event extends AbstractEvent {
 	    builder.append("et=").append(et).append(", ");
 	if (causeEventId() != null)
 	    builder.append("causeEventId=").append(causeEventId()).append(", ");
+	if (sourceBusId() != null)
+	    builder.append("sourceBusId=").append(sourceBusId()).append(", ");
+	builder.append("relayHops=").append(relayHops()).append(", ");
+	if (scope != null)
+	    builder.append("scope=").append(scope).append(", ");
+	if (category != null)
+	    builder.append("category=").append(category).append(", ");
+	if (name != null)
+	    builder.append("name=").append(name).append(", ");
 	if (topic != null)
 	    builder.append("topic=").append(topic).append(", ");
 	builder.append("ts=").append(ts).append(", ");
@@ -335,6 +356,30 @@ public class Event extends AbstractEvent {
 	builder.append("]");
 	return builder.toString();
     }
+
+//    /* (non-Javadoc)
+//     * @see java.lang.Object#toString()
+//     */
+//    @Override
+//    public String toString() {
+//	StringBuilder builder = new StringBuilder();
+//	builder.append("Event [");
+//	if (super.toString() != null)
+//	    builder.append("toString()=").append(super.toString()).append(", ");
+//	if (id != null)
+//	    builder.append("id=").append(id).append(", ");
+//	if (et != null)
+//	    builder.append("et=").append(et).append(", ");
+//	if (causeEventId() != null)
+//	    builder.append("causeEventId=").append(causeEventId()).append(", ");
+//	if (topic != null)
+//	    builder.append("topic=").append(topic).append(", ");
+//	builder.append("ts=").append(ts).append(", ");
+//	if (params != null)
+//	    builder.append("params=").append(params);
+//	builder.append("]");
+//	return builder.toString();
+//    }
 
     
 }

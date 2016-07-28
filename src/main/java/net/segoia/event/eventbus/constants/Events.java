@@ -42,6 +42,7 @@ public class Events {
 	public static final String EXECUTED="EXECUTED";
 	public static final String USER="USER";
 	public static final String RESPONSE="RESPONSE";
+	public static final String PEER="PEER";
     }
     
     public static final class ACTIONS {
@@ -56,6 +57,8 @@ public class Events {
 	public static final String LOGOUT="LOGOUT";
 	public static final String VISIT="VISIT";
 	public static final String CHANGED="CHANGED";
+	public static final String NEW="NEW";
+	public static final String REMOVED="REMOVED";
     }
       
     public static DefaultEventBuilder builder() {
