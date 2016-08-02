@@ -22,7 +22,7 @@ public class LifecycledEventBus extends FilteringEventBus {
     public static final String START_DISPATCH = "start_dispatch";
     public static final String END_DISPATCH = "end_dispatch";
 
-    public EventTracker postEvent(Event event, EventListener lifecycleEventListener) {
+    public InternalEventTracker postEvent(Event event, EventListener lifecycleEventListener) {
 	return super.postEvent(event, lifecycleEventListener);
     }
 
@@ -33,13 +33,13 @@ public class LifecycledEventBus extends FilteringEventBus {
      * @return
      */
     @Override
-    protected EventTracker postEvent(EventContext ec) {
+    protected InternalEventTracker postEvent(EventContext ec) {
 	if (ec.hasLifecycleListener()) {
 	    Event startDispatchEvent = Events.builder().system().event().name(START_DISPATCH)
 		    .topic(ec.getEvent().getId()).build();
 	    ec.sendLifecycleEvent(buildEventContext(startDispatchEvent));
 	}
-	EventTracker tracker = super.postEvent(ec);
+	InternalEventTracker tracker = super.postEvent(ec);
 	if (ec.hasLifecycleListener()) {
 	    Event endDispatchEvent = Events.builder().system().event().name(END_DISPATCH).topic(ec.getEvent().getId())
 		    .build();

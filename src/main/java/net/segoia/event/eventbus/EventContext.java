@@ -127,7 +127,7 @@ public class EventContext {
      * @param event
      * @return
      */
-    public EventTracker postEvent(Event event) {
+    public InternalEventTracker postEvent(Event event) {
 	return eventBus.postEvent(event);
     }
 }

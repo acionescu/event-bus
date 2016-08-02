@@ -31,14 +31,21 @@ public abstract class EventBusRelay {
         return id;
     }
     
+    /**
+     * Connects this relay with a remote relay
+     * @param peerRelay
+     */
     public void bind(EventBusRelay peerRelay) {
 	this.peerRelay = peerRelay;
 	peerRelay.peerRelay = this;
     }
     
-    
-    protected void onLocalEvent(EventContext ec) {
+    public void onLocalEvent(EventContext ec) {
 	forwardEvent(ec);
+    }
+    
+    protected void onRemoteEvent(Event event) {
+	receiveEvent(event);
     }
     
     protected void forwardEvent(EventContext ec) {
@@ -56,15 +63,10 @@ public abstract class EventBusRelay {
 	    peerRelay.onRemoteEvent(event);
     }
     
-    protected void onRemoteEvent(Event event) {
-	receiveEvent(event);
-    }
-    
     protected void receiveEvent(Event event) {
-	postInternally(event);
+	parentNode.handleRemoteEvent(new PeerEventContext(this, event));
     }
     
-    protected abstract void postInternally(Event event);
     
     protected void setForwardingCondition(Condition condition) {
 	forwardingCondition = condition;
@@ -72,6 +74,10 @@ public abstract class EventBusRelay {
     
     public String getParentNodeId() {
 	return parentNode.getId();
+    }
+    
+    public String getRemoteNodeId() {
+	return peerRelay.getParentNodeId();
     }
     
     protected abstract void init();

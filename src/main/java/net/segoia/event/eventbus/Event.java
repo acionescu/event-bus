@@ -21,10 +21,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import net.segoia.event.eventbus.util.JsonUtils;
+
 public class Event extends AbstractEvent {
     public static final String etSep = ":";
 
-    private transient EventHeader header = new EventHeader();
+    private EventHeader header = new EventHeader();
 
 
     /**
@@ -126,6 +128,21 @@ public class Event extends AbstractEvent {
 
 	this(scope, category, name, cause);
 	this.topic = topic;
+    }
+    
+    
+    public static Event fromJson(String json) {
+		
+	Event e = JsonUtils.fromJson(json, Event.class);
+	if(e.header == null) {
+	    e.header=new EventHeader();
+	}
+	e.close();
+	return e;
+    }
+    
+    public String toJson() {
+	return JsonUtils.toJson(this);
     }
 
     protected void lazyInit() {
@@ -274,14 +291,19 @@ public class Event extends AbstractEvent {
 	return header.wasRelayedBy(busNodeId);
     }
     
-    public String lastRelay() {
-	return header.lastRelay();
-    }
     
     public int relayHops() {
 	return header.relayHops();
     }
     
+    
+    public void to(String nodeId) {
+	header.to(nodeId);
+    }
+    
+    public String to() {
+	return header.to();
+    }
     
 
     /* (non-Javadoc)
@@ -341,13 +363,9 @@ public class Event extends AbstractEvent {
 	    builder.append("causeEventId=").append(causeEventId()).append(", ");
 	if (sourceBusId() != null)
 	    builder.append("sourceBusId=").append(sourceBusId()).append(", ");
+	if(to() != null)
+	    builder.append("to=").append(to()).append(", ");
 	builder.append("relayHops=").append(relayHops()).append(", ");
-	if (scope != null)
-	    builder.append("scope=").append(scope).append(", ");
-	if (category != null)
-	    builder.append("category=").append(category).append(", ");
-	if (name != null)
-	    builder.append("name=").append(name).append(", ");
 	if (topic != null)
 	    builder.append("topic=").append(topic).append(", ");
 	builder.append("ts=").append(ts).append(", ");

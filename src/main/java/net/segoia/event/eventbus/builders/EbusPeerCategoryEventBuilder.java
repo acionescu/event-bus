@@ -12,5 +12,13 @@ public class EbusPeerCategoryEventBuilder extends CategoryRestrictedEventBuilder
 	return super.name(Events.ACTIONS.NEW);
 	
     }
+    
+    public EventBuilder peerRemoved() {
+	return super.name(Events.ACTIONS.REMOVED);
+    }
+    
+    public EventBuilder init() {
+	return super.name(Events.ACTIONS.INIT);
+    }
 
 }

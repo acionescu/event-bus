@@ -29,20 +29,20 @@ public class SimpleEventBus implements EventBus {
     protected EventDispatcher eventDispatcher = new SimpleEventDispatcher();
     private EventBusConfig config = new EventBusConfig();
 
-    public EventTracker postEvent(Event event) {
+    public InternalEventTracker postEvent(Event event) {
 	EventContext ec = buildEventContext(event);
 	return postEvent(ec,getHandle(ec) );
     }
     
-    protected EventTracker postEvent(Event event, EventListener lifecycleEventListener) {
+    protected InternalEventTracker postEvent(Event event, EventListener lifecycleEventListener) {
 	EventContext ec = buildEventContext(event, lifecycleEventListener);
 	return postEvent(ec, getHandle(ec));
     }
 
-    protected EventTracker postEvent(EventContext ec) {
+    protected InternalEventTracker postEvent(EventContext ec) {
 	prepareEventForPosting(ec.getEvent());
 	boolean posted = dispatchEvent(ec);
-	return new EventTracker(ec, posted);
+	return new InternalEventTracker(ec, posted);
     }
 
     protected void prepareEventForPosting(Event event) {
@@ -73,11 +73,11 @@ public class SimpleEventBus implements EventBus {
     }
 
     @Override
-    public EventTracker postEvent(EventContext eventContext, EventHandle eventHandle) {
+    public InternalEventTracker postEvent(EventContext eventContext, EventHandle eventHandle) {
 	if (eventHandle.isAllowed()) {
 	    return postEvent(eventContext);
 	}
-	return new EventTracker(eventContext, false);
+	return new InternalEventTracker(eventContext, false);
     }
 
     protected boolean dispatchEvent(EventContext ec) {

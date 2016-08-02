@@ -53,6 +53,10 @@ public class DefaultComponentCategory extends EventBuilder {
 	return super.name(Events.ACTIONS.CHANGED);
     }
     
+    public EventBuilder updated() {
+	return super.name(Events.ACTIONS.UPDATED);
+    }
+    
     /* (non-Javadoc)
      * @see net.segoia.event.eventbus.builders.EventBuilder#name(java.lang.String)
      */

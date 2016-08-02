@@ -23,9 +23,9 @@ public interface EventBus {
      * @param event
      * @return
      */
-    EventTracker postEvent(Event event);
+    InternalEventTracker postEvent(Event event);
     
-    EventTracker postEvent(EventContext eventContext, EventHandle eventHandle);
+    InternalEventTracker postEvent(EventContext eventContext, EventHandle eventHandle);
     
     void registerListener(EventListener listener);
     

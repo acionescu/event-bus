@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +46,7 @@ public class EventHeader {
     /**
      * Holds the ids of the events that were triggered by this event
      */
-    private Set<String> spawnedEventsIds = new HashSet<>();
+    private Set<String> spawnedEventsIds = new LinkedHashSet<>();
     
     
     private String sourceBusId;
@@ -53,7 +54,13 @@ public class EventHeader {
     /**
      * Each time this event is forwarded to another bus, the relaying bus id is added here
      */
-    private Deque<String> relayedBy = new ArrayDeque<>();
+    private LinkedHashSet<String> relayedBy = new LinkedHashSet<>();
+    
+    /**
+     * The event should only be relayed to the node with this address
+     */
+    private String to;
+    
     
     public EventHeader() {
 	params = new HashMap<>();
@@ -129,7 +136,7 @@ public class EventHeader {
     }
     
     public void addRelay(String busNodeId) {
-	relayedBy.push(busNodeId);
+	relayedBy.add(busNodeId);
 	if(sourceBusId == null) {
 	    sourceBusId = busNodeId;
 	}
@@ -146,13 +153,17 @@ public class EventHeader {
 	return relayedBy.contains(busNodeId);
     }
     
-    public String lastRelay() {
-	return relayedBy.peek();
-    }
     
     public int relayHops() {
 	return relayedBy.size();
     }
     
+    public void to(String nodeId) {
+	this.to = nodeId;
+    }
+    
+    public String to() {
+	return this.to;
+    }
     
 }

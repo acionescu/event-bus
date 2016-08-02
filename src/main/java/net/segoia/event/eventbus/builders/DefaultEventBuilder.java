@@ -18,6 +18,7 @@ package net.segoia.event.eventbus.builders;
 
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
+import net.segoia.event.eventbus.constants.Events;
 
 public class DefaultEventBuilder extends CustomEventBuilder{
     
@@ -42,6 +43,11 @@ public class DefaultEventBuilder extends CustomEventBuilder{
     public EbusEventsBuilder ebus() {
 	return new EbusEventsBuilder(newContext(1));
     }
+    
+    public DefaultComponentEventBuilder peer() {
+	return new DefaultComponentEventBuilder(Events.SCOPE.PEER);
+    }
+    
     
     public DefaultEventBuilder spawnFrom( EventContext ec) {
 	return spawnFrom(ec.event());

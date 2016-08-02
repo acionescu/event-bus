@@ -17,31 +17,30 @@
 package net.segoia.event.eventbus.util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Map;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
-
 import net.segoia.event.conditions.Condition;
+import net.segoia.event.conditions.TrueCondition;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventHandle;
 import net.segoia.event.eventbus.EventListener;
-import net.segoia.event.eventbus.EventTracker;
+import net.segoia.event.eventbus.InternalEventTracker;
 import net.segoia.event.eventbus.FilteringEventBus;
 import net.segoia.event.eventbus.builders.DefaultComponentEventBuilder;
-import net.segoia.event.eventbus.builders.EventBuilderContext;
 import net.segoia.event.eventbus.config.json.EventBusJsonConfig;
 import net.segoia.event.eventbus.config.json.EventBusJsonConfigLoader;
 import net.segoia.event.eventbus.config.json.EventListenerJsonConfig;
+import net.segoia.event.eventbus.peers.EventBusNode;
+import net.segoia.event.eventbus.peers.EventBusNodeConfig;
+import net.segoia.event.eventbus.peers.LocalEventBusNode;
 
 public class EBus {
     private static final String jsonConfigFile = "ebus.json";
 
     private static FilteringEventBus bus = new FilteringEventBus();
+    
+    private static LocalEventBusNode mainNode;
 
     static {
 	/* set if there's any config file */
@@ -79,11 +78,22 @@ public class EBus {
 		System.err.println("Failed to load Ebus config from file " + jsonConfigFile);
 		e.printStackTrace();
 	    }
+	    
+	    /* create the main event bus node */
+	    
+	    EventBusNodeConfig nc = new EventBusNodeConfig();
+	    /* we will try to get all the events from our peers by default */
+	    nc.setDefaultRequestedEvents(new TrueCondition());
+	    
+	    /* autorelay all events to the peers */
+	    nc.setAutoRelayEanbled(true);
+	    mainNode = new LocalEventBusNode(bus, nc);
+	    
 	}
 
     }
 
-    public static EventTracker postEvent(Event event) {
+    public static InternalEventTracker postEvent(Event event) {
 	return bus.postEvent(event);
     }
     
@@ -99,4 +109,8 @@ public class EBus {
 	return new DefaultComponentEventBuilder(componentId);
     }
     
+    
+    public static EventBusNode getMainNode() {
+	return mainNode;
+    }
 }

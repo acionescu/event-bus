@@ -19,19 +19,26 @@ package net.segoia.event.eventbus;
 public class EventHandle {
     private EventContext eventContext;
     private EventRights eventRights;
+    private Event event;
 
     public EventHandle(EventContext eventContext, EventRights eventRights) {
 	super();
 	this.eventContext = eventContext;
 	this.eventRights = eventRights;
+	this.event = eventContext.event();
     }
 
     public boolean isAllowed() {
 	return eventRights.isAllowed();
     }
 
-    public EventTracker post() {
+    public InternalEventTracker post() {
 	return eventContext.bus().postEvent(eventContext, this);
+    }
+    
+    public InternalEventTracker send(String to) {
+	event.to(to);
+	return post();
     }
 
     /**
@@ -42,15 +49,15 @@ public class EventHandle {
     }
 
     public Event getEvent() {
-	return eventContext.getEvent();
+	return event;
     }
 
     public Event event() {
-	return eventContext.event();
+	return event;
     }
     
     public EventHandle addParam(String key, Object value) {
-	eventContext.event().addParam(key, value);
+	event.addParam(key, value);
 	return this;
     }
 }

@@ -72,4 +72,8 @@ public class DefaultComponentEventBuilder extends EventBuilder{
     public DefaultComponentCategory executed() {
 	return category(Events.CATEGORY.EXECUTED);
     }
+    
+    public DefaultComponentCategory status() {
+	return category(Events.CATEGORY.STATUS);
+    }
 }
