@@ -11,7 +11,7 @@ import java.util.Map;
  * @author adi
  *
  */
-public abstract class LocalNodeAgent extends EventBusNode {
+public abstract class AgentNode extends EventBusNode {
     protected EventBusNode mainNode;
 
     private Map<String, RemoteEventHandler<?>> handlers = new HashMap<>();
@@ -47,7 +47,7 @@ public abstract class LocalNodeAgent extends EventBusNode {
 	String et = pc.getEvent().getEt();
 	RemoteEventHandler h = handlers.get(et);
 	if (h != null) {
-	    h.handleRemoteEvent(new RemoteEventContext<LocalNodeAgent>(this, pc));
+	    h.handleRemoteEvent(new RemoteEventContext<AgentNode>(this, pc));
 	}
 
     }
