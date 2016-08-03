@@ -31,7 +31,7 @@ import net.segoia.event.eventbus.builders.DefaultComponentEventBuilder;
 import net.segoia.event.eventbus.config.json.EventBusJsonConfig;
 import net.segoia.event.eventbus.config.json.EventBusJsonConfigLoader;
 import net.segoia.event.eventbus.config.json.EventListenerJsonConfig;
-import net.segoia.event.eventbus.peers.EventBusNode;
+import net.segoia.event.eventbus.peers.EventNode;
 import net.segoia.event.eventbus.peers.EventBusNodeConfig;
 import net.segoia.event.eventbus.peers.LocalEventBusNode;
 
@@ -86,7 +86,7 @@ public class EBus {
 	    nc.setDefaultRequestedEvents(new TrueCondition());
 	    
 	    /* autorelay all events to the peers */
-	    nc.setAutoRelayEanbled(true);
+	    nc.setAutoRelayEnabled(true);
 	    mainNode = new LocalEventBusNode(bus, nc);
 	    
 	}
@@ -110,7 +110,7 @@ public class EBus {
     }
     
     
-    public static EventBusNode getMainNode() {
+    public static EventNode getMainNode() {
 	return mainNode;
     }
 }

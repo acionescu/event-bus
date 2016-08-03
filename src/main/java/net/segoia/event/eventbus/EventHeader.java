@@ -165,5 +165,13 @@ public class EventHeader {
     public String to() {
 	return this.to;
     }
+
+    /**
+     * @return the relayedBy
+     */
+    public LinkedHashSet<String> getRelayedBy() {
+        return relayedBy;
+    }
+    
     
 }

@@ -8,7 +8,7 @@ public class EventBusNodeConfig {
     /**
      * If this is enabled, this node will relay events from other peers as well
      */
-    private boolean autoRelayEanbled;
+    private boolean autoRelayEnabled;
     
     /**
      * What internal events this node is allowed to share ( forward to peers )
@@ -26,15 +26,15 @@ public class EventBusNodeConfig {
     /**
      * @return the autoRelayEanbled
      */
-    public boolean isAutoRelayEanbled() {
-        return autoRelayEanbled;
+    public boolean isAutoRelayEnabled() {
+        return autoRelayEnabled;
     }
 
     /**
-     * @param autoRelayEanbled the autoRelayEanbled to set
+     * @param autoRelayEnabled the autoRelayEanbled to set
      */
-    public void setAutoRelayEanbled(boolean autoRelayEanbled) {
-        this.autoRelayEanbled = autoRelayEanbled;
+    public void setAutoRelayEnabled(boolean autoRelayEnabled) {
+        this.autoRelayEnabled = autoRelayEnabled;
     }
 
     /**

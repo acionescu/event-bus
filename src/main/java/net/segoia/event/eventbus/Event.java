@@ -365,7 +365,7 @@ public class Event extends AbstractEvent {
 	    builder.append("sourceBusId=").append(sourceBusId()).append(", ");
 	if(to() != null)
 	    builder.append("to=").append(to()).append(", ");
-	builder.append("relayHops=").append(relayHops()).append(", ");
+	builder.append("relayedBy=").append(header.getRelayedBy()).append(", ");
 	if (topic != null)
 	    builder.append("topic=").append(topic).append(", ");
 	builder.append("ts=").append(ts).append(", ");

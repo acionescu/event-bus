@@ -3,10 +3,10 @@ package net.segoia.event.eventbus.peers;
 import net.segoia.event.eventbus.Event;
 
 public class PeerEventContext {
-    private EventBusRelay relay;
+    private EventRelay relay;
     private Event event;
     
-    public PeerEventContext(EventBusRelay relay, Event event) {
+    public PeerEventContext(EventRelay relay, Event event) {
 	super();
 	this.relay = relay;
 	this.event = event;
@@ -15,7 +15,7 @@ public class PeerEventContext {
     /**
      * @return the relay
      */
-    public EventBusRelay getRelay() {
+    public EventRelay getRelay() {
         return relay;
     }
 

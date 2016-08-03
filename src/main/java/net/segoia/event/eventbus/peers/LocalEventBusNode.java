@@ -5,7 +5,7 @@ import net.segoia.event.eventbus.InternalEventTracker;
 import net.segoia.event.eventbus.FilteringEventBus;
 import net.segoia.event.eventbus.util.EBus;
 
-public class LocalEventBusNode extends EventBusNode{
+public class LocalEventBusNode extends EventNode{
     private FilteringEventBus bus;
     
     public LocalEventBusNode() {
@@ -15,8 +15,6 @@ public class LocalEventBusNode extends EventBusNode{
     public LocalEventBusNode(FilteringEventBus bus) {
 	this.bus = bus;
     }
-    
-    
 
     public LocalEventBusNode(FilteringEventBus bus, EventBusNodeConfig config) {
 	super(config);
@@ -24,17 +22,38 @@ public class LocalEventBusNode extends EventBusNode{
     }
 
     @Override
-    protected EventBusRelay buildLocalRelay(String peerId) {
+    protected EventRelay buildLocalRelay(String peerId) {
 	return new LocalEventBusRelay(peerId, this, bus );
     }
 
+    /**
+     * We're simply posting the event to the internal bus
+     */
     @Override
-    protected InternalEventTracker postInternally(Event event) {
+    protected InternalEventTracker handleEvent(Event event) {
 	InternalEventTracker eventTracker = bus.postEvent(event);
 	if(eventTracker.hasErrors()) {
 	    eventTracker.getFirstError().printStackTrace();
 	}
 	return eventTracker;
+    }
+    
+    @Override
+    protected void handleRemoteEvent(PeerEventContext pc) {
+	handleEvent(pc.getEvent());
+    }
+    
+
+    /* (non-Javadoc)
+     * @see net.segoia.event.eventbus.peers.EventNode#forwardToAll(net.segoia.event.eventbus.Event)
+     */
+    @Override
+    protected void forwardToAll(Event event) {
+	/* 
+	 * Because we want this event to get also to all the listeners on the internal bus, we simply post it there,
+	 * and it will get to the peers to since all the relays are listening on the bus as well 
+	 */
+	handleEvent(event);
     }
 
     @Override
@@ -44,15 +63,9 @@ public class LocalEventBusNode extends EventBusNode{
     }
 
     @Override
-    public void terminate() {
+    public void cleanUp() {
 	
     }
 
-    @Override
-    protected void handleRemoteEvent(PeerEventContext pc) {
-	postInternally(pc.getEvent());
-    }
-
-    
     
 }

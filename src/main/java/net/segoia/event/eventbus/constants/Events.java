@@ -64,6 +64,8 @@ public class Events {
 	public static final String NEW="NEW";
 	public static final String REMOVED="REMOVED";
 	public static final String UPDATED="UPDATED";
+	public static final String CONNECTED="CONNECTED";
+	public static final String AUTH="AUTH";
     }
       
     public static DefaultEventBuilder builder() {

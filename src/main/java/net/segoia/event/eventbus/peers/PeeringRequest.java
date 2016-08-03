@@ -5,7 +5,7 @@ import net.segoia.event.conditions.LooseEventMatchCondition;
 import net.segoia.event.eventbus.constants.Events;
 
 public class PeeringRequest {
-    private EventBusNode requestingNode;
+    private EventNode requestingNode;
     /**
      * On what kind of events this node wants to listed
      * </br>
@@ -17,11 +17,11 @@ public class PeeringRequest {
      */
     private Condition eventsCondition=LooseEventMatchCondition.build(Events.SCOPE.EBUS,Events.CATEGORY.PEER);
     
-    public PeeringRequest(EventBusNode requestingNode) {
+    public PeeringRequest(EventNode requestingNode) {
 	super();
 	this.requestingNode = requestingNode;
     }
-    public PeeringRequest(EventBusNode requestingNode, Condition eventsCondition) {
+    public PeeringRequest(EventNode requestingNode, Condition eventsCondition) {
 	super();
 	this.requestingNode = requestingNode;
 	this.eventsCondition = eventsCondition;
@@ -29,7 +29,7 @@ public class PeeringRequest {
     /**
      * @return the requestingNode
      */
-    public EventBusNode getRequestingNode() {
+    public EventNode getRequestingNode() {
         return requestingNode;
     }
     /**
@@ -41,7 +41,7 @@ public class PeeringRequest {
     /**
      * @param requestingNode the requestingNode to set
      */
-    public void setRequestingNode(EventBusNode requestingNode) {
+    public void setRequestingNode(EventNode requestingNode) {
         this.requestingNode = requestingNode;
     }
     /**

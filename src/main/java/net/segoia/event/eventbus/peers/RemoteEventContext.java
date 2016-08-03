@@ -2,7 +2,7 @@ package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.Event;
 
-public class RemoteEventContext<N extends EventBusNode> {
+public class RemoteEventContext<N extends EventNode> {
     private N currentNode;
     private PeerEventContext peerContext;
     

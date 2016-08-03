@@ -4,10 +4,10 @@ import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.EventListener;
 import net.segoia.event.eventbus.FilteringEventBus;
 
-public class LocalEventBusRelay extends EventBusRelay implements EventListener{
+public class LocalEventBusRelay extends EventRelay implements EventListener{
     private FilteringEventBus bus;
 
-    public LocalEventBusRelay(String id, EventBusNode parentNode, FilteringEventBus bus) {
+    public LocalEventBusRelay(String id, EventNode parentNode, FilteringEventBus bus) {
 	super(id, parentNode);
 	this.bus = bus;
     }
@@ -20,13 +20,19 @@ public class LocalEventBusRelay extends EventBusRelay implements EventListener{
 
     @Override
     public void init() {
-	bus.registerListener(this,999);
+	
     }
 
 
     @Override
-    public void terminate() {
+    public void cleanUp() {
 	bus.removeListener(this);
+	
+    }
+
+    @Override
+    protected void start() {
+	bus.registerListener(this,999);
 	
     }
     

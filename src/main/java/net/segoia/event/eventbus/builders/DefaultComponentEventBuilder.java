@@ -76,4 +76,5 @@ public class DefaultComponentEventBuilder extends EventBuilder{
     public DefaultComponentCategory status() {
 	return category(Events.CATEGORY.STATUS);
     }
+    
 }
