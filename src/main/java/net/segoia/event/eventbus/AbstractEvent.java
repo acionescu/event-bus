@@ -16,6 +16,8 @@
  */
 package net.segoia.event.eventbus;
 
+import net.segoia.event.eventbus.util.JsonUtils;
+
 public abstract class AbstractEvent {
 
     protected String id;
@@ -53,6 +55,12 @@ public abstract class AbstractEvent {
 	doInit();
 	return et;
     }
+    
+    public String toJson() {
+	doInit();
+	return JsonUtils.toJson(this);
+    }
+
 
     /*
      * (non-Javadoc)

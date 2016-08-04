@@ -3,6 +3,9 @@ package net.segoia.event.eventbus.peers;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.segoia.event.conditions.TrueCondition;
+import net.segoia.event.eventbus.Event;
+
 
 /**
  * An agent is a node that reacts to events in a certain way
@@ -14,9 +17,34 @@ import java.util.Map;
 public abstract class AgentNode extends EventNode {
     protected EventNode mainNode;
 
-    private Map<String, RemoteEventHandler<?>> handlers = new HashMap<>();
+    private Map<String, RemoteEventHandler<?>> handlers;
+    private Map<Class<?>, RemoteEventHandler<?>> handlersByEventClass;
+    
+    public AgentNode() {
+	handlers = new HashMap<>();
+	handlersByEventClass = new HashMap<>();
+	
+	init();
+    }
+    
+    protected void init() {
+	registerHandlers();
+	setRequesteEventsCondition();
+	agentInit();
+    }
+    
+    protected abstract void agentInit();
+    
+    /**
+     * Override this to register handlers
+     */
+    protected abstract void registerHandlers();
+    
+    protected void setRequesteEventsCondition() {
+	//TODO: implement this, for now request all
+	config.setDefaultRequestedEvents(new TrueCondition());
+    }
 
-    private boolean hasHandlers = false;
 
     @Override
     protected EventRelay buildLocalRelay(String peerId) {
@@ -25,12 +53,18 @@ public abstract class AgentNode extends EventNode {
 
     protected void addEventHandler(String eventType, RemoteEventHandler<?> handler) {
 	handlers.put(eventType, handler);
-	hasHandlers = true;
+    }
+    
+    protected void addEventHandler(Class<?> eventClass, RemoteEventHandler<?> handler) {
+	handlersByEventClass.put(eventClass, handler);
+    }
+    
+    protected void removeEventHandler(Class<?> eventClass) {
+	handlersByEventClass.remove(eventClass);
     }
 
     protected void removeEventHandlers(String eventType) {
 	handlers.remove(eventType);
-	hasHandlers = (handlers.size() > 0);
     }
 
     /*
@@ -41,14 +75,20 @@ public abstract class AgentNode extends EventNode {
      */
     @Override
     protected void handleRemoteEvent(PeerEventContext pc) {
-	if (!hasHandlers) {
-	    handleEvent(pc.getEvent());
-	    return;
+	Event event = pc.getEvent();
+	
+	RemoteEventHandler<?> handler = handlersByEventClass.get(event.getClass());
+	
+	if(handler == null ) {
+	    String et = event.getEt();
+	    handler = handlers.get(et);
 	}
-	String et = pc.getEvent().getEt();
-	RemoteEventHandler h = handlers.get(et);
-	if (h != null) {
-	    h.handleRemoteEvent(new RemoteEventContext<AgentNode>(this, pc));
+	
+	if(handler == null) {
+	    handleEvent(event);
+	}
+	else {
+	    handler.handleRemoteEvent(new RemoteEventContext(this, pc));
 	}
 
     }

@@ -211,6 +211,7 @@ public abstract class EventNode {
 	    handleEvent(event);
 	    return;
 	}
+	
 	EventContext ec = new EventContext(event, null);
 	/* first check if the destination is one of the peers */
 	EventRelay peerRelay = peers.get(to);
@@ -243,7 +244,7 @@ public abstract class EventNode {
 	}
 	
 	/* if this wasn't forwarded allow it */
-	String sourceBusId = event.sourceBusId();
+	String sourceBusId = event.from();
 	if (sourceBusId == null || sourceBusId.equals(id)) {
 	    return true;
 	}

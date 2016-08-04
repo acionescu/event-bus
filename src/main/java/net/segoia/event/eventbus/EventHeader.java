@@ -26,42 +26,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
- * This defines the header of an {@link Event}
- * </br>
+ * This defines the header of an {@link Event} </br>
  * Contains a map of parameters and a set of tags
+ * 
  * @author adi
  *
  */
 public class EventHeader {
-    private Map<String,Object> params;
+    private Map<String, Object> params;
     private Set<String> tags;
-    
+
     /**
      * Hold the id of the event that caused this event to be triggered
      */
     private String causeEventId;
-    
+
     /**
      * Holds the ids of the events that were triggered by this event
      */
     private Set<String> spawnedEventsIds = new LinkedHashSet<>();
-    
-    
-    private String sourceBusId;
-    
+
+    private String sourceNodeId;
+
     /**
      * Each time this event is forwarded to another bus, the relaying bus id is added here
      */
-    private LinkedHashSet<String> relayedBy = new LinkedHashSet<>();
-    
+    private List<String> relayedBy = new ArrayList<>();
+
     /**
      * The event should only be relayed to the node with this address
      */
     private String to;
-    
-    
+
     public EventHeader() {
 	params = new HashMap<>();
 	tags = new HashSet<>();
@@ -71,59 +68,57 @@ public class EventHeader {
 	params.put(key, value);
 	return this;
     }
-    
+
     public EventHeader addTag(String tag) {
 	tags.add(tag);
 	return this;
     }
-    
+
     public Object getParam(String key) {
 	return params.get(key);
     }
-    
+
     public boolean hasTag(String tag) {
 	return tags.contains(tag);
     }
-    
 
     /**
      * @return the params
      */
     public Map<String, Object> getParams() {
-        return params;
+	return params;
     }
-
 
     /**
      * @return the tags
      */
     public Set<String> getTags() {
-        return tags;
+	return tags;
     }
-
 
     /**
-     * @param params the params to set
+     * @param params
+     *            the params to set
      */
     public void setParams(Map<String, Object> params) {
-        this.params = params;
+	this.params = params;
     }
 
-   
     /**
      * @return the causeEventId
      */
     public String getCauseEventId() {
-        return causeEventId;
+	return causeEventId;
     }
 
     /**
-     * @param causeEventId the causeEventId to set
+     * @param causeEventId
+     *            the causeEventId to set
      */
     public void setCauseEventId(String causeEventId) {
-        this.causeEventId = causeEventId;
+	this.causeEventId = causeEventId;
     }
-    
+
     public void addSpawnedEventId(String id) {
 	spawnedEventsIds.add(id);
     }
@@ -132,36 +127,35 @@ public class EventHeader {
      * @return the spawnedEventsIds
      */
     public Set<String> getSpawnedEventsIds() {
-        return spawnedEventsIds;
+	return spawnedEventsIds;
     }
-    
+
     public void addRelay(String busNodeId) {
 	relayedBy.add(busNodeId);
-	if(sourceBusId == null) {
-	    sourceBusId = busNodeId;
+	if (sourceNodeId == null) {
+	    sourceNodeId = busNodeId;
 	}
     }
 
     /**
      * @return the sourceBusId
      */
-    public String getSourceBusId() {
-        return sourceBusId;
+    public String from() {
+	return sourceNodeId;
     }
-    
+
     public boolean wasRelayedBy(String busNodeId) {
 	return relayedBy.contains(busNodeId);
     }
-    
-    
+
     public int relayHops() {
 	return relayedBy.size();
     }
-    
+
     public void to(String nodeId) {
 	this.to = nodeId;
     }
-    
+
     public String to() {
 	return this.to;
     }
@@ -169,9 +163,18 @@ public class EventHeader {
     /**
      * @return the relayedBy
      */
-    public LinkedHashSet<String> getRelayedBy() {
-        return relayedBy;
+    public List<String> getRelayedBy() {
+	return relayedBy;
     }
-    
-    
+
+    public void replaceRelay(String oldId, String newId) {
+	int i = relayedBy.indexOf(oldId);
+	if (i >= 0) {
+	    relayedBy.set(i, newId);
+	    if (i == 0) {
+		sourceNodeId = newId;
+	    }
+	}
+    }
+
 }

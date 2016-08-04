@@ -21,6 +21,7 @@ import org.junit.Test;
 import junit.framework.Assert;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
+import net.segoia.event.eventbus.EventsRepository;
 import net.segoia.event.eventbus.LifecycledEventBus;
 import net.segoia.event.eventbus.constants.Events;
 import net.segoia.event.eventbus.test.test.logger.TestLoggingEventListener;
@@ -114,6 +115,15 @@ public class EventTest {
 	Assert.assertEquals(e1.getId(), e2.causeEventId());
 	
 	Assert.assertTrue(e1.getSpawnedEventsIds().contains(e2.getId()));
+    }
+    
+    @Test
+    public void testEventType() {
+	/* make sure we use the class first to get loaded */
+	new CustomTestEvent("foo bar");
+	
+	Class eventClass = EventsRepository.getEventClass("TEST:TEST:EVENT");
+	Assert.assertEquals(CustomTestEvent.class, eventClass);
     }
 
 }

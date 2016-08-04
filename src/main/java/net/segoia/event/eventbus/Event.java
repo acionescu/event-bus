@@ -21,11 +21,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.google.gson.JsonObject;
+
 import net.segoia.event.eventbus.util.JsonUtils;
 
 public class Event extends AbstractEvent {
     public static final String etSep = ":";
-
+    
     private EventHeader header = new EventHeader();
 
 
@@ -61,6 +63,11 @@ public class Event extends AbstractEvent {
     private transient boolean closed;
 
     private Map<String, Object> params = new HashMap<>();
+    
+    public Event(Class<?> clazz) {
+	/* try to determine event type by from its class. Only works if the class is annotated with EventType */
+	this(EventsRepository.getEventType(clazz));
+    }
 
     public Event(String et) {
 	if (et == null) {
@@ -132,8 +139,12 @@ public class Event extends AbstractEvent {
     
     
     public static Event fromJson(String json) {
-		
-	Event e = JsonUtils.fromJson(json, Event.class);
+	JsonObject o = JsonUtils.fromJson(json, JsonObject.class);
+	String cet = o.get("et").getAsString();
+	
+	Class<Event> eclass = EventsRepository.getEventClass(cet);
+	
+	Event e = JsonUtils.fromJson(json, eclass);
 	if(e.header == null) {
 	    e.header=new EventHeader();
 	}
@@ -141,10 +152,6 @@ public class Event extends AbstractEvent {
 	return e;
     }
     
-    public String toJson() {
-	return JsonUtils.toJson(this);
-    }
-
     protected void lazyInit() {
 	this.id = UUID.randomUUID().toString();
 	if (et == null) {
@@ -283,8 +290,8 @@ public class Event extends AbstractEvent {
     /**
      * @return the sourceBusId
      */
-    public String sourceBusId() {
-       return header.getSourceBusId();
+    public String from() {
+       return header.from();
     }
     
     public boolean wasRelayedBy(String busNodeId) {
@@ -297,12 +304,18 @@ public class Event extends AbstractEvent {
     }
     
     
-    public void to(String nodeId) {
+    public Event to(String nodeId) {
 	header.to(nodeId);
+	return this;
     }
     
     public String to() {
 	return header.to();
+    }
+    
+    
+    public void replaceRelay(String oldId, String newId) {
+	header.replaceRelay(oldId, newId);
     }
     
 
@@ -361,8 +374,8 @@ public class Event extends AbstractEvent {
 	    builder.append("et=").append(et).append(", ");
 	if (causeEventId() != null)
 	    builder.append("causeEventId=").append(causeEventId()).append(", ");
-	if (sourceBusId() != null)
-	    builder.append("sourceBusId=").append(sourceBusId()).append(", ");
+	if (from() != null)
+	    builder.append("from=").append(from()).append(", ");
 	if(to() != null)
 	    builder.append("to=").append(to()).append(", ");
 	builder.append("relayedBy=").append(header.getRelayedBy()).append(", ");

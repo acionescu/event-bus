@@ -281,6 +281,30 @@ This also disallows some events from being propagated through the bus.
 Of course, many more listeners doing different stuff can be added. We may add a listener that stores the events in a database, or that sends an email when a particular event happens, or who knows.
 
 
+##Custom events
+
+One can also create custom events by extending Event class and using EventType annotation:
+
+```
+@EventType(value="TEST:TEST:EVENT")
+public class CustomTestEvent extends Event{
+    private String prop;
+
+    public CustomTestEvent(String prop) {
+	super(CustomTestEvent.class);
+	this.prop = prop;
+    }
+
+    /**
+     * @return the prop
+     */
+    public String getProp() {
+        return prop;
+    }
+}
+```
+
+
 #Distributing events
 
 
