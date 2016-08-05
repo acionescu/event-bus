@@ -16,9 +16,7 @@
  */
 package net.segoia.event.eventbus;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -33,7 +31,7 @@ import java.util.Set;
  * @author adi
  *
  */
-public class EventHeader {
+public class EventHeader implements Cloneable {
     private Map<String, Object> params;
     private Set<String> tags;
 
@@ -59,9 +57,36 @@ public class EventHeader {
      */
     private String to;
 
+    private Set<String> forwardTo = new HashSet<>();
+
     public EventHeader() {
 	params = new HashMap<>();
 	tags = new HashSet<>();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    protected EventHeader clone() {
+
+	try {
+	    EventHeader c = (EventHeader) super.clone();
+	    
+	    /* do a shallow copy for these */
+	    c.params = new HashMap<>(params);
+	    c.tags = new HashSet<String>(tags);
+	    c.relayedBy = new ArrayList<String>(relayedBy);
+	    c.spawnedEventsIds = new LinkedHashSet<>(spawnedEventsIds);
+
+	    return c;
+	} catch (CloneNotSupportedException e) {
+	    e.printStackTrace();
+	    return null;
+	}
+
     }
 
     public EventHeader addParam(String key, Object value) {
@@ -175,6 +200,121 @@ public class EventHeader {
 		sourceNodeId = newId;
 	    }
 	}
+    }
+    
+    public void removeLastRelay() {
+	int li = relayedBy.size()-1;
+	if(li >=0 ) {
+	    relayedBy.remove(li);
+	    if(li==0) {
+		sourceNodeId=null;
+	    }
+	}
+    }
+
+    public String getLastRelay() {
+
+	int size = relayedBy.size();
+	if (size > 0) {
+	    return relayedBy.get(size - 1);
+	}
+	return null;
+    }
+
+    /**
+     * @return the forwardTo
+     */
+    public Set<String> getForwardTo() {
+	return forwardTo;
+    }
+
+    /**
+     * @param forwardTo
+     *            the forwardTo to set
+     */
+    public void setForwardTo(Set<String> forwardTo) {
+	this.forwardTo = forwardTo;
+    }
+
+    public void addForwardTo(String nodeId) {
+	forwardTo.add(nodeId);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + ((causeEventId == null) ? 0 : causeEventId.hashCode());
+	result = prime * result + ((forwardTo == null) ? 0 : forwardTo.hashCode());
+	result = prime * result + ((params == null) ? 0 : params.hashCode());
+	result = prime * result + ((relayedBy == null) ? 0 : relayedBy.hashCode());
+	result = prime * result + ((sourceNodeId == null) ? 0 : sourceNodeId.hashCode());
+	result = prime * result + ((spawnedEventsIds == null) ? 0 : spawnedEventsIds.hashCode());
+	result = prime * result + ((tags == null) ? 0 : tags.hashCode());
+	result = prime * result + ((to == null) ? 0 : to.hashCode());
+	return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (obj == null)
+	    return false;
+	if (getClass() != obj.getClass())
+	    return false;
+	EventHeader other = (EventHeader) obj;
+	if (causeEventId == null) {
+	    if (other.causeEventId != null)
+		return false;
+	} else if (!causeEventId.equals(other.causeEventId))
+	    return false;
+	if (forwardTo == null) {
+	    if (other.forwardTo != null)
+		return false;
+	} else if (!forwardTo.equals(other.forwardTo))
+	    return false;
+	if (params == null) {
+	    if (other.params != null)
+		return false;
+	} else if (!params.equals(other.params))
+	    return false;
+	if (relayedBy == null) {
+	    if (other.relayedBy != null)
+		return false;
+	} else if (!relayedBy.equals(other.relayedBy))
+	    return false;
+	if (sourceNodeId == null) {
+	    if (other.sourceNodeId != null)
+		return false;
+	} else if (!sourceNodeId.equals(other.sourceNodeId))
+	    return false;
+	if (spawnedEventsIds == null) {
+	    if (other.spawnedEventsIds != null)
+		return false;
+	} else if (!spawnedEventsIds.equals(other.spawnedEventsIds))
+	    return false;
+	if (tags == null) {
+	    if (other.tags != null)
+		return false;
+	} else if (!tags.equals(other.tags))
+	    return false;
+	if (to == null) {
+	    if (other.to != null)
+		return false;
+	} else if (!to.equals(other.to))
+	    return false;
+	return true;
     }
 
 }

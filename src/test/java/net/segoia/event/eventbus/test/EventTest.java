@@ -126,4 +126,33 @@ public class EventTest {
 	Assert.assertEquals(CustomTestEvent.class, eventClass);
     }
 
+    
+    @Test
+    public void testEventCopy() {
+	CustomTestEvent ce = new CustomTestEvent("foo bar");
+	ce.addParam("p1", "foo");
+	ce.addHeaderParam("p2", "bar");
+	
+	ce.addRelay("meme");
+	
+	CustomTestEvent ne = (CustomTestEvent)ce.clone();
+	
+	Assert.assertEquals(ce.getClass(), ne.getClass());
+	Assert.assertEquals(ce.getLastRelay(), ne.getLastRelay());
+	Assert.assertEquals(ce.getData().getProp(), ne.getData().getProp());
+	Assert.assertEquals(ce.getData().getProp(), "foo bar");
+	
+	Assert.assertEquals(ce, ne);
+	
+	ne.addRelay("dudu");
+	
+	Assert.assertTrue(ne.equals(ce));
+	Assert.assertFalse(ne.equalsWithHeader(ce));
+	
+	ne.addParam("Chuck", "Norris");
+	
+	/* the internal event data has to be the same */
+	Assert.assertEquals(ne, ce);
+    }
+    
 }

@@ -11,7 +11,6 @@ public abstract class EventRelay {
     protected EventNode parentNode;
 
     private Condition forwardingCondition;
-    private boolean isAlive = true;
 
     public EventRelay(String id, EventNode parentNode) {
 	this.id = id;
@@ -50,7 +49,9 @@ public abstract class EventRelay {
 
     protected void forwardEvent(EventContext ec) {
 	if (parentNode.isEventForwardingAllowed(ec, peerRelay.getParentNodeId()) && isForwardingAllowed(ec)) {
-	    sendEvent(ec.event());
+	    Event event = ec.event();
+	    /* We need to copy this event before sending */
+	    sendEvent(event.clone());
 	}
     }
 
@@ -80,11 +81,13 @@ public abstract class EventRelay {
     }
 
     protected abstract void init();
-    
+
     protected abstract void start();
-    
+
     public void terminate() {
-	peerRelay.onRemoteLeaving(this);
+	if (peerRelay != null) {
+	    peerRelay.onRemoteLeaving(this);
+	}
 	cleanUp();
     }
 

@@ -321,5 +321,13 @@ public class CustomTestEvent extends Event{
 	- should a peer be accepted at all
 	
 
+##Routing events between two unconnected nodes
+
+So we have two nodes that don't have direct access to each other, but they have a communication route through a number
+of relay nodes. 
+
+###How do we let at least one node to get messages from the other, without doing a full broadcast ?
+
+* First the initiating node will send a peer:request:register message ( this will have to be broadcasted to all / alternatively maybe each node will have to keep routing tables ) 
 
 

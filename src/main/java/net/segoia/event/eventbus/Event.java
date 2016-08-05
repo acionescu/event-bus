@@ -25,11 +25,12 @@ import com.google.gson.JsonObject;
 
 import net.segoia.event.eventbus.util.JsonUtils;
 
-public class Event extends AbstractEvent {
-    public static final String etSep = ":";
-    
-    private EventHeader header = new EventHeader();
+public class Event implements Cloneable{
 
+    protected String id;
+    protected String et;
+
+    public static final String etSep = ":";
 
     /**
      * The scope of the event, providing a way to set a certain concern area ( e.g. SYSTEM, APP, ... )
@@ -51,7 +52,6 @@ public class Event extends AbstractEvent {
      */
     private String topic;
 
-    
     /**
      * Event's creation timestamp
      */
@@ -62,8 +62,16 @@ public class Event extends AbstractEvent {
      */
     private transient boolean closed;
 
+    protected EventHeader header = new EventHeader();
+
     private Map<String, Object> params = new HashMap<>();
-    
+
+    private transient boolean initialized = false;
+
+    private Event() {
+
+    }
+
     public Event(Class<?> clazz) {
 	/* try to determine event type by from its class. Only works if the class is annotated with EventType */
 	this(EventsRepository.getEventType(clazz));
@@ -136,73 +144,44 @@ public class Event extends AbstractEvent {
 	this(scope, category, name, cause);
 	this.topic = topic;
     }
-    
-    
-    public static Event fromJson(String json) {
-	JsonObject o = JsonUtils.fromJson(json, JsonObject.class);
-	String cet = o.get("et").getAsString();
-	
-	Class<Event> eclass = EventsRepository.getEventClass(cet);
-	
-	Event e = JsonUtils.fromJson(json, eclass);
-	if(e.header == null) {
-	    e.header=new EventHeader();
-	}
-	e.close();
-	return e;
-    }
-    
+
+    /**
+     * Override this to lazy initialize this event </br>
+     * The method will be called during {@link #getId()} {@link #getEt()} {@link #hashCode()} {@link #equals(Object)}
+     * {@link #toString()}
+     */
     protected void lazyInit() {
 	this.id = UUID.randomUUID().toString();
 	if (et == null) {
 	    /**
-	     * event type - we can formalize this as: <scope>:<category>:<name> ( e.g. system:error:db-connection-failed )
+	     * event type - we can formalize this as: <scope>:<category>:<name> ( e.g. system:error:db-connection-failed
+	     * )
 	     */
 	    this.et = new StringBuffer().append(scope).append(etSep).append(category).append(etSep).append(name)
 		    .toString();
 	}
     }
 
-    /**
-     * Generates a new event from this event, setting this one as the cause of the generated one
-     * 
-     * @param et
-     * @return
-     */
-    protected Event setAsCauseFor(Event newEvent) {
-	newEvent.header.setCauseEventId(this.getId());
-	this.header.addSpawnedEventId(newEvent.getId());
-	return newEvent;
-    }
-
-    public Event setHeaderParam(String key, Object value) {
-	header.addParam(key, value);
-	return this;
-    }
-
-    public Object getHeaderParam(String key, Object defaultValue) {
-	Object hp = header.getParam(key);
-	if (hp == null) {
-	    return defaultValue;
+    private synchronized void doInit() {
+	if (initialized) {
+	    return;
 	}
-	return hp;
+	lazyInit();
+	initialized = true;
     }
 
-    public Object getHeaderParam(String key) {
-	return header.getParam(key);
-    }
-    
-    public void addHeaderParam(String key, Object value) {
-	header.addParam(key, value);
-    }
+    public static Event fromJson(String json) {
+	JsonObject o = JsonUtils.fromJson(json, JsonObject.class);
+	String cet = o.get("et").getAsString();
 
-    public Event tag(String tag) {
-	header.addTag(tag);
-	return this;
-    }
+	Class<Event> eclass = EventsRepository.getEventClass(cet);
 
-    public boolean hasTag(String tag) {
-	return header.hasTag(tag);
+	Event e = JsonUtils.fromJson(json, eclass);
+	if (e.header == null) {
+	    e.header = new EventHeader();
+	}
+	e.close();
+	return e;
     }
 
     public Object getParam(String key) {
@@ -220,6 +199,99 @@ public class Event extends AbstractEvent {
     public Event addParams(Map<String, Object> params) {
 	this.params.putAll(params);
 	return this;
+    }
+
+    /**
+     * @return the id
+     */
+    public String getId() {
+	doInit();
+	return id;
+    }
+
+    /**
+     * @return the et
+     */
+    public String getEt() {
+	doInit();
+	return et;
+    }
+
+    public String toJson() {
+	doInit();
+	return JsonUtils.toJson(this);
+    }
+
+    /**
+     * Generates a new event from this event, setting this one as the cause of the generated one
+     * 
+     * @param et
+     * @return
+     */
+    protected Event setAsCauseFor(Event newEvent) {
+	newEvent.header.setCauseEventId(this.getId());
+	this.header.addSpawnedEventId(newEvent.getId());
+	return newEvent;
+    }
+
+    public Event clone() {
+	doInit();
+	Event newEvent;
+	try {
+	    newEvent = (Event)super.clone();
+	    
+	    newEvent.header = header.clone();
+	} catch (CloneNotSupportedException e) {
+	    e.printStackTrace();
+	    return null;
+	}
+//	newEvent.id = getId();
+//	newEvent.init(scope, category, name);
+//	newEvent.topic = topic;
+//	newEvent.ts = ts;
+//	newEvent.closed = closed;
+//	if (closed) {
+//	    newEvent.params = params;
+//	} else {
+//	    /* if we're not closed to a shallow copy of params */
+//	    newEvent.params = ((HashMap<String, Object>) ((HashMap) params).clone());
+//	}
+//	
+//	/* add header */
+//	newEvent.header=header.clone();
+	
+	return newEvent;
+    }
+
+
+    public Event setHeaderParam(String key, Object value) {
+	header.addParam(key, value);
+	return this;
+    }
+
+    public Object getHeaderParam(String key, Object defaultValue) {
+	Object hp = header.getParam(key);
+	if (hp == null) {
+	    return defaultValue;
+	}
+	return hp;
+    }
+
+    public Object getHeaderParam(String key) {
+	return header.getParam(key);
+    }
+
+    public void addHeaderParam(String key, Object value) {
+	header.addParam(key, value);
+    }
+
+    public Event tag(String tag) {
+	header.addTag(tag);
+	return this;
+    }
+
+    public boolean hasTag(String tag) {
+	return header.hasTag(tag);
     }
 
     /**
@@ -271,18 +343,14 @@ public class Event extends AbstractEvent {
     public String getName() {
 	return name;
     }
-    
-    
 
     /**
      * @return the topic
      */
     public String getTopic() {
-        return topic;
+	return topic;
     }
-    
-    
-    
+
     public void addRelay(String busNodeId) {
 	header.addRelay(busNodeId);
     }
@@ -291,41 +359,66 @@ public class Event extends AbstractEvent {
      * @return the sourceBusId
      */
     public String from() {
-       return header.from();
+	return header.from();
     }
-    
+
     public boolean wasRelayedBy(String busNodeId) {
 	return header.wasRelayedBy(busNodeId);
     }
-    
-    
+
     public int relayHops() {
 	return header.relayHops();
     }
-    
-    
+
     public Event to(String nodeId) {
 	header.to(nodeId);
 	return this;
     }
-    
+
     public String to() {
 	return header.to();
     }
-    
-    
+
     public void replaceRelay(String oldId, String newId) {
 	header.replaceRelay(oldId, newId);
     }
-    
 
+    public String getLastRelay() {
+	return header.getLastRelay();
+    }
+
+    public void removeLastRelay() {
+	header.removeLastRelay();
+    }
+    
+    /**
+     * @return the forwardTo
+     */
+    public Set<String> getForwardTo() {
+        return header.getForwardTo();
+    }
+
+    /**
+     * @param forwardTo the forwardTo to set
+     */
+    public void setForwardTo(Set<String> forwardTo) {
+       header.setForwardTo(forwardTo);
+    }
+    
+    public void addForwardTo(String nodeId) {
+	header.addForwardTo(nodeId);
+    }
+   
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
+	doInit();
 	final int prime = 31;
-	int result = super.hashCode();
+	int result = 1;
+	result = prime * result + ((et == null) ? 0 : et.hashCode());
+	result = prime * result + ((id == null) ? 0 : id.hashCode());
 	result = prime * result + ((params == null) ? 0 : params.hashCode());
 	result = prime * result + ((topic == null) ? 0 : topic.hashCode());
 	result = prime * result + (int) (ts ^ (ts >>> 32));
@@ -337,13 +430,25 @@ public class Event extends AbstractEvent {
      */
     @Override
     public boolean equals(Object obj) {
+	doInit();
 	if (this == obj)
 	    return true;
-	if (!super.equals(obj))
+	if (obj == null)
 	    return false;
 	if (getClass() != obj.getClass())
 	    return false;
 	Event other = (Event) obj;
+	other.doInit();
+	if (et == null) {
+	    if (other.et != null)
+		return false;
+	} else if (!et.equals(other.et))
+	    return false;
+	if (id == null) {
+	    if (other.id != null)
+		return false;
+	} else if (!id.equals(other.id))
+	    return false;
 	if (params == null) {
 	    if (other.params != null)
 		return false;
@@ -358,16 +463,21 @@ public class Event extends AbstractEvent {
 	    return false;
 	return true;
     }
+    
+    public boolean equalsWithHeader(Event other) {
+	return (equals(other) && header.equals(other.header));
+    }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
+	doInit();
 	StringBuilder builder = new StringBuilder();
 	builder.append("Event [");
-	if (super.toString() != null)
-	    builder.append("toString()=").append(super.toString()).append(", ");
 	if (id != null)
 	    builder.append("id=").append(id).append(", ");
 	if (et != null)
@@ -376,41 +486,17 @@ public class Event extends AbstractEvent {
 	    builder.append("causeEventId=").append(causeEventId()).append(", ");
 	if (from() != null)
 	    builder.append("from=").append(from()).append(", ");
-	if(to() != null)
+	if (to() != null)
 	    builder.append("to=").append(to()).append(", ");
 	builder.append("relayedBy=").append(header.getRelayedBy()).append(", ");
 	if (topic != null)
 	    builder.append("topic=").append(topic).append(", ");
 	builder.append("ts=").append(ts).append(", ");
+
 	if (params != null)
 	    builder.append("params=").append(params);
 	builder.append("]");
 	return builder.toString();
     }
 
-//    /* (non-Javadoc)
-//     * @see java.lang.Object#toString()
-//     */
-//    @Override
-//    public String toString() {
-//	StringBuilder builder = new StringBuilder();
-//	builder.append("Event [");
-//	if (super.toString() != null)
-//	    builder.append("toString()=").append(super.toString()).append(", ");
-//	if (id != null)
-//	    builder.append("id=").append(id).append(", ");
-//	if (et != null)
-//	    builder.append("et=").append(et).append(", ");
-//	if (causeEventId() != null)
-//	    builder.append("causeEventId=").append(causeEventId()).append(", ");
-//	if (topic != null)
-//	    builder.append("topic=").append(topic).append(", ");
-//	builder.append("ts=").append(ts).append(", ");
-//	if (params != null)
-//	    builder.append("params=").append(params);
-//	builder.append("]");
-//	return builder.toString();
-//    }
-
-    
 }
