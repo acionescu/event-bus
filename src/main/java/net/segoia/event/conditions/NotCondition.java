@@ -28,6 +28,10 @@ public class NotCondition extends AggregatedCondition{
 	super(id,new Condition[]{cond});
     }
     
+    public NotCondition(Condition cond) {
+	this("!"+cond.getId(),cond);
+    }
+    
 
     @Override
     public boolean test(EventContext input) {

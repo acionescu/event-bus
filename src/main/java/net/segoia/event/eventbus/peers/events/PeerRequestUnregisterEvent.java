@@ -4,7 +4,7 @@ import net.segoia.event.eventbus.CustomEvent;
 import net.segoia.event.eventbus.EventType;
 import net.segoia.event.eventbus.peers.events.PeerRequestUnregisterEvent.Data;
 
-@EventType("PEER:REQUEST:UNRESITER")
+@EventType("PEER:REQUEST:UNREGISTER")
 public class PeerRequestUnregisterEvent extends CustomEvent<Data>{
     
     

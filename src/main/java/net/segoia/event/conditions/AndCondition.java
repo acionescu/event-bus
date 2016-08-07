@@ -16,6 +16,8 @@
  */
 package net.segoia.event.conditions;
 
+import java.util.Arrays;
+
 import net.segoia.event.eventbus.EventContext;
 
 public class AndCondition extends AggregatedCondition {
@@ -23,6 +25,19 @@ public class AndCondition extends AggregatedCondition {
     public AndCondition(String id, Condition... subconditions) {
 	super(id, subconditions);
     }
+    
+    public AndCondition(Condition... subconditions) {
+
+	this(buildId(subconditions), subconditions);
+    }
+
+    private static String buildId(Condition... subconditions) {
+	StringBuffer out = new StringBuffer();
+	out.append(subconditions[0].getId());
+	Arrays.stream(subconditions).skip(1).map(c -> "&" + c.getId()).forEach(out::append);
+	return out.toString();
+    }
+
 
     @Override
     public boolean test(EventContext eventContext) {

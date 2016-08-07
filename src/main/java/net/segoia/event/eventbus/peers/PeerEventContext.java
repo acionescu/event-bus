@@ -1,15 +1,14 @@
 package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.Event;
+import net.segoia.event.eventbus.EventContext;
 
-public class PeerEventContext {
+public class PeerEventContext extends EventContext{
     private EventRelay relay;
-    private Event event;
     
     public PeerEventContext(EventRelay relay, Event event) {
-	super();
+	super(event,null);
 	this.relay = relay;
-	this.event = event;
     }
 
     /**
@@ -20,12 +19,5 @@ public class PeerEventContext {
     }
 
 
-
-    /**
-     * @return the event
-     */
-    public Event getEvent() {
-        return event;
-    }
     
 }

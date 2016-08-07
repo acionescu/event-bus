@@ -244,7 +244,7 @@ public abstract class EventNode {
 	    registerRemotePeer(prre);
 	    break;
 	    
-	case "PEER:REQUEST:UNRESITER":
+	case "PEER:REQUEST:UNREGISTER":
 	    unregisterRemotePeer((PeerRequestUnregisterEvent)event); 
 	    break;    
 	}
