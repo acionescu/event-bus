@@ -67,5 +67,11 @@ public class LocalEventBusNode extends EventNode{
 	
     }
 
+    @Override
+    protected void onTerminate() {
+	// TODO Auto-generated method stub
+	
+    }
+
     
 }

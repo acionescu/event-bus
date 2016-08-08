@@ -489,6 +489,7 @@ public class Event implements Cloneable{
 	if (to() != null)
 	    builder.append("to=").append(to()).append(", ");
 	builder.append("relayedBy=").append(header.getRelayedBy()).append(", ");
+	builder.append("forwardTo=").append(header.getForwardTo()).append(", ");
 	if (topic != null)
 	    builder.append("topic=").append(topic).append(", ");
 	builder.append("ts=").append(ts).append(", ");

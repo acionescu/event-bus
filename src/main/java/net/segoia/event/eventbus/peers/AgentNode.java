@@ -1,10 +1,11 @@
 package net.segoia.event.eventbus.peers;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import net.segoia.event.conditions.Condition;
+import net.segoia.event.conditions.EventClassMatchCondition;
+import net.segoia.event.conditions.StrictEventMatchCondition;
 import net.segoia.event.conditions.TrueCondition;
 import net.segoia.event.eventbus.Event;
+import net.segoia.event.eventbus.FilteringEventBus;
 
 /**
  * An agent is a node that reacts to events in a certain way </br>
@@ -22,8 +23,10 @@ public abstract class AgentNode extends EventNode {
     private boolean autoinit = true;
     private boolean initialized;
 
-    private Map<String, RemoteEventHandler<?>> handlers;
-    private Map<Class<?>, RemoteEventHandler<?>> handlersByEventClass;
+    /**
+     * This is used to delegate events to internal handlers
+     */
+    private FilteringEventBus handlersBus;
 
     public AgentNode() {
 	this(true);
@@ -32,8 +35,6 @@ public abstract class AgentNode extends EventNode {
     public AgentNode(boolean autoinit) {
 
 	this.autoinit = autoinit;
-	handlers = new HashMap<>();
-	handlersByEventClass = new HashMap<>();
 
 	if (autoinit) {
 	    init();
@@ -51,6 +52,12 @@ public abstract class AgentNode extends EventNode {
     public void lazyInit() {
 	if (!autoinit && !initialized) {
 	    init();
+	}
+    }
+
+    private void initInternalBus() {
+	if (handlersBus == null) {
+	    handlersBus = new FilteringEventBus();
 	}
     }
 
@@ -73,20 +80,29 @@ public abstract class AgentNode extends EventNode {
 	return new DefaultEventRelay(peerId, this);
     }
 
-    protected void addEventHandler(String eventType, RemoteEventHandler<?> handler) {
-	handlers.put(eventType, handler);
+    protected void removeEventHandler(CustomEventHandler<?> handler) {
+	handlersBus.removeListener(handler);
     }
 
-    protected void addEventHandler(Class<?> eventClass, RemoteEventHandler<?> handler) {
-	handlersByEventClass.put(eventClass, handler);
+    protected void addEventHandler(Class<?> eventClass, CustomEventHandler<?> handler) {
+	addBusHandler(new EventClassMatchCondition(eventClass), handler);
     }
 
-    protected void removeEventHandler(Class<?> eventClass) {
-	handlersByEventClass.remove(eventClass);
+    protected void addEventHandler(String eventType, CustomEventHandler<?> handler) {
+	addBusHandler(new StrictEventMatchCondition(eventType), handler);
+    }
+    
+    protected <E extends Event> void addEventHandler(Class<E> eventClass, EventHandler<E> handler) {
+	addEventHandler(eventClass, new CustomEventHandler<>(handler));
+    }
+    
+    protected <E extends Event> void addEventHandler(String eventType, EventHandler<E> handler) {
+	addEventHandler(eventType, new CustomEventHandler<>(handler));
     }
 
-    protected void removeEventHandlers(String eventType) {
-	handlers.remove(eventType);
+    private void addBusHandler(Condition cond, CustomEventHandler<?> handler) {
+	initInternalBus();
+	handlersBus.registerListener(cond, handler);
     }
 
     /*
@@ -98,16 +114,20 @@ public abstract class AgentNode extends EventNode {
     @Override
     protected void handleRemoteEvent(PeerEventContext pc) {
 	Event event = pc.getEvent();
+	//
+	// RemoteEventHandler<?> handler = handlersByEventClass.get(event.getClass());
+	//
+	// if (handler == null) {
+	// String et = event.getEt();
+	// handler = handlers.get(et);
+	// }
+	//
+	// if (handler != null) {
+	// handler.handleRemoteEvent(new RemoteEventContext(this, pc));
+	// }
 
-	RemoteEventHandler<?> handler = handlersByEventClass.get(event.getClass());
-
-	if (handler == null) {
-	    String et = event.getEt();
-	    handler = handlers.get(et);
-	}
-
-	if (handler != null) {
-	    handler.handleRemoteEvent(new RemoteEventContext(this, pc));
+	if (handlersBus != null) {
+	    handlersBus.postEvent(event);
 	}
 
 	handleEvent(event);

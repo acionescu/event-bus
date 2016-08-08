@@ -57,7 +57,21 @@ public class PeerRegisterRequestEvent extends CustomEvent<Data>{
 	public void setEventsCondition(Condition eventsCondition) {
 	    this.eventsCondition = eventsCondition;
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+	    StringBuilder builder = new StringBuilder();
+	    builder.append("Data [");
+	    if (peerId != null)
+		builder.append("peerId=").append(peerId).append(", ");
+	    if (eventsCondition != null)
+		builder.append("eventsCondition=").append(eventsCondition);
+	    builder.append("]");
+	    return builder.toString();
+	}
     }
 
 }

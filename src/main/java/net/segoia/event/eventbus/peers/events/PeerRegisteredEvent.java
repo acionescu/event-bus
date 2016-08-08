@@ -33,6 +33,20 @@ public class PeerRegisteredEvent extends CustomEvent<Data>{
 	public void setPeerId(String peerId) {
 	    this.peerId = peerId;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+	    StringBuilder builder = new StringBuilder();
+	    builder.append("Data [");
+	    if (peerId != null)
+		builder.append("peerId=").append(peerId);
+	    builder.append("]");
+	    return builder.toString();
+	}
+	
 	
     }
 

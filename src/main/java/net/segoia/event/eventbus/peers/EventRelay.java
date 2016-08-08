@@ -5,7 +5,7 @@ import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
 
 public abstract class EventRelay {
-    private EventRelay peerRelay;
+    protected EventRelay peerRelay;
     private String id;
 
     protected EventNode parentNode;
@@ -43,7 +43,7 @@ public abstract class EventRelay {
 	forwardEvent(ec);
     }
 
-    protected void onRemoteEvent(Event event) {
+    public void onRemoteEvent(Event event) {
 	receiveEvent(event);
     }
 
