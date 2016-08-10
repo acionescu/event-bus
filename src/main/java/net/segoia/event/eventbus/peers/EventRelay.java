@@ -11,6 +11,7 @@ public abstract class EventRelay {
     protected EventNode parentNode;
 
     private Condition forwardingCondition;
+    private boolean active;
 
     public EventRelay(String id, EventNode parentNode) {
 	this.id = id;
@@ -37,6 +38,7 @@ public abstract class EventRelay {
     public void bind(EventRelay peerRelay) {
 	this.peerRelay = peerRelay;
 	peerRelay.peerRelay = this;
+	parentNode.onBindConfirmed(this);
     }
 
     public void onLocalEvent(EventContext ec) {
@@ -78,6 +80,27 @@ public abstract class EventRelay {
 
     public String getRemoteNodeId() {
 	return peerRelay.getParentNodeId();
+    }
+
+    public void bindAccepted(EventNode node) {
+	/* only the parent node can call this */
+	if (parentNode == node) {
+	    doStart();
+	}
+    }
+
+    private void doStart() {
+	if (!active) {
+	    active = true;
+	    start();
+	    peerRelay.onRemoteStarted(this);
+	}
+    }
+
+    private void onRemoteStarted(EventRelay peerRelay) {
+	if (this.peerRelay == peerRelay) {
+	    doStart();
+	}
     }
 
     protected abstract void init();

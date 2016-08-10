@@ -23,6 +23,14 @@ import net.segoia.event.conditions.Condition;
 
 public class FilteringEventBus extends SimpleEventBus {
     private Map<Condition, FilteringEventListener> conditionedListeners = new HashMap<>();
+    
+    public FilteringEventBus() {
+	super();
+    }
+
+    public FilteringEventBus(EventDispatcher eventDispatcher) {
+	super(eventDispatcher);
+    }
 
     /**
      * Registers a listener for a particular condition with no special priority
@@ -81,4 +89,14 @@ public class FilteringEventBus extends SimpleEventBus {
 	return l;
     }
 
+    /* (non-Javadoc)
+     * @see net.segoia.event.eventbus.SimpleEventBus#clone()
+     */
+    @Override
+    public FilteringEventBus clone(){
+	return (FilteringEventBus)super.clone();
+    }
+
+    
+    
 }

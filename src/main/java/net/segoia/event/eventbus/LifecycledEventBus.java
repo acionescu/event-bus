@@ -21,6 +21,14 @@ import net.segoia.event.eventbus.constants.Events;
 public class LifecycledEventBus extends FilteringEventBus {
     public static final String START_DISPATCH = "start_dispatch";
     public static final String END_DISPATCH = "end_dispatch";
+    
+    public LifecycledEventBus() {
+	super();
+    }
+
+    public LifecycledEventBus(EventDispatcher eventDispatcher) {
+	super(eventDispatcher);
+    }
 
     public InternalEventTracker postEvent(Event event, EventListener lifecycleEventListener) {
 	return super.postEvent(event, lifecycleEventListener);

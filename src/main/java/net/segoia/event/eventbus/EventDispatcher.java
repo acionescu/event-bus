@@ -23,6 +23,10 @@ package net.segoia.event.eventbus;
  *
  */
 public interface EventDispatcher {
+    
+    void start();
+    
+    void stop();
 
     boolean dispatchEvent(EventContext ec);
 

@@ -22,6 +22,20 @@ public class CustomTestEvent extends CustomEvent<Data> {
 	public String getProp() {
 	    return prop;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+	    StringBuilder builder = new StringBuilder();
+	    builder.append("Data [");
+	    if (prop != null)
+		builder.append("prop=").append(prop);
+	    builder.append("]");
+	    return builder.toString();
+	}
+	
     }
     
 }

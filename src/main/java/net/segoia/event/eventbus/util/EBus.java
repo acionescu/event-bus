@@ -22,17 +22,20 @@ import java.util.Map;
 
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.conditions.TrueCondition;
+import net.segoia.event.eventbus.AsyncEventDispatcher;
 import net.segoia.event.eventbus.Event;
+import net.segoia.event.eventbus.EventDispatcher;
 import net.segoia.event.eventbus.EventHandle;
 import net.segoia.event.eventbus.EventListener;
-import net.segoia.event.eventbus.InternalEventTracker;
 import net.segoia.event.eventbus.FilteringEventBus;
+import net.segoia.event.eventbus.InternalEventTracker;
+import net.segoia.event.eventbus.SimpleEventDispatcher;
 import net.segoia.event.eventbus.builders.DefaultComponentEventBuilder;
 import net.segoia.event.eventbus.config.json.EventBusJsonConfig;
 import net.segoia.event.eventbus.config.json.EventBusJsonConfigLoader;
 import net.segoia.event.eventbus.config.json.EventListenerJsonConfig;
-import net.segoia.event.eventbus.peers.EventNode;
 import net.segoia.event.eventbus.peers.EventBusNodeConfig;
+import net.segoia.event.eventbus.peers.EventNode;
 import net.segoia.event.eventbus.peers.LocalEventBusNode;
 
 public class EBus {
@@ -113,4 +116,22 @@ public class EBus {
     public static EventNode getMainNode() {
 	return mainNode;
     }
+    
+    
+    public static FilteringEventBus buildAsyncFilteringEventBus(int cacheCapacity, int workerThreads, EventDispatcher eventDispatcher) {
+	AsyncEventDispatcher asyncDispatcher = new AsyncEventDispatcher(eventDispatcher, cacheCapacity,workerThreads);
+	
+	FilteringEventBus b = new FilteringEventBus(asyncDispatcher);
+	b.start();
+	return b;
+    }
+    
+    public static FilteringEventBus buildSingleThreadedAsyncFilteringEventBus(int cacheCapacity, EventDispatcher eventDispatcher) {
+	return buildAsyncFilteringEventBus(cacheCapacity, 1, eventDispatcher);
+    }
+    public static FilteringEventBus buildSingleThreadedAsyncFilteringEventBus(int cacheCapacity) {
+	return buildAsyncFilteringEventBus(cacheCapacity, 1, new SimpleEventDispatcher());
+    }
+    
+    
 }

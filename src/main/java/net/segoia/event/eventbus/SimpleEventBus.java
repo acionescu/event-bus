@@ -25,9 +25,18 @@ package net.segoia.event.eventbus;
  * @author adi
  *
  */
-public class SimpleEventBus implements EventBus {
+public class SimpleEventBus implements EventBus, Cloneable{
     protected EventDispatcher eventDispatcher = new SimpleEventDispatcher();
     private EventBusConfig config = new EventBusConfig();
+    
+    public SimpleEventBus(EventDispatcher eventDispatcher) {
+	super();
+	this.eventDispatcher = eventDispatcher;
+    }
+
+    public SimpleEventBus() {
+	super();
+    }
 
     public InternalEventTracker postEvent(Event event) {
 	EventContext ec = buildEventContext(event);
@@ -132,4 +141,41 @@ public class SimpleEventBus implements EventBus {
 	return config.getConfigForEventType(eventType);
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public SimpleEventBus clone(){
+	try {
+	    return (SimpleEventBus)super.clone();
+	} catch (CloneNotSupportedException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+	return null;
+    }
+
+    /**
+     * @return the eventDispatcher
+     */
+    public EventDispatcher getEventDispatcher() {
+        return eventDispatcher;
+    }
+
+    /**
+     * @param eventDispatcher the eventDispatcher to set
+     */
+    public void setEventDispatcher(EventDispatcher eventDispatcher) {
+        this.eventDispatcher = eventDispatcher;
+    }
+
+    @Override
+    public void start() {
+	eventDispatcher.start();
+    }
+
+    @Override
+    public void stop() {
+	eventDispatcher.stop();
+    }
 }
