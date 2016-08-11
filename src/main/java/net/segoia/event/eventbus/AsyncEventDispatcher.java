@@ -7,14 +7,14 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * This will receive events in an async manner, store them in an internal cache, and delegate them, to one or more
- * worker threads
+ * This will receive events in an async manner, store them in an internal cache, and delegate them to the nested
+ * dispatcher in one or more worker threads
  * 
  * @author adi
  *
  */
-public class AsyncEventDispatcher implements EventDispatcher {
-    private EventDispatcher nestedDispatcher;
+public class AsyncEventDispatcher extends EventDispatcherWrapper {
+
     private BlockingDeque<EventContext> eventQueue;
     private ExecutorService threadPool;
     private Thread dispatcherThread;
@@ -34,7 +34,7 @@ public class AsyncEventDispatcher implements EventDispatcher {
      * @param workerThreads
      */
     public AsyncEventDispatcher(EventDispatcher nestedDispatcher, int cacheCapacity, int workerThreads) {
-	super();
+	super(nestedDispatcher);
 	this.nestedDispatcher = nestedDispatcher;
 	eventQueue = new LinkedBlockingDeque<>(cacheCapacity);
 	threadPool = Executors.newFixedThreadPool(workerThreads, new ThreadFactory() {
@@ -74,7 +74,7 @@ public class AsyncEventDispatcher implements EventDispatcher {
 			try {
 			    /* get next event, or wait for one to become available */
 			    EventContext ec = eventQueue.takeFirst();
-			    if(!running) {
+			    if (!running) {
 				break;
 			    }
 			    /* once we have an event, delegate it to the nested dispatcher in a worker thread */
@@ -96,6 +96,9 @@ public class AsyncEventDispatcher implements EventDispatcher {
 		    System.out.println("Exiting");
 		}
 	    });
+	    
+	    super.start();
+	    
 	    /* make sure we accept events */
 	    open();
 	    /* we need to move to running state before starting the dispatcher thread */
@@ -112,14 +115,16 @@ public class AsyncEventDispatcher implements EventDispatcher {
     }
 
     public void stop() {
+	
 	running = false;
 	open = false;
 	try {
+	    /* this is a hack to escape waiting on an empty queue */
 	    eventQueue.putLast(new EventContext(null, null));
 	} catch (InterruptedException e) {
-	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
+	super.stop();
     }
 
     public boolean dispatchEvent(EventContext ec) {
@@ -135,22 +140,6 @@ public class AsyncEventDispatcher implements EventDispatcher {
 	    e.printStackTrace();
 	}
 	return posted;
-    }
-
-    @Override
-    public void registerListener(EventListener listener) {
-	nestedDispatcher.registerListener(listener);
-    }
-
-    @Override
-    public void registerListener(EventListener listener, int priority) {
-	nestedDispatcher.registerListener(listener, priority);
-    }
-
-    @Override
-    public void removeListener(EventListener listener) {
-	nestedDispatcher.registerListener(listener);
-
     }
 
 }

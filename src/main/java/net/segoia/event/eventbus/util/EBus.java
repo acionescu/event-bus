@@ -23,7 +23,9 @@ import java.util.Map;
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.conditions.TrueCondition;
 import net.segoia.event.eventbus.AsyncEventDispatcher;
+import net.segoia.event.eventbus.DelegatingEventDispatcher;
 import net.segoia.event.eventbus.Event;
+import net.segoia.event.eventbus.EventContextDispatcher;
 import net.segoia.event.eventbus.EventDispatcher;
 import net.segoia.event.eventbus.EventHandle;
 import net.segoia.event.eventbus.EventListener;
@@ -42,8 +44,14 @@ public class EBus {
     private static final String jsonConfigFile = "ebus.json";
 
     private static FilteringEventBus bus = new FilteringEventBus();
-    
+
     private static LocalEventBusNode mainNode;
+
+    /**
+     * The main loop event bus dispatcher that will dispatch all events through a single thread
+     */
+    private static AsyncEventDispatcher mainLoopDispatcher = new AsyncEventDispatcher(new EventContextDispatcher(),
+	    1000);
 
     static {
 	/* set if there's any config file */
@@ -52,46 +60,51 @@ public class EBus {
 	if (cfgFile.exists()) {
 	    try {
 		EventBusJsonConfig ebusJsonConfig = EventBusJsonConfigLoader.load(new FileReader(cfgFile));
-		
+
 		String ebusImpl = ebusJsonConfig.getBusClassName();
-		
-		bus = (FilteringEventBus)Class.forName(ebusImpl).newInstance();
+
+		bus = (FilteringEventBus) Class.forName(ebusImpl).newInstance();
 		bus.setConfig(ebusJsonConfig);
+
+		AsyncEventDispatcher mainNodeDispatcher = new AsyncEventDispatcher(new EventContextDispatcher(),
+			    1000);
+		bus.setEventDispatcher(new DelegatingEventDispatcher(new SimpleEventDispatcher(), mainLoopDispatcher));
+		//mainNodeDispatcher.start();
 		
 		Map<String, EventListenerJsonConfig> listeners = ebusJsonConfig.getListeners();
-		if(listeners != null) {
-		    for(EventListenerJsonConfig lc : listeners.values()) {
+		if (listeners != null) {
+		    for (EventListenerJsonConfig lc : listeners.values()) {
 			EventListener listenerInstance = lc.getInstance();
 			listenerInstance.init();
-			
+
 			Condition lcond = lc.getCondition();
-			if(lcond == null) {
+			if (lcond == null) {
 			    bus.registerListener(listenerInstance, lc.getPriority());
-			}
-			else {
+			} else {
 			    bus.registerListener(lcond, lc.getCondPriority(), listenerInstance, lc.getPriority());
 			}
-			
+
 		    }
 		}
-		
-		
-		
+
 	    } catch (Exception e) {
 		System.err.println("Failed to load Ebus config from file " + jsonConfigFile);
 		e.printStackTrace();
 	    }
-	    
+
 	    /* create the main event bus node */
-	    
+
 	    EventBusNodeConfig nc = new EventBusNodeConfig();
 	    /* we will try to get all the events from our peers by default */
 	    nc.setDefaultRequestedEvents(new TrueCondition());
-	    
+
 	    /* autorelay all events to the peers */
 	    nc.setAutoRelayEnabled(true);
 	    mainNode = new LocalEventBusNode(bus, nc);
+	    bus.start();
 	    
+	    /* start main loop dispatcher */
+	    mainLoopDispatcher.start();
 	}
 
     }
@@ -99,7 +112,7 @@ public class EBus {
     public static InternalEventTracker postEvent(Event event) {
 	return bus.postEvent(event);
     }
-    
+
     public static EventHandle getHandle(Event event) {
 	return bus.getHandle(event);
     }
@@ -111,27 +124,38 @@ public class EBus {
     public static DefaultComponentEventBuilder getComponentEventBuilder(String componentId) {
 	return new DefaultComponentEventBuilder(componentId);
     }
-    
-    
+
     public static EventNode getMainNode() {
 	return mainNode;
     }
-    
-    
-    public static FilteringEventBus buildAsyncFilteringEventBus(int cacheCapacity, int workerThreads, EventDispatcher eventDispatcher) {
-	AsyncEventDispatcher asyncDispatcher = new AsyncEventDispatcher(eventDispatcher, cacheCapacity,workerThreads);
-	
+
+    public static FilteringEventBus buildAsyncFilteringEventBus(int cacheCapacity, int workerThreads,
+	    EventDispatcher eventDispatcher) {
+	AsyncEventDispatcher asyncDispatcher = new AsyncEventDispatcher(eventDispatcher, cacheCapacity, workerThreads);
+
 	FilteringEventBus b = new FilteringEventBus(asyncDispatcher);
 	b.start();
 	return b;
     }
-    
-    public static FilteringEventBus buildSingleThreadedAsyncFilteringEventBus(int cacheCapacity, EventDispatcher eventDispatcher) {
+
+    public static FilteringEventBus buildSingleThreadedAsyncFilteringEventBus(int cacheCapacity,
+	    EventDispatcher eventDispatcher) {
 	return buildAsyncFilteringEventBus(cacheCapacity, 1, eventDispatcher);
     }
+
     public static FilteringEventBus buildSingleThreadedAsyncFilteringEventBus(int cacheCapacity) {
 	return buildAsyncFilteringEventBus(cacheCapacity, 1, new SimpleEventDispatcher());
     }
-    
-    
+
+    /**
+     * Builds an event bus with the given dispatcher that will function on the main loop
+     * 
+     * @param eventDispatcher
+     * @return
+     */
+    public static FilteringEventBus buildFilteringEventBusOnMainLoop(EventDispatcher eventDispatcher) {
+	FilteringEventBus b = new FilteringEventBus(new DelegatingEventDispatcher(eventDispatcher, mainLoopDispatcher));
+	b.start();
+	return b;
+    }
 }
