@@ -286,23 +286,99 @@ Of course, many more listeners doing different stuff can be added. We may add a 
 One can also create custom events by extending Event class and using EventType annotation:
 
 ```
-@EventType(value="TEST:TEST:EVENT")
-public class CustomTestEvent extends Event{
-    private String prop;
-
+@EventType(value = "TEST:TEST:EVENT")
+public class CustomTestEvent extends CustomEvent<Data> {
+    
     public CustomTestEvent(String prop) {
 	super(CustomTestEvent.class);
-	this.prop = prop;
+	this.data = new Data();
+	this.data.prop = prop;
     }
 
-    /**
-     * @return the prop
-     */
-    public String getProp() {
-        return prop;
+    class Data {
+	private String prop;
+
+	/**
+	 * @return the prop
+	 */
+	public String getProp() {
+	    return prop;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+	    StringBuilder builder = new StringBuilder();
+	    builder.append("Data [");
+	    if (prop != null)
+		builder.append("prop=").append(prop);
+	    builder.append("]");
+	    return builder.toString();
+	}
+	
     }
 }
+
 ```
+
+#Processing events
+
+Now that we can trigger events, we may want to use them to implement a certain business logic.
+
+We can implement a certain behavior through a set of event listeners.
+
+To further encapsulate this, we can create an event node with its own internal bus and its own listeners that acts
+as an independent agent.
+
+So an event node will be able to :
+
+* receive events from outside or from other nodes ( we can call them peers )
+* connect with other nodes
+* implement its own listeners to deal with those events
+* generate its own events and send them to interested peers
+* act as a relay that routes events between other nodes that are not directly connected with each other 
+
+
+This provides a robust model for event processing and event distribution.
+
+
+## Event processing considerations
+
+Events, through their nature, are concurrent. The event bus processes the event in the thread that does the posting.
+
+This requires for our event node to be thread safe. We can achieve this in two ways:
+
+* either through a synchronizing mess
+* or by handling incoming events sequentially in a single thread
+
+By far, the latter one seems the most sane and fortunately the most efficient.
+
+Why is that ?
+
+Basically you would want to expedite the processing of an event as fast as possible. By processing one event at a time,
+this is ensured, because you won't loose time with synchronizing threads or, sharing cpu resources between more events.
+
+So, now it's settled that we have one processing thread per node. 
+
+But what if we will have 1000 event nodes running in our jvm instance. Will we have 1000 threads running ?  This would be overkill.
+
+What is the solution ?
+
+The obvious solution is to make all these nodes share a pool of execution threads. But this still wouldn't be quite efficient. 
+
+Better yet, we can make all of them share just one thread. This way we can ensure that all the resources go into executing 
+events and not in something else.
+
+But this is dangerous. What if the handling of an event takes really long. Won't this block everything ? 
+
+Well yes. But there's a simple solution to this. Just make that node run in its own thread. 
+
+So there you have it. All the lightweight nodes will share a single processing thread, and the ones doing heavy lifting 
+can spawn their own thread. 
+However this should be used judiciously. There's no way you could achieve performance if you have lots of threads messing around. 
+
 
 
 #Distributing events
@@ -317,17 +393,34 @@ public class CustomTestEvent extends Event{
 
 
 ###Security: 
-	- what kind of messages should be forwarded to a peer
+	- what kind of events should be forwarded to a peer
 	- should a peer be accepted at all
 	
 
 ##Routing events between two unconnected nodes
 
 So we have two nodes that don't have direct access to each other, but they have a communication route through a number
-of relay nodes. 
+of peer nodes. 
 
-###How do we let at least one node to get messages from the other, without doing a full broadcast ?
+###How do we let at least one node to get events from the other, without doing a full broadcast ?
 
-* First the initiating node will send a peer:request:register message ( this will have to be broadcasted to all / alternatively maybe each node will have to keep routing tables ) 
+The easiest solution is for each node to keep a routing table to each remote node, with the direct peers that can be used
+to reach that node. This information can be extracted from the broadcast events that reach a node. The last relay node
+for an event can be used as a via for the source node.
+
+### Registering to a remote peer and getting events from it
 
 
+* First, a node should be aware of the existence of a remote peer in order to register to it. Alternatively, another node 
+can do the registering on its behalf.
+
+* Then the initiating node will send a peer:request:register event to the remote node ( this will have to be broadcasted to all / alternatively maybe each node will have to keep routing tables ) 
+
+* The receiving node will register the remote node and make an entry in its routing table for that node ( if it doesn't have one) , with the last relay node as a via. Then it will send a peer:respose:registered event.
+
+* Then all the events that should get to the remote peer, will be routed to one of the via nodes for that peer
+
+* Each node when receiving an event will check if this should be further forwarded to reach the desired receiver. 
+
+* If this is one of its direct peers then it will simply send it, otherwise it will check if it has a via for this
+node in its routing table and send it through the found via ( if any ).  
