@@ -45,7 +45,7 @@ public class EventHeader implements Cloneable {
      */
     private Set<String> spawnedEventsIds = new LinkedHashSet<>();
 
-    private String sourceNodeId;
+    private String from;
 
     /**
      * Each time this event is forwarded to another bus, the relaying bus id is added here
@@ -157,8 +157,8 @@ public class EventHeader implements Cloneable {
 
     public void addRelay(String busNodeId) {
 	relayedBy.add(busNodeId);
-	if (sourceNodeId == null) {
-	    sourceNodeId = busNodeId;
+	if (from == null) {
+	    from = busNodeId;
 	}
     }
 
@@ -166,7 +166,7 @@ public class EventHeader implements Cloneable {
      * @return the sourceBusId
      */
     public String from() {
-	return sourceNodeId;
+	return from;
     }
 
     public boolean wasRelayedBy(String busNodeId) {
@@ -197,7 +197,7 @@ public class EventHeader implements Cloneable {
 	if (i >= 0) {
 	    relayedBy.set(i, newId);
 	    if (i == 0) {
-		sourceNodeId = newId;
+		from = newId;
 	    }
 	}
     }
@@ -207,7 +207,7 @@ public class EventHeader implements Cloneable {
 	if(li >=0 ) {
 	    relayedBy.remove(li);
 	    if(li==0) {
-		sourceNodeId=null;
+		from=null;
 	    }
 	}
     }
@@ -253,7 +253,7 @@ public class EventHeader implements Cloneable {
 	result = prime * result + ((forwardTo == null) ? 0 : forwardTo.hashCode());
 	result = prime * result + ((params == null) ? 0 : params.hashCode());
 	result = prime * result + ((relayedBy == null) ? 0 : relayedBy.hashCode());
-	result = prime * result + ((sourceNodeId == null) ? 0 : sourceNodeId.hashCode());
+	result = prime * result + ((from == null) ? 0 : from.hashCode());
 	result = prime * result + ((spawnedEventsIds == null) ? 0 : spawnedEventsIds.hashCode());
 	result = prime * result + ((tags == null) ? 0 : tags.hashCode());
 	result = prime * result + ((to == null) ? 0 : to.hashCode());
@@ -294,10 +294,10 @@ public class EventHeader implements Cloneable {
 		return false;
 	} else if (!relayedBy.equals(other.relayedBy))
 	    return false;
-	if (sourceNodeId == null) {
-	    if (other.sourceNodeId != null)
+	if (from == null) {
+	    if (other.from != null)
 		return false;
-	} else if (!sourceNodeId.equals(other.sourceNodeId))
+	} else if (!from.equals(other.from))
 	    return false;
 	if (spawnedEventsIds == null) {
 	    if (other.spawnedEventsIds != null)

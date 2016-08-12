@@ -27,6 +27,12 @@ public abstract class EventRelay {
     protected EventNode parentNode;
 
     private Condition forwardingCondition;
+    
+    /**
+     * the request from which this relay was created 
+     */
+    private PeeringRequest peeringRequest;
+    
     private boolean active;
 
     public EventRelay(String id, EventNode parentNode) {
@@ -88,6 +94,33 @@ public abstract class EventRelay {
 
     protected void setForwardingCondition(Condition condition) {
 	forwardingCondition = condition;
+    }
+    
+    
+    
+
+    /**
+     * @return the peeringRequest
+     */
+    public PeeringRequest getPeeringRequest() {
+        return peeringRequest;
+    }
+
+    /**
+     * @param peeringRequest the peeringRequest to set
+     */
+    public void setPeeringRequest(PeeringRequest peeringRequest) {
+        this.peeringRequest = peeringRequest;
+        if(peeringRequest != null) {
+            setForwardingCondition(peeringRequest.getEventsCondition());
+        }
+    }
+    
+    public boolean isRemoteNodeAgent() {
+	if(peeringRequest != null) {
+	    return peeringRequest.isAgent();
+	}
+	return false;
     }
 
     public String getParentNodeId() {

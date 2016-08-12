@@ -33,6 +33,11 @@ public class PeeringRequest {
      */
     private Condition eventsCondition=LooseEventMatchCondition.build(Events.SCOPE.EBUS,Events.CATEGORY.PEER);
     
+    /**
+     * If this is true, then the events meant for the master node will be forwarded to this node as well 
+     */
+    private boolean agent;
+    
     public PeeringRequest(EventNode requestingNode) {
 	super();
 	this.requestingNode = requestingNode;
@@ -42,6 +47,15 @@ public class PeeringRequest {
 	this.requestingNode = requestingNode;
 	this.eventsCondition = eventsCondition;
     }
+    
+    public PeeringRequest(EventNode requestingNode, Condition eventsCondition, boolean agent) {
+	super();
+	this.requestingNode = requestingNode;
+	this.eventsCondition = eventsCondition;
+	this.agent = agent;
+    }
+    
+    
     /**
      * @return the requestingNode
      */
@@ -65,6 +79,12 @@ public class PeeringRequest {
      */
     public void setEventsCondition(Condition eventsCondition) {
         this.eventsCondition = eventsCondition;
+    }
+    /**
+     * @return the agent
+     */
+    public boolean isAgent() {
+        return agent;
     }
     
 }

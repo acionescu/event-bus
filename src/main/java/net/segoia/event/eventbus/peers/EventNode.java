@@ -67,7 +67,7 @@ public abstract class EventNode {
     private Map<String, EventRelay> remotePeers = new HashMap<>();
 
     private RoutingTable routingTable = new RoutingTable();
-    
+
     private EventNodeStats stats = new EventNodeStats();
 
     /**
@@ -158,11 +158,22 @@ public abstract class EventNode {
 	addEventHandler(PeerBindRequestEvent.class, (c) -> {
 
 	    PeeringRequest req = c.getEvent().getData();
-	    EventRelay localRelay = buildRelay(req);
+	    String peerId = req.getRequestingNode().getId();
+	    getDirectPeerRelay(peerId);
+
+	    EventRelay localRelay = getDirectPeerRelay(peerId);
+	    if (localRelay == null) {
+		localRelay = buildRelay(req);
+	    } else {
+		localRelay.setPeeringRequest(req);
+		localRelay.bindAccepted(this);
+		return;
+	    }
 
 	    PeerBindResponse resp = new PeerBindResponse(localRelay, getPeeringRequest());
 	    PeerBindResponseEvent respEvent = new PeerBindResponseEvent(resp);
-	    respEvent.to(req.getRequestingNode().getId());
+
+	    respEvent.to(peerId);
 
 	    req.getRequestingNode().postInternally(respEvent);
 	});
@@ -244,17 +255,22 @@ public abstract class EventNode {
 	    unregisterRemotePeer((PeerRequestUnregisterEvent) event);
 	});
 
-	/* if autorelay enabled, then forward the event to the peers that weren't already targeted by the event */
+	/*
+	 * if autorelay enabled, then forward the event to the peers marked as agents, that weren't already targeted by
+	 * the event
+	 */
 	addEventHandler((c) -> {
 	    Event event = c.getEvent();
-	    if (!config.isAutoRelayEnabled() || event.wasRelayedBy(getId()) || !event.getForwardTo().isEmpty() || event.to() != null ) {
+	    if (!config.isAutoRelayEnabled() || event.wasRelayedBy(getId())) {
 		return;
 	    }
 
 	    getPeers().forEach((peerId, relay) -> {
-//		if (!event.getForwardTo().contains(peerId) && !peerId.equals(event.to())) {
-		    relay.onLocalEvent(c);
-//		}
+		if (!event.getForwardTo().contains(peerId) && !peerId.equals(event.to())) {
+		    if (relay.isRemoteNodeAgent()) {
+			relay.onLocalEvent(c);
+		    }
+		}
 	    });
 	});
 
@@ -285,6 +301,16 @@ public abstract class EventNode {
 
     public void registerPeer(EventNode peerNode, Condition condition) {
 	registerPeer(new PeeringRequest(peerNode, condition));
+    }
+
+    /**
+     * Will register peer as an agent
+     * 
+     * @param peerNode
+     * @param condition
+     */
+    public void registerPeerAsAgent(EventNode peerNode, Condition condition) {
+	registerPeer(new PeeringRequest(peerNode, condition, true));
     }
 
     public synchronized void registerPeer(PeeringRequest request) {
@@ -396,7 +422,8 @@ public abstract class EventNode {
 	EventRelay localRelay = buildLocalRelay(relayId);
 	localRelay.init();
 
-	setRelayForwardingCondition(localRelay, req.getEventsCondition());
+	// setRelayForwardingCondition(localRelay, req.getEventsCondition());
+	localRelay.setPeeringRequest(req);
 
 	return localRelay;
     }
@@ -451,7 +478,7 @@ public abstract class EventNode {
      */
     protected boolean handleRemoteEvent(EventContext pc) {
 	Event event = pc.getEvent();
-
+	System.out.println(getId() + " handling " + event);
 	boolean forUs = false;
 	/* if this event is sent to one of our peers then forward it to them */
 	String destination = event.to();
@@ -466,9 +493,9 @@ public abstract class EventNode {
 	    if (!forwardTo.isEmpty()) {
 		/* check if we're targeted by this event */
 		forUs = forwardTo.remove(getId());
-		
+
 		/* forward to the others if any */
-		if(forwardTo.size() > 0 ) {
+		if (forwardTo.size() > 0) {
 		    forwardTo(event, forwardTo);
 		}
 
@@ -591,7 +618,7 @@ public abstract class EventNode {
 
     protected void forwardTo(Event event, Set<String> peerIds) {
 	/* check if if we are targeted by the event as well */
-	if(peerIds.contains(getId())) {
+	if (peerIds.contains(getId())) {
 	    postInternally(event);
 	    return;
 	}
@@ -600,7 +627,7 @@ public abstract class EventNode {
 	if (peerIds.size() <= 0) {
 	    return;
 	}
-	
+	System.out.println(getId() + " forwarding " + event);
 	/* Keep the peers indexed by the next hop in the path to them */
 	SetMap<String, String> peersByVia = new SetMap<>();
 
@@ -659,17 +686,23 @@ public abstract class EventNode {
     }
 
     protected void forwardToAllKnown(Event event) {
-
 	EventContext ec = new EventContext(event, null);
+	Set<String> targetedPeers = getKnownPeers(ec);
+
+	event.setForwardTo(targetedPeers);
+	forwardTo(event, targetedPeers);
+
+    }
+
+    protected Set<String> getKnownPeers(EventContext ec) {
+
 	Stream<String> dpStream = directPeers.entrySet().stream().filter((e) -> e.getValue().isForwardingAllowed(ec))
 		.map((e) -> e.getKey());
 	Stream<String> rpStream = remotePeers.entrySet().stream().filter((e) -> e.getValue().isForwardingAllowed(ec))
 		.map((e) -> e.getKey());
 	Set<String> targetedPeers = Stream.concat(dpStream, rpStream).collect(Collectors.toSet());
 
-	forwardTo(event, targetedPeers);
-//	event.setForwardTo(targetedPeers);
-//	handleRemoteEvent(ec);
+	return targetedPeers;
     }
 
     protected static String generatePeerId() {
@@ -727,19 +760,13 @@ public abstract class EventNode {
 	/* handle this internally */
 	forwardTo(pbce, getId());
     }
-    
 
     /**
      * @return the stats
      */
     public EventNodeStats getStats() {
-        return stats;
+	return stats;
     }
-
-
-
-
-
 
     class EventNodeDispatcher extends SimpleEventDispatcher {
 
@@ -749,8 +776,8 @@ public abstract class EventNode {
 	    boolean forUs = handleRemoteEvent(ec);
 	    if (forUs) {
 		Event event = ec.getEvent();
-		/*if no from address, then this comes from us */
-		if(event.from() == null) {
+		/* if no from address, then this comes from us */
+		if (event.from() == null) {
 		    event.addRelay(getId());
 		}
 		/* dispatch this further only if this event is meant for us */
