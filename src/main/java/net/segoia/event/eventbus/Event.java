@@ -78,6 +78,17 @@ public class Event implements Cloneable{
     }
 
     public Event(String et) {
+	this.et = et;
+	initFromEventType();
+    }
+
+    public Event(String et, String topic) {
+	this(et);
+	this.topic = topic;
+    }
+
+    
+    private void initFromEventType() {
 	if (et == null) {
 	    throw new IllegalArgumentException("Event type cannot be null");
 	}
@@ -89,12 +100,7 @@ public class Event implements Cloneable{
 
 	init(etArray[0], etArray[1], etArray[2]);
     }
-
-    public Event(String et, String topic) {
-	this(et);
-	this.topic = topic;
-    }
-
+    
     /**
      * Initializes this event
      * 
@@ -159,6 +165,9 @@ public class Event implements Cloneable{
 	     */
 	    this.et = new StringBuffer().append(scope).append(etSep).append(category).append(etSep).append(name)
 		    .toString();
+	}
+	else if(scope==null) {
+	    initFromEventType();
 	}
     }
 
@@ -407,6 +416,10 @@ public class Event implements Cloneable{
     
     public void addForwardTo(String nodeId) {
 	header.addForwardTo(nodeId);
+    }
+    
+    public void clearRelays() {
+	header.clearRelays();
     }
    
     /* (non-Javadoc)

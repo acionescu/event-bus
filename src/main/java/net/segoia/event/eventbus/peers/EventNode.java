@@ -28,6 +28,7 @@ import net.segoia.event.conditions.EventClassMatchCondition;
 import net.segoia.event.conditions.StrictEventMatchCondition;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
+import net.segoia.event.eventbus.EventDispatcher;
 import net.segoia.event.eventbus.FilteringEventBus;
 import net.segoia.event.eventbus.SimpleEventDispatcher;
 import net.segoia.event.eventbus.constants.EventParams;
@@ -149,6 +150,20 @@ public abstract class EventNode {
      * A subclass may implement this to set up extra stuff
      */
     protected abstract void nodeConfig();
+
+    /**
+     * Call this to spawn an extra event bus for this node </br>
+     * This may be useful if you want to handle events coming from different sources but still keep the same internal
+     * state
+     * </br>
+     * This additional bus should run in the same thread as the internal bus of this node
+     * 
+     * @param eventDispatcher
+     * @return
+     */
+    protected FilteringEventBus spawnAdditionalBus(EventDispatcher eventDispatcher) {
+	return EBus.buildFilteringEventBusOnMainLoop(eventDispatcher);
+    }
 
     /**
      * Override this to register handlers, but don't forget to call super or you'll lose basic functionality
@@ -478,7 +493,6 @@ public abstract class EventNode {
      */
     protected boolean handleRemoteEvent(EventContext pc) {
 	Event event = pc.getEvent();
-	System.out.println(getId() + " handling " + event);
 	boolean forUs = false;
 	/* if this event is sent to one of our peers then forward it to them */
 	String destination = event.to();
@@ -627,7 +641,6 @@ public abstract class EventNode {
 	if (peerIds.size() <= 0) {
 	    return;
 	}
-	System.out.println(getId() + " forwarding " + event);
 	/* Keep the peers indexed by the next hop in the path to them */
 	SetMap<String, String> peersByVia = new SetMap<>();
 

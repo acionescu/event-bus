@@ -220,6 +220,11 @@ public class EventHeader implements Cloneable {
 	}
 	return null;
     }
+    
+    public void clearRelays() {
+	relayedBy.clear();
+	from = null;
+    }
 
     /**
      * @return the forwardTo
