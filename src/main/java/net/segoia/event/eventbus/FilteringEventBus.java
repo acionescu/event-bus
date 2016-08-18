@@ -20,9 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.segoia.event.conditions.Condition;
+import net.segoia.event.conditions.EventClassMatchCondition;
+import net.segoia.event.conditions.StrictEventMatchCondition;
+import net.segoia.event.eventbus.peers.CustomEventListener;
+import net.segoia.event.eventbus.peers.EventHandler;
 
 public class FilteringEventBus extends SimpleEventBus {
-    private Map<Condition, FilteringEventListener> conditionedListeners = new HashMap<>();
+    private Map<Condition, FilteringEventDispatcher> conditionedListeners = new HashMap<>();
     
     public FilteringEventBus() {
 	super();
@@ -75,10 +79,10 @@ public class FilteringEventBus extends SimpleEventBus {
 	getListenerForCondition(condition, cPriority).registerListener(listener);
     }
 
-    private FilteringEventListener getListenerForCondition(Condition condition, int priority) {
-	FilteringEventListener l = conditionedListeners.get(condition);
+    private FilteringEventDispatcher getListenerForCondition(Condition condition, int priority) {
+	FilteringEventDispatcher l = conditionedListeners.get(condition);
 	if (l == null) {
-	    l = new FilteringEventListener(condition);
+	    l = new FilteringEventDispatcher(condition);
 	    conditionedListeners.put(condition, l);
 	    if (priority >= 0) {
 		registerListener(l, priority);
@@ -88,6 +92,29 @@ public class FilteringEventBus extends SimpleEventBus {
 	}
 	return l;
     }
+    
+    
+    public <E extends Event> void addEventHandler(EventHandler<E> handler) {
+	registerListener(getCustomEventListener(handler));
+    }
+    
+    public <E extends Event> void addEventHandler(Condition condition, EventHandler<E> handler) {
+	registerListener(condition, getCustomEventListener(handler));
+    }
+    
+    public <E extends Event> void addEventHandler(Class<E> eventClass, EventHandler<E> handler) {
+	addEventHandler(new EventClassMatchCondition(eventClass), handler);
+    }
+
+    public <E extends Event> void addEventHandler(String eventType, EventHandler<E> handler) {
+	addEventHandler(new StrictEventMatchCondition(eventType), handler);
+    }
+    
+    
+    private <E extends Event>  CustomEventListener<E> getCustomEventListener(EventHandler<E> handler){
+	return new CustomEventListener<>(handler);
+    }
+    
 
     /* (non-Javadoc)
      * @see net.segoia.event.eventbus.SimpleEventBus#clone()

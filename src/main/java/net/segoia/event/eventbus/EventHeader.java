@@ -45,6 +45,9 @@ public class EventHeader implements Cloneable {
      */
     private Set<String> spawnedEventsIds = new LinkedHashSet<>();
 
+    /**
+     * The id of the entity that generated this event ( the first relay )
+     */
     private String from;
 
     /**
@@ -57,7 +60,15 @@ public class EventHeader implements Cloneable {
      */
     private String to;
 
+    /**
+     * The event should be forwarded to these nodes 
+     */
     private Set<String> forwardTo = new HashSet<>();
+    
+    /**
+     * Use this to mark the event as handled
+     */
+    private boolean handled;
 
     public EventHeader() {
 	params = new HashMap<>();
@@ -243,6 +254,17 @@ public class EventHeader implements Cloneable {
 
     public void addForwardTo(String nodeId) {
 	forwardTo.add(nodeId);
+    }
+    
+    public void setHandled() {
+	this.handled=true;
+    }
+
+    /**
+     * @return the handled
+     */
+    public boolean isHandled() {
+        return handled;
     }
 
     /*

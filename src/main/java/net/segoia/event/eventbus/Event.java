@@ -68,10 +68,6 @@ public class Event implements Cloneable{
 
     private transient boolean initialized = false;
 
-    private Event() {
-
-    }
-
     public Event(Class<?> clazz) {
 	/* try to determine event type by from its class. Only works if the class is annotated with EventType */
 	this(EventsRepository.getEventType(clazz));
@@ -421,6 +417,15 @@ public class Event implements Cloneable{
     public void clearRelays() {
 	header.clearRelays();
     }
+    
+    public void setHandled() {
+	header.setHandled();
+    }
+    
+    public boolean isHandled() {
+	return header.isHandled();
+    }
+    
    
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()

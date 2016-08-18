@@ -21,43 +21,45 @@ import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.EventListener;
 
-public class CustomEventHandler<E extends Event> implements EventListener{
+public class CustomEventListener<E extends Event> implements EventListener {
     private EventHandler<E> eventHandler;
-    
-    
-    
-    public CustomEventHandler(EventHandler<E> eventHandler) {
+
+    public CustomEventListener(EventHandler<E> eventHandler) {
 	super();
 	this.eventHandler = eventHandler;
     }
 
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.segoia.event.eventbus.EventListener#onEvent(net.segoia.event.eventbus.EventContext)
      */
     @Override
     public void onEvent(EventContext ec) {
 	eventHandler.handleEvent(new CustomEventContext<>(ec));
-	
+
     }
 
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.segoia.event.eventbus.EventListener#init()
      */
     @Override
     public void init() {
 	// TODO Auto-generated method stub
-	
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.segoia.event.eventbus.EventListener#terminate()
      */
     @Override
     public void terminate() {
 	// TODO Auto-generated method stub
-	
+
     }
-    
+
 }

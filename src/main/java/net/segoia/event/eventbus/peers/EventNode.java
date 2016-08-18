@@ -451,36 +451,36 @@ public abstract class EventNode {
     // */
     // protected abstract EventTracker handleEvent(Event event);
 
-    protected void removeEventHandler(CustomEventHandler<?> handler) {
+    protected void removeEventHandler(CustomEventListener<?> handler) {
 	internalBus.removeListener(handler);
     }
 
-    protected void addEventHandler(Class<?> eventClass, CustomEventHandler<?> handler) {
+    protected void addEventHandler(Class<?> eventClass, CustomEventListener<?> handler) {
 	addBusHandler(new EventClassMatchCondition(eventClass), handler);
     }
 
-    protected void addEventHandler(String eventType, CustomEventHandler<?> handler) {
+    protected void addEventHandler(String eventType, CustomEventListener<?> handler) {
 	addBusHandler(new StrictEventMatchCondition(eventType), handler);
     }
 
     protected <E extends Event> void addEventHandler(Class<E> eventClass, EventHandler<E> handler) {
-	addEventHandler(eventClass, new CustomEventHandler<>(handler));
+	addEventHandler(eventClass, new CustomEventListener<>(handler));
     }
 
     protected <E extends Event> void addEventHandler(String eventType, EventHandler<E> handler) {
-	addEventHandler(eventType, new CustomEventHandler<>(handler));
+	addEventHandler(eventType, new CustomEventListener<>(handler));
     }
 
-    private void addBusHandler(Condition cond, CustomEventHandler<?> handler) {
+    private void addBusHandler(Condition cond, CustomEventListener<?> handler) {
 	initInternalBus();
 	internalBus.registerListener(cond, handler);
     }
 
     protected <E extends Event> void addEventHandler(EventHandler<E> handler) {
-	addBusHandler(new CustomEventHandler<>(handler));
+	addBusHandler(new CustomEventListener<>(handler));
     }
 
-    private void addBusHandler(CustomEventHandler<?> handler) {
+    private void addBusHandler(CustomEventListener<?> handler) {
 	initInternalBus();
 	internalBus.registerListener(handler);
     }
@@ -556,10 +556,19 @@ public abstract class EventNode {
 
 	sendPeerRegisteredEvent(peerId);
     }
+    
+    /**
+     * Override this for extra actions when a peer registers to us
+     * @param peerId
+     */
+    protected void onPeerRegistered(String peerId) {
+	
+    }
 
     private void sendPeerRegisteredEvent(String peerId) {
 	PeerRegisteredEvent e = new PeerRegisteredEvent(peerId);
 	forwardToAll(e);
+	onPeerRegistered(peerId);
     }
 
     protected EventRelay addRemotePeer(String peerId) {
@@ -584,10 +593,19 @@ public abstract class EventNode {
 	    sendPeerUnregisteredEvent(peerId);
 	}
     }
+    
+    /**
+     * Override this for extra actions when a peer unregisters from us
+     * @param peerId
+     */
+    protected void onPeerUnregistered(String peerId) {
+	
+    }
 
     private void sendPeerUnregisteredEvent(String peerId) {
 	PeerUnregisteredEvent e = new PeerUnregisteredEvent(peerId);
 	forwardToAll(e);
+	onPeerUnregistered(peerId);
     }
 
     protected void forwardToAll(Event event) {

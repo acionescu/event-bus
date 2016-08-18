@@ -18,10 +18,10 @@ package net.segoia.event.eventbus;
 
 import net.segoia.event.conditions.Condition;
 
-public class FilteringEventListener extends SimpleEventDispatcher implements EventListener {
+public class FilteringEventDispatcher extends SimpleEventDispatcher implements EventListener {
     private Condition condition;
     
-    public FilteringEventListener(Condition condition) {
+    public FilteringEventDispatcher(Condition condition) {
 	super();
 	this.condition = condition;
     }
