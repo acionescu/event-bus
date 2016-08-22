@@ -23,9 +23,10 @@ import java.util.UUID;
 
 import com.google.gson.JsonObject;
 
+import net.segoia.event.eventbus.util.EBus;
 import net.segoia.event.eventbus.util.JsonUtils;
 
-public class Event implements Cloneable{
+public class Event implements Cloneable {
 
     protected String id;
     protected String et;
@@ -83,7 +84,6 @@ public class Event implements Cloneable{
 	this.topic = topic;
     }
 
-    
     private void initFromEventType() {
 	if (et == null) {
 	    throw new IllegalArgumentException("Event type cannot be null");
@@ -96,7 +96,7 @@ public class Event implements Cloneable{
 
 	init(etArray[0], etArray[1], etArray[2]);
     }
-    
+
     /**
      * Initializes this event
      * 
@@ -161,8 +161,7 @@ public class Event implements Cloneable{
 	     */
 	    this.et = new StringBuffer().append(scope).append(etSep).append(category).append(etSep).append(name)
 		    .toString();
-	}
-	else if(scope==null) {
+	} else if (scope == null) {
 	    initFromEventType();
 	}
     }
@@ -189,8 +188,30 @@ public class Event implements Cloneable{
 	return e;
     }
 
+    public static Event fromJson(String json, Event cause) {
+	Event e = fromJson(json);
+	cause.setAsCauseFor(e);
+	return e;
+    }
+
     public Object getParam(String key) {
 	return params.get(key);
+    }
+    /**
+     * Returns the param with specified name from the nth cause event
+     * @param key
+     * @param depth
+     * @return
+     */
+    public Object getParam(String key, int depth) {
+	if(depth <= 0) {
+	    return getParam(key);
+	}
+	Event cause = getCauseEvent();
+	if(cause != null) {
+	    return cause.getParam(key, depth-1);
+	}
+	return null;
     }
 
     public Event addParam(String key, Object value) {
@@ -234,8 +255,10 @@ public class Event implements Cloneable{
      * @return
      */
     protected Event setAsCauseFor(Event newEvent) {
-	newEvent.header.setCauseEventId(this.getId());
-	this.header.addSpawnedEventId(newEvent.getId());
+	newEvent.header.setCauseEvent(this);
+	if (EBus.debugEnabled) {
+	    this.header.addSpawnedEventId(newEvent.getId());
+	}
 	return newEvent;
     }
 
@@ -243,31 +266,30 @@ public class Event implements Cloneable{
 	doInit();
 	Event newEvent;
 	try {
-	    newEvent = (Event)super.clone();
-	    
+	    newEvent = (Event) super.clone();
+
 	    newEvent.header = header.clone();
 	} catch (CloneNotSupportedException e) {
 	    e.printStackTrace();
 	    return null;
 	}
-//	newEvent.id = getId();
-//	newEvent.init(scope, category, name);
-//	newEvent.topic = topic;
-//	newEvent.ts = ts;
-//	newEvent.closed = closed;
-//	if (closed) {
-//	    newEvent.params = params;
-//	} else {
-//	    /* if we're not closed to a shallow copy of params */
-//	    newEvent.params = ((HashMap<String, Object>) ((HashMap) params).clone());
-//	}
-//	
-//	/* add header */
-//	newEvent.header=header.clone();
-	
+	// newEvent.id = getId();
+	// newEvent.init(scope, category, name);
+	// newEvent.topic = topic;
+	// newEvent.ts = ts;
+	// newEvent.closed = closed;
+	// if (closed) {
+	// newEvent.params = params;
+	// } else {
+	// /* if we're not closed to a shallow copy of params */
+	// newEvent.params = ((HashMap<String, Object>) ((HashMap) params).clone());
+	// }
+	//
+	// /* add header */
+	// newEvent.header=header.clone();
+
 	return newEvent;
     }
-
 
     public Event setHeaderParam(String key, Object value) {
 	header.addParam(key, value);
@@ -395,39 +417,45 @@ public class Event implements Cloneable{
     public void removeLastRelay() {
 	header.removeLastRelay();
     }
-    
+
     /**
      * @return the forwardTo
      */
     public Set<String> getForwardTo() {
-        return header.getForwardTo();
+	return header.getForwardTo();
     }
 
     /**
-     * @param forwardTo the forwardTo to set
+     * @param forwardTo
+     *            the forwardTo to set
      */
     public void setForwardTo(Set<String> forwardTo) {
-       header.setForwardTo(forwardTo);
+	header.setForwardTo(forwardTo);
     }
-    
+
     public void addForwardTo(String nodeId) {
 	header.addForwardTo(nodeId);
     }
-    
+
     public void clearRelays() {
 	header.clearRelays();
     }
-    
+
     public void setHandled() {
 	header.setHandled();
     }
-    
+
     public boolean isHandled() {
 	return header.isHandled();
     }
     
-   
-    /* (non-Javadoc)
+    public Event getCauseEvent() {
+	return header.getCauseEvent();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -443,7 +471,9 @@ public class Event implements Cloneable{
 	return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -481,7 +511,7 @@ public class Event implements Cloneable{
 	    return false;
 	return true;
     }
-    
+
     public boolean equalsWithHeader(Event other) {
 	return (equals(other) && header.equals(other.header));
     }

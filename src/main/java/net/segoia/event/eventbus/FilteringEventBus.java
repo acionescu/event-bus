@@ -98,6 +98,10 @@ public class FilteringEventBus extends SimpleEventBus {
 	registerListener(getCustomEventListener(handler));
     }
     
+    public <E extends Event> void addEventHandler(EventHandler<E> handler, int priority) {
+	registerListener(getCustomEventListener(handler),priority);
+    }
+    
     public <E extends Event> void addEventHandler(Condition condition, EventHandler<E> handler) {
 	registerListener(condition, getCustomEventListener(handler));
     }

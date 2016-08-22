@@ -39,6 +39,11 @@ public class EventHeader implements Cloneable {
      * Hold the id of the event that caused this event to be triggered
      */
     private String causeEventId;
+    
+    /**
+     * The reference to the event that caused this event
+     */
+    private Event causeEvent;
 
     /**
      * Holds the ids of the events that were triggered by this event
@@ -265,6 +270,23 @@ public class EventHeader implements Cloneable {
      */
     public boolean isHandled() {
         return handled;
+    }
+    
+    
+
+    /**
+     * @return the causeEvent
+     */
+    public Event getCauseEvent() {
+        return causeEvent;
+    }
+
+    /**
+     * @param causeEvent the causeEvent to set
+     */
+    public void setCauseEvent(Event causeEvent) {
+        this.causeEvent = causeEvent;
+        setCauseEventId(causeEvent.getId());
     }
 
     /*

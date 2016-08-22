@@ -46,6 +46,8 @@ public class EBus {
     private static FilteringEventBus bus = new FilteringEventBus();
 
     private static LocalEventBusNode mainNode;
+    
+    public static boolean debugEnabled;
 
     /**
      * The main loop event bus dispatcher that will dispatch all events through a single thread
@@ -60,6 +62,8 @@ public class EBus {
 	if (cfgFile.exists()) {
 	    try {
 		EventBusJsonConfig ebusJsonConfig = EventBusJsonConfigLoader.load(new FileReader(cfgFile));
+		
+		debugEnabled = ebusJsonConfig.isDebugEnabled();
 
 		String ebusImpl = ebusJsonConfig.getBusClassName();
 
@@ -106,7 +110,6 @@ public class EBus {
 	    /* start main loop dispatcher */
 	    mainLoopDispatcher.start();
 	}
-
     }
 
     public static InternalEventTracker postEvent(Event event) {

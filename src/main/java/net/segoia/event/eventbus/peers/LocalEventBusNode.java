@@ -56,8 +56,8 @@ public class LocalEventBusNode extends EventNode{
      */
     @Override
     protected boolean handleRemoteEvent(EventContext pc) {
-	/* we want to peek on all events */
-	handleEvent(pc.getEvent());
+//	/* we want to peek on all events */
+//	handleEvent(pc.getEvent());
 	return super.handleRemoteEvent(pc);
     }
     

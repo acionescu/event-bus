@@ -28,6 +28,7 @@ public class EventBusJsonConfig extends EventBusConfig{
      * What implementation of {@link EventBus} to use
      */
     private String busClassName;
+    private boolean debugEnabled;
     private Map<String,Condition> conditions;
     private Map<String, EventListenerJsonConfig> listeners;
         
@@ -67,6 +68,18 @@ public class EventBusJsonConfig extends EventBusConfig{
      */
     public void setListeners(Map<String, EventListenerJsonConfig> listeners) {
         this.listeners = listeners;
+    }
+    /**
+     * @return the debugEnabled
+     */
+    public boolean isDebugEnabled() {
+        return debugEnabled;
+    }
+    /**
+     * @param debugEnabled the debugEnabled to set
+     */
+    public void setDebugEnabled(boolean debugEnabled) {
+        this.debugEnabled = debugEnabled;
     }
         
 }

@@ -1,5 +1,6 @@
 {
 	"busClassName": "net.segoia.event.eventbus.FilteringEventBus",
+	"debugEnabled" : true,
 	"defaultEventConfig": {
 		"loggingOn": true,
 		"loggingLevel": "INFO"

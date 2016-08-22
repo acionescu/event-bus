@@ -129,7 +129,12 @@ public class EventBusLoaderTest {
 	eh1.post();
 	eh2.post();
 	
-	
+	try {
+	    Thread.sleep(50);
+	} catch (InterruptedException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
 	
 	/* check that our listener actually received an echo from the listener registered for APP:USER:LOGIN event */
 	Assert.assertTrue(tl.isConditionSatisfied());
