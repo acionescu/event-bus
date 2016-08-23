@@ -35,7 +35,6 @@ public class JsonUtils {
 	try {
 	    return gs.fromJson(json, classOfT);
 	} catch (Exception e) {
-	    System.out.println("json: '" + json + "'");
 	    throw e;
 	}
     }

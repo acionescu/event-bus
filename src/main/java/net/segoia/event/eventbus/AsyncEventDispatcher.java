@@ -109,7 +109,6 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 			}
 
 		    }
-		    System.out.println("Exiting");
 		}
 	    });
 	    

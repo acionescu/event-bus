@@ -210,7 +210,6 @@ public class EventBusJsonConfigLoader {
 			if (!value.isJsonObject()) {
 			    return delegateAdapter.fromJsonTree(value);
 			}
-			// System.out.println(value+" "+value.getClass());
 			JsonObject jo = value.getAsJsonObject();
 
 			JsonElement cnameElem = jo.remove("className");
@@ -219,10 +218,8 @@ public class EventBusJsonConfigLoader {
 			    String cname = cnameElem.getAsString();
 
 			    try {
-				// System.out.println("using clazz " + cname);
 				return (T) gson.fromJson(value, Class.forName(cname));
 			    } catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return null;
 			    }

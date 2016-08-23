@@ -37,14 +37,13 @@ public class EventsRepository {
     }
 
     public static final synchronized void load() {
-	System.out.println(Thread.currentThread().getId() + " -> start load");
 	try {
 	    Field f = ClassLoader.class.getDeclaredField("classes");
 	    f.setAccessible(true);
 
 	    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 	    Vector<Class> classes = (Vector<Class>) f.get(classLoader);
-	    System.out.println(classLoader);
+
 	    Collection<Class> clset = Collections.synchronizedCollection(classes);
 	    Exception error = null;
 	    do {
@@ -61,7 +60,6 @@ public class EventsRepository {
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-	System.out.println(Thread.currentThread().getId() + " -> end load");
     }
 
     public static void processClass(Class c) {

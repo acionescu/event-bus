@@ -632,9 +632,7 @@ public abstract class EventNode {
 	/* otherwise, set destination and forward it to the peers */
 	else if (!event.wasRelayedBy(getId())) {
 	    forwardToAll(event);
-	} else {
-	    // System.out.println(getId() + " Skipping " + event);
-	}
+	} 
     }
 
     protected EventRelay getRelayForPeer(String peerId) {
@@ -700,7 +698,6 @@ public abstract class EventNode {
 	    if (ftp != null) {
 		/* if our rules forbid us to forward to this node, then don't bother */
 		if (!isEventForwardingAllowed(ec, via)) {
-//		    System.out.println(getId() + ": Not allowed forwarding via " + via + " " + event);
 		    continue;
 		}
 		EventRelay viaRelay = getDirectPeerRelay(via);
