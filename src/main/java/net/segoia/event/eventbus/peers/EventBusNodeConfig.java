@@ -38,6 +38,13 @@ public class EventBusNodeConfig {
      */
     private Condition defaultRequestedEvents = LooseEventMatchCondition.build(Events.SCOPE.EBUS,Events.CATEGORY.PEER);
     
+    
+    /**
+     * If true, this node will handle all incoming events regardless of the destination
+     */
+    private boolean god;
+    
+    
 
     /**
      * @return the autoRelayEanbled
@@ -79,6 +86,20 @@ public class EventBusNodeConfig {
      */
     public void setDefaultRequestedEvents(Condition defaultRequestedEvents) {
         this.defaultRequestedEvents = defaultRequestedEvents;
+    }
+
+    /**
+     * @return the god
+     */
+    public boolean isGod() {
+        return god;
+    }
+
+    /**
+     * @param god the god to set
+     */
+    public void setGod(boolean god) {
+        this.god = god;
     }
     
 }

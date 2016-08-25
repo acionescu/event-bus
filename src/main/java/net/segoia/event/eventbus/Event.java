@@ -197,21 +197,34 @@ public class Event implements Cloneable {
     public Object getParam(String key) {
 	return params.get(key);
     }
+
     /**
      * Returns the param with specified name from the nth cause event
+     * 
      * @param key
      * @param depth
      * @return
      */
     public Object getParam(String key, int depth) {
-	if(depth <= 0) {
+	if (depth <= 0) {
 	    return getParam(key);
 	}
 	Event cause = getCauseEvent();
-	if(cause != null) {
-	    return cause.getParam(key, depth-1);
+	if (cause != null) {
+	    return cause.getParam(key, depth - 1);
 	}
 	return null;
+    }
+
+    public Object getParamUpToDepth(String key, int maxDepth) {
+	Object value = getParam(key);
+	if (value == null && maxDepth > 0) {
+	    Event cause = getCauseEvent();
+	    if (cause != null) {
+		return cause.getParamUpToDepth(key, maxDepth - 1);
+	    }
+	}
+	return value;
     }
 
     public Event addParam(String key, Object value) {
@@ -448,7 +461,7 @@ public class Event implements Cloneable {
     public boolean isHandled() {
 	return header.isHandled();
     }
-    
+
     public Event getCauseEvent() {
 	return header.getCauseEvent();
     }

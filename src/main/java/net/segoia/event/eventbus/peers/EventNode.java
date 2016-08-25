@@ -17,6 +17,7 @@
 package net.segoia.event.eventbus.peers;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -66,6 +67,11 @@ public abstract class EventNode {
     private Map<String, EventRelay> directPeers = new HashMap<>();
 
     private Map<String, EventRelay> remotePeers = new HashMap<>();
+    
+    /**
+     * The ids of direct peers registered as agents
+     */
+    private Set<String> agents = new HashSet<>();
 
     private RoutingTable routingTable = new RoutingTable();
 
@@ -154,8 +160,7 @@ public abstract class EventNode {
     /**
      * Call this to spawn an extra event bus for this node </br>
      * This may be useful if you want to handle events coming from different sources but still keep the same internal
-     * state
-     * </br>
+     * state </br>
      * This additional bus should run in the same thread as the internal bus of this node
      * 
      * @param eventDispatcher
@@ -174,7 +179,6 @@ public abstract class EventNode {
 
 	    PeeringRequest req = c.getEvent().getData();
 	    String peerId = req.getRequestingNode().getId();
-	    getDirectPeerRelay(peerId);
 
 	    EventRelay localRelay = getDirectPeerRelay(peerId);
 	    if (localRelay == null) {
@@ -276,15 +280,14 @@ public abstract class EventNode {
 	 */
 	addEventHandler((c) -> {
 	    Event event = c.getEvent();
+
 	    if (!config.isAutoRelayEnabled() || event.wasRelayedBy(getId())) {
 		return;
 	    }
 
-	    getPeers().forEach((peerId, relay) -> {
+	    agents.forEach((peerId) -> {
 		if (!event.getForwardTo().contains(peerId) && !peerId.equals(event.to())) {
-		    if (relay.isRemoteNodeAgent()) {
-			relay.onLocalEvent(c);
-		    }
+			getDirectPeerRelay(peerId).onLocalEvent(c);
 		}
 	    });
 	});
@@ -411,6 +414,11 @@ public abstract class EventNode {
      * @param peerNode
      */
     protected void onNewPeer(String peerId) {
+	if(getDirectPeerRelay(peerId).isRemoteNodeAgent()) {
+	    agents.add(peerId);
+	    /* don't broadcast agents as peers, this is private business */
+	    return;
+	}
 	Event nne = Events.builder().ebus().peer().newPeer().topic(getId()).build();
 	nne.addParam("peerId", peerId);
 	forwardToAll(nne);
@@ -435,10 +443,9 @@ public abstract class EventNode {
     protected EventRelay buildRelay(PeeringRequest req) {
 	String relayId = generatePeerId();
 	EventRelay localRelay = buildLocalRelay(relayId);
-	localRelay.init();
 
-	// setRelayForwardingCondition(localRelay, req.getEventsCondition());
 	localRelay.setPeeringRequest(req);
+	localRelay.init();
 
 	return localRelay;
     }
@@ -556,13 +563,14 @@ public abstract class EventNode {
 
 	sendPeerRegisteredEvent(peerId);
     }
-    
+
     /**
      * Override this for extra actions when a peer registers to us
+     * 
      * @param peerId
      */
     protected void onPeerRegistered(String peerId) {
-	
+
     }
 
     private void sendPeerRegisteredEvent(String peerId) {
@@ -593,13 +601,14 @@ public abstract class EventNode {
 	    sendPeerUnregisteredEvent(peerId);
 	}
     }
-    
+
     /**
      * Override this for extra actions when a peer unregisters from us
+     * 
      * @param peerId
      */
     protected void onPeerUnregistered(String peerId) {
-	
+
     }
 
     private void sendPeerUnregisteredEvent(String peerId) {
@@ -632,7 +641,7 @@ public abstract class EventNode {
 	/* otherwise, set destination and forward it to the peers */
 	else if (!event.wasRelayedBy(getId())) {
 	    forwardToAll(event);
-	} 
+	}
     }
 
     protected EventRelay getRelayForPeer(String peerId) {
@@ -802,7 +811,7 @@ public abstract class EventNode {
 	public boolean dispatchEvent(EventContext ec) {
 	    stats.onEvent(ec);
 	    boolean forUs = handleRemoteEvent(ec);
-	    if (forUs) {
+	    if (forUs || config.isGod()) {
 		Event event = ec.getEvent();
 		/* if no from address, then this comes from us */
 		if (event.from() == null) {
@@ -810,7 +819,7 @@ public abstract class EventNode {
 		}
 		/* dispatch this further only if this event is meant for us */
 		return super.dispatchEvent(ec);
-	    }
+	    } 
 	    return false;
 	}
 
