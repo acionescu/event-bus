@@ -184,6 +184,9 @@ public class Event implements Cloneable {
 	if (e.header == null) {
 	    e.header = new EventHeader();
 	}
+	if(e.params == null) {
+	    e.params = new HashMap<>();
+	}
 	e.close();
 	return e;
     }
