@@ -569,14 +569,14 @@ public abstract class EventNode {
      * 
      * @param peerId
      */
-    protected void onPeerRegistered(String peerId) {
+    protected void onPeerRegistered(PeerRegisteredEvent event) {
 
     }
 
     private void sendPeerRegisteredEvent(String peerId) {
 	PeerRegisteredEvent e = new PeerRegisteredEvent(peerId);
 	forwardToAll(e);
-	onPeerRegistered(peerId);
+	onPeerRegistered(e);
     }
 
     protected EventRelay addRemotePeer(String peerId) {
@@ -607,14 +607,14 @@ public abstract class EventNode {
      * 
      * @param peerId
      */
-    protected void onPeerUnregistered(String peerId) {
+    protected void onPeerUnregistered(PeerUnregisteredEvent event) {
 
     }
 
     private void sendPeerUnregisteredEvent(String peerId) {
 	PeerUnregisteredEvent e = new PeerUnregisteredEvent(peerId);
 	forwardToAll(e);
-	onPeerUnregistered(peerId);
+	onPeerUnregistered(e);
     }
 
     protected void forwardToAll(Event event) {
