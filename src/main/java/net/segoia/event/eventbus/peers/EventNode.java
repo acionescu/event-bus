@@ -486,10 +486,19 @@ public abstract class EventNode {
     protected <E extends Event> void addEventHandler(EventHandler<E> handler) {
 	addBusHandler(new CustomEventListener<>(handler));
     }
+    
+    protected <E extends Event> void addEventHandler(EventHandler<E> handler, int priority) {
+	addBusHandler(new CustomEventListener<>(handler),priority);
+    }
 
     private void addBusHandler(CustomEventListener<?> handler) {
 	initInternalBus();
 	internalBus.registerListener(handler);
+    }
+    
+    private void addBusHandler(CustomEventListener<?> handler, int priority) {
+	initInternalBus();
+	internalBus.registerListener(handler,priority);
     }
 
     /**
