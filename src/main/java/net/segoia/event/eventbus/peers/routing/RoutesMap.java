@@ -42,6 +42,10 @@ public class RoutesMap {
 	return best.getNextNodeId();
     }
     
+    public boolean hasVia(String via) {
+	return routes.containsKey(via);
+    }
+    
     public void add(String to, String via) {
 	Route r = new Route(via, to);
 	routes.put(via,r);

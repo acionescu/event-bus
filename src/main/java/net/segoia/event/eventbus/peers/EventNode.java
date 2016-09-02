@@ -304,7 +304,7 @@ public abstract class EventNode {
 
     protected abstract void onTerminate();
 
-    private void updateRoute(Event event) {
+    protected void updateRoute(Event event) {
 	String from = event.from();
 	String via = event.getLastRelay();
 
@@ -695,6 +695,7 @@ public abstract class EventNode {
 		 * normal conditions
 		 */
 		System.err.println(getId() + ": Couldn't find a via for " + cto + " , forwarding to all");
+		event.setForwardTo(peerIds);
 		forwardToAll(event);
 		return;
 	    } else {

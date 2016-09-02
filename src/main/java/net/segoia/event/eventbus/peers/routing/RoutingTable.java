@@ -48,6 +48,9 @@ public class RoutingTable {
      *            - the next node in the route
      */
     public synchronized void addRoute(String to, String via) {
+	if(routeExists(to, via)) {
+	    return;
+	}
 	addForwardEntry(to, via);
 	inverseTable.add(via, to);
     }
@@ -58,6 +61,27 @@ public class RoutingTable {
 	    return null;
 	}
 	return rm.getBestVia();
+    }
+    
+    /**
+     * Checks if we have at least one route to the target
+     * @param to
+     * @return
+     */
+    public boolean routeExists(String to) {
+	RoutesMap routesMap = forwardTable.get(to);
+	if(routesMap == null) {
+	    return false;
+	}
+	return (routesMap.size() > 0);
+    }
+    
+    public boolean routeExists(String to, String via) {
+	RoutesMap routesMap = forwardTable.get(to);
+	if(routesMap == null) {
+	    return false;
+	}
+	return routesMap.hasVia(via);
     }
 
     protected void addForwardEntry(String to, String via) {

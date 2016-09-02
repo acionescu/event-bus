@@ -20,7 +20,9 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 public class EventsRepository {
@@ -30,10 +32,21 @@ public class EventsRepository {
 
     private static boolean isLoaded;
 
+    private static Set<String> loadedForEventType = new HashSet<>();
+
     public static synchronized void checkLoaded() {
 	if (!isLoaded) {
 	    load();
 	}
+    }
+
+    public static synchronized boolean checkLoaded(String eventType) {
+	if (!loadedForEventType.contains(eventType)) {
+	    load();
+	    loadedForEventType.add(eventType);
+	    return false;
+	}
+	return true;
     }
 
     public static final synchronized void load() {
@@ -74,7 +87,15 @@ public class EventsRepository {
 	checkLoaded();
 	Class<?> c = eventTypes.get(eventType);
 	if (c == null) {
-	    return Event.class;
+	    if (!checkLoaded(eventType)) {
+		c = eventTypes.get(eventType);
+		if (c == null) {
+		    return Event.class;
+		}
+	    }
+	    else {
+		return Event.class;
+	    }
 	}
 	return (Class<Event>) c;
     }
