@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import com.google.gson.JsonObject;
 
+import net.segoia.event.eventbus.constants.EventConstants;
 import net.segoia.event.eventbus.util.EBus;
 import net.segoia.event.eventbus.util.JsonUtils;
 
@@ -184,7 +185,7 @@ public class Event implements Cloneable {
 	if (e.header == null) {
 	    e.header = new EventHeader();
 	}
-	if(e.params == null) {
+	if (e.params == null) {
 	    e.params = new HashMap<>();
 	}
 	e.close();
@@ -262,6 +263,22 @@ public class Event implements Cloneable {
     public String toJson() {
 	doInit();
 	return JsonUtils.toJson(this);
+    }
+
+    public Map<String, String> toFlatMap() {
+	Map<String, String> out = new HashMap<>();
+	out.put(EventConstants.ID, getId());
+	out.put(EventConstants.ET, getEt());
+
+	String causeEventId = causeEventId();
+	if (causeEventId != null) {
+	    out.put(EventConstants.CAUSE_EVENT_ID, causeEventId);
+	}
+
+	for (String k : params.keySet()) {
+	    out.put(k, params.get(k).toString());
+	}
+	return out;
     }
 
     /**

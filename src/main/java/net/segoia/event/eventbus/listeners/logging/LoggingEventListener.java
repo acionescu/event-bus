@@ -27,6 +27,7 @@ public class LoggingEventListener implements EventListener {
     private Logger logger;
     private LoggerFactory loggerFactory;
     private String defaultLoggerName = LoggingEventListener.class.getSimpleName();
+    private boolean printAsJson;
 
     public LoggingEventListener() {
 	super();
@@ -63,7 +64,15 @@ public class LoggingEventListener implements EventListener {
 	    return false;
 	}
 
-	return logger.trace(etc.getLoggingLevel(), ec.getEvent(), null);
+	String out = null;
+	if(printAsJson) {
+	    out = ec.getEvent().toJson();
+	}
+	else {
+	    out = ec.getEvent().toString();
+	}
+	
+	return logger.trace(etc.getLoggingLevel(), out, null);
     }
 
     

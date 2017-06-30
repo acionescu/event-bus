@@ -60,6 +60,7 @@ public class EBus {
 
 	File cfgFile = new File(EBus.class.getClassLoader().getResource(jsonConfigFile).getFile());
 	if (cfgFile.exists()) {
+	    
 	    try {
 		EventBusJsonConfig ebusJsonConfig = EventBusJsonConfigLoader.load(new FileReader(cfgFile));
 		
@@ -74,6 +75,24 @@ public class EBus {
 			    1000);
 		bus.setEventDispatcher(new DelegatingEventDispatcher(new SimpleEventDispatcher(), mainLoopDispatcher));
 		//mainNodeDispatcher.start();
+		
+		
+		
+		/* create the main event bus node */
+
+		    EventBusNodeConfig nc = new EventBusNodeConfig();
+		    /* we will try to get all the events from our peers by default */
+		    nc.setDefaultRequestedEvents(new TrueCondition());
+
+		    /* autorelay all events to the peers */
+		    nc.setAutoRelayEnabled(true);
+		    mainNode = new LocalEventBusNode(bus, nc);
+		    bus.start();
+		    
+		    /* start main loop dispatcher */
+		    mainLoopDispatcher.start();
+		
+		
 		
 		Map<String, EventListenerJsonConfig> listeners = ebusJsonConfig.getListeners();
 		if (listeners != null) {
@@ -96,19 +115,7 @@ public class EBus {
 		e.printStackTrace();
 	    }
 
-	    /* create the main event bus node */
-
-	    EventBusNodeConfig nc = new EventBusNodeConfig();
-	    /* we will try to get all the events from our peers by default */
-	    nc.setDefaultRequestedEvents(new TrueCondition());
-
-	    /* autorelay all events to the peers */
-	    nc.setAutoRelayEnabled(true);
-	    mainNode = new LocalEventBusNode(bus, nc);
-	    bus.start();
-	    
-	    /* start main loop dispatcher */
-	    mainLoopDispatcher.start();
+	   
 	}
     }
 

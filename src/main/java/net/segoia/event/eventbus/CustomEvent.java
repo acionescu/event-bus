@@ -21,6 +21,14 @@ public abstract class CustomEvent<D> extends Event {
     public CustomEvent(Class<?> clazz) {
 	super(clazz);
     }
+        
+
+    public CustomEvent(Class<?> clazz, D data) {
+	super(clazz);
+	this.data = data;
+    }
+
+
 
     protected D data;
 
