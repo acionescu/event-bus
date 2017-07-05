@@ -16,6 +16,7 @@
  */
 package net.segoia.event.eventbus;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -484,6 +485,22 @@ public class Event implements Cloneable {
 
     public Event getCauseEvent() {
 	return header.getCauseEvent();
+    }
+    
+    public String getCauseEventId() {
+	return header.getCauseEventId();
+    }
+    
+    public Map<String,Object> getHeaderParams(){
+	return header.getParams();
+    }
+    
+    public Set<String> getTags() {
+	return header.getTags();
+    }
+    
+    public Map<String, Object> getParams(){
+	return Collections.unmodifiableMap(params);
     }
 
     /*

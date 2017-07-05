@@ -23,31 +23,35 @@ import net.segoia.event.eventbus.constants.Events;
 public class PeeringRequest {
     private EventNode requestingNode;
     /**
-     * On what kind of events this node wants to listed
-     * </br>
-     * If left null, it will attempt to listen on all events
-     * </br>
-     * it may be rejected if the source node does not allow this kind of peering
-     * </br>
+     * On what kind of events this node wants to listed </br>
+     * If left null, it will attempt to listen on all events </br>
+     * it may be rejected if the source node does not allow this kind of peering </br>
      * By default it's set to listen only on EBUS:PEER: events
      */
-    private Condition eventsCondition=LooseEventMatchCondition.build(Events.SCOPE.EBUS,Events.CATEGORY.PEER);
-    
+    private Condition eventsCondition = LooseEventMatchCondition.build(Events.SCOPE.EBUS, Events.CATEGORY.PEER);
+
     /**
-     * If this is true, then the events meant for the master node will be forwarded to this node as well 
+     * If this is true, then the events meant for the master node will be forwarded to this node as well
      */
     private boolean agent;
-    
+
+    /**
+     * if this is true, the {@link EventNode#registerPeer(PeeringRequest) will not return until the node was
+     * successfully registered *
+     */
+    private boolean synchronous;
+
     public PeeringRequest(EventNode requestingNode) {
 	super();
 	this.requestingNode = requestingNode;
     }
+
     public PeeringRequest(EventNode requestingNode, Condition eventsCondition) {
 	super();
 	this.requestingNode = requestingNode;
 	this.eventsCondition = eventsCondition;
     }
-    
+
     public PeeringRequest(EventNode requestingNode, Condition eventsCondition, boolean agent) {
 	super();
 	this.requestingNode = requestingNode;
@@ -56,35 +60,56 @@ public class PeeringRequest {
     }
     
     
+
+    public PeeringRequest(EventNode requestingNode, boolean synchronous) {
+	super();
+	this.requestingNode = requestingNode;
+	this.synchronous = synchronous;
+    }
+
     /**
      * @return the requestingNode
      */
     public EventNode getRequestingNode() {
-        return requestingNode;
+	return requestingNode;
     }
+
     /**
      * @return the eventsCondition
      */
     public Condition getEventsCondition() {
-        return eventsCondition;
+	return eventsCondition;
     }
+
     /**
-     * @param requestingNode the requestingNode to set
+     * @param requestingNode
+     *            the requestingNode to set
      */
     public void setRequestingNode(EventNode requestingNode) {
-        this.requestingNode = requestingNode;
+	this.requestingNode = requestingNode;
     }
+
     /**
-     * @param eventsCondition the eventsCondition to set
+     * @param eventsCondition
+     *            the eventsCondition to set
      */
     public void setEventsCondition(Condition eventsCondition) {
-        this.eventsCondition = eventsCondition;
+	this.eventsCondition = eventsCondition;
     }
+
     /**
      * @return the agent
      */
     public boolean isAgent() {
-        return agent;
+	return agent;
     }
-    
+
+    public boolean isSynchronous() {
+        return synchronous;
+    }
+
+    public void setSynchronous(boolean synchronous) {
+        this.synchronous = synchronous;
+    }
+
 }

@@ -77,6 +77,9 @@ public abstract class EventRelay {
 	    /* We need to copy this event before sending */
 	    sendEvent(event.clone());
 	}
+	else {
+	    System.out.println("Discarding event: "+ec.getEvent());
+	}
     }
 
     protected boolean isForwardingAllowed(EventContext ec) {

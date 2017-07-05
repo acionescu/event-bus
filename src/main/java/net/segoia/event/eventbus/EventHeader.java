@@ -43,12 +43,12 @@ public class EventHeader implements Cloneable {
     /**
      * The reference to the event that caused this event
      */
-    private Event causeEvent;
+    private transient Event causeEvent;
 
     /**
      * Holds the ids of the events that were triggered by this event
      */
-    private Set<String> spawnedEventsIds = new LinkedHashSet<>();
+    private transient Set<String> spawnedEventsIds = new LinkedHashSet<>();
 
     /**
      * The id of the entity that generated this event ( the first relay )

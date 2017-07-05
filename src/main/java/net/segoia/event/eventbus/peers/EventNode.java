@@ -18,6 +18,7 @@ package net.segoia.event.eventbus.peers;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -67,7 +68,7 @@ public abstract class EventNode {
     private Map<String, EventRelay> directPeers = new HashMap<>();
 
     private Map<String, EventRelay> remotePeers = new HashMap<>();
-    
+
     /**
      * The ids of direct peers registered as agents
      */
@@ -88,6 +89,11 @@ public abstract class EventNode {
      * This is used to delegate events to internal handlers
      */
     private FilteringEventBus internalBus;
+
+    /**
+     * Keep a map with the synchronous registration requests
+     */
+    private Map<String, PeeringRequest> waitingRegistration = new Hashtable<>();
 
     public EventNode(String id, boolean autoinit, EventBusNodeConfig config) {
 	this.id = id;
@@ -199,7 +205,7 @@ public abstract class EventNode {
 
 	addEventHandler(PeerBindResponseEvent.class, (c) -> {
 	    PeerBindResponse resp = c.getEvent().getData();
-
+	    
 	    EventRelay remoteRelay = resp.getRelay();
 	    EventRelay localRelay = buildRelay(resp.getBindRequest());
 
@@ -215,6 +221,18 @@ public abstract class EventNode {
 	    directPeers.put(peerId, localRelay);
 	    localRelay.bindAccepted(this);
 	    onNewPeer(peerId);
+
+	    /* if this is a synchronous registration then notify that it ended */
+	    PeeringRequest r = null;
+	    synchronized (waitingRegistration) {
+		r = waitingRegistration.remove(peerId);
+	    }
+
+	    if (r != null) {
+		synchronized (r) {
+		    r.notifyAll();
+		}
+	    }
 	});
 
 	addEventHandler("EBUS:PEER:NEW", (c) -> {
@@ -224,6 +242,7 @@ public abstract class EventNode {
 	    if (lastRelay != null) {
 		routingTable.addRoute(peerId, lastRelay);
 	    }
+	    
 	});
 
 	addEventHandler("EBUS:PEER:REMOVED", (c) -> {
@@ -287,7 +306,7 @@ public abstract class EventNode {
 
 	    agents.forEach((peerId) -> {
 		if (!event.getForwardTo().contains(peerId) && !peerId.equals(event.to())) {
-			getDirectPeerRelay(peerId).onLocalEvent(c);
+		    getDirectPeerRelay(peerId).onLocalEvent(c);
 		}
 	    });
 	});
@@ -333,7 +352,31 @@ public abstract class EventNode {
 
     public synchronized void registerPeer(PeeringRequest request) {
 	// getRelayForPeer(request, true);
+	String peerId = request.getRequestingNode().getId();
+	if (request.isSynchronous()) {
+	    waitingRegistration.put(peerId, request);
+	}
+
 	forwardTo(new PeerBindRequestEvent(request), getId());
+
+	/* if synchronous wait for the registration to finish */
+	if (request.isSynchronous()) {
+	    PeeringRequest r = null;
+	    synchronized (waitingRegistration) {
+		r = waitingRegistration.get(peerId);
+	    }
+	    
+	    if (r != null) {
+		synchronized (r) {
+		    try {
+			r.wait();
+		    } catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		    }
+		}
+	    }
+	}
 
     }
 
@@ -414,7 +457,7 @@ public abstract class EventNode {
      * @param peerNode
      */
     protected void onNewPeer(String peerId) {
-	if(getDirectPeerRelay(peerId).isRemoteNodeAgent()) {
+	if (getDirectPeerRelay(peerId).isRemoteNodeAgent()) {
 	    agents.add(peerId);
 	    /* don't broadcast agents as peers, this is private business */
 	    return;
@@ -486,19 +529,19 @@ public abstract class EventNode {
     protected <E extends Event> void addEventHandler(EventHandler<E> handler) {
 	addBusHandler(new CustomEventListener<>(handler));
     }
-    
+
     protected <E extends Event> void addEventHandler(EventHandler<E> handler, int priority) {
-	addBusHandler(new CustomEventListener<>(handler),priority);
+	addBusHandler(new CustomEventListener<>(handler), priority);
     }
 
     private void addBusHandler(CustomEventListener<?> handler) {
 	initInternalBus();
 	internalBus.registerListener(handler);
     }
-    
+
     private void addBusHandler(CustomEventListener<?> handler, int priority) {
 	initInternalBus();
-	internalBus.registerListener(handler,priority);
+	internalBus.registerListener(handler, priority);
     }
 
     /**
@@ -542,8 +585,11 @@ public abstract class EventNode {
 
     protected void postInternally(Event event) {
 
-	if (internalBus != null && initialized) {
+	if (internalBus != null) {
 	    internalBus.postEvent(event);
+	}
+	else {
+	    throw new RuntimeException("Warning! Internal bus for node "+getId()+" is not initialized");
 	}
     }
 
@@ -829,7 +875,7 @@ public abstract class EventNode {
 		}
 		/* dispatch this further only if this event is meant for us */
 		return super.dispatchEvent(ec);
-	    } 
+	    }
 	    return false;
 	}
 

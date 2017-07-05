@@ -59,7 +59,7 @@ public class LoggingEventListener implements EventListener {
 
     protected boolean log(EventContext ec) {
 	EventTypeConfig etc = ec.getConfigForEventType(true);
-
+	
 	if (!etc.isLoggingOn()) {
 	    return false;
 	}
