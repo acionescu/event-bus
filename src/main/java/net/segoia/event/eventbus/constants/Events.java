@@ -66,6 +66,8 @@ public class Events {
 	public static final String UPDATED="UPDATED";
 	public static final String CONNECTED="CONNECTED";
 	public static final String AUTH="AUTH";
+	public static final String ILLEGAL_ACTION="ILLEGAL_ACTION";
+	public static final String INVALID_VALUE="INVALID_VALUE";
     }
       
     public static DefaultEventBuilder builder() {
