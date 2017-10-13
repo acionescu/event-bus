@@ -25,8 +25,8 @@ import net.segoia.util.data.ListMap;
 import net.segoia.util.data.ListTreeMapFactory;
 
 /**
- * This dispatcher will call the {@link EventContext#visitListener(EventListener)} method sequentially for all the registered
- * listeners </br>
+ * This dispatcher will call the {@link EventContext#visitListener(EventListener)} method sequentially for all the
+ * registered listeners </br>
  * All processing will be done in a single Thread, so each visitListener call will block execution until finished
  * 
  * @author adi
@@ -40,12 +40,30 @@ public class SimpleEventDispatcher implements EventDispatcher {
     private ListMap<Integer, EventListener> listeners = new ListMap<Integer, EventListener>(
 	    new ListTreeMapFactory<Integer, EventListener>());
 
+    private ListMap<Integer, EventListener> pendingListeners = new ListMap<Integer, EventListener>(
+	    new ListTreeMapFactory<Integer, EventListener>());
+
     public boolean dispatchEvent(EventContext ec) {
 	if (lastError != null) {
 	    return false;
 	}
 	ReadLock readLock = lock.readLock();
+	
 	readLock.lock();
+
+	if (pendingListeners.size() > 0) {
+	    
+	    ListMap<Integer, EventListener> mergeListeners = new ListMap<Integer, EventListener>(
+		    new ListTreeMapFactory<Integer, EventListener>());
+
+	    mergeListeners.add(listeners.getAll());
+	    mergeListeners.add(pendingListeners.getAll());
+
+	    pendingListeners.clear();
+	    listeners = mergeListeners;
+
+	}
+
 	try {
 	    for (List<EventListener> list : listeners.values()) {
 		for (EventListener el : list) {
@@ -71,9 +89,15 @@ public class SimpleEventDispatcher implements EventDispatcher {
 
     public void registerListener(EventListener listener) {
 	WriteLock writeLock = lock.writeLock();
-	writeLock.lock();
-	listeners.add(listeners.size(), listener);
-	writeLock.unlock();
+	if (writeLock.tryLock()) {
+
+//	    writeLock.lock();
+	    listeners.add(listeners.size(), listener);
+	    writeLock.unlock();
+	} else {
+
+	    pendingListeners.add(listeners.size(), listener);
+	}
     }
 
     public void removeListener(EventListener listener) {
@@ -85,26 +109,36 @@ public class SimpleEventDispatcher implements EventDispatcher {
 
     public void registerListener(EventListener listener, int priority) {
 	WriteLock writeLock = lock.writeLock();
-	writeLock.lock();
-	if (priority >= 0) {
-	    listeners.add(priority, listener);
+
+	ListMap<Integer, EventListener> recipient = listeners;
+	boolean locked = false;
+	if (writeLock.tryLock()) {
+//	    writeLock.lock();
+	    locked = true;
 	} else {
-	    listeners.add(listeners.size(), listener);
+	    recipient = pendingListeners;
 	}
-	writeLock.unlock();
+	if (priority >= 0) {
+	    recipient.add(priority, listener);
+	} else {
+	    recipient.add(listeners.size(), listener);
+	}
+	if (locked) {
+	    writeLock.unlock();
+	}
 
     }
 
     @Override
     public void start() {
 	// TODO Auto-generated method stub
-	
+
     }
 
     @Override
     public void stop() {
 	// TODO Auto-generated method stub
-	
+
     }
 
 }
