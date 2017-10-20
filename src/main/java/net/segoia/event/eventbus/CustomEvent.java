@@ -39,7 +39,9 @@ public abstract class CustomEvent<D> extends Event {
 	return data;
     }
     
-    
+    public void setData(D data) {
+	this.data = data;
+    }
     
 
     /* (non-Javadoc)
