@@ -16,28 +16,39 @@
  */
 package net.segoia.event.eventbus.peers;
 
-public class DefaultEventRelay extends EventRelay{
+public class DefaultEventRelay extends EventRelay {
+
+    public DefaultEventRelay(EventNode parentNode, EventTransceiver tranceiver) {
+	super(parentNode, tranceiver);
+	// TODO Auto-generated constructor stub
+    }
+
+    public DefaultEventRelay(String id, EventNode parentNode, EventTransceiver tranceiver) {
+	super(id, parentNode, tranceiver);
+	// TODO Auto-generated constructor stub
+    }
 
     public DefaultEventRelay(String id, EventNode parentNode) {
 	super(id, parentNode);
+	// TODO Auto-generated constructor stub
     }
 
     @Override
     protected void init() {
 	// TODO Auto-generated method stub
-	
+
     }
 
     @Override
     protected void cleanUp() {
 	// TODO Auto-generated method stub
-	
+
     }
 
     @Override
     protected void start() {
 	// TODO Auto-generated method stub
-	
+
     }
 
 }

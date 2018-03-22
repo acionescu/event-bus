@@ -14,17 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.peers.events;
+package net.segoia.event.eventbus.peers.events.register;
 
 import net.segoia.event.eventbus.CustomEvent;
 import net.segoia.event.eventbus.EventType;
+import net.segoia.event.eventbus.peers.events.NodeInfo;
 
-@EventType("PEER:RESPONSE:UNREGISTERED")
-public class PeerUnregisteredEvent extends CustomEvent<PeerInfo>{
-    
-    public PeerUnregisteredEvent(String peerId) {
-	super(PeerUnregisteredEvent.class);
-	this.data = new PeerInfo(peerId);
+@EventType("PEER:REQUEST:UNREGISTER")
+public class PeerRequestUnregisterEvent extends CustomEvent<NodeInfo> {
+
+    public PeerRequestUnregisterEvent(String peerId) {
+	super(PeerRequestUnregisterEvent.class);
+	this.data = new NodeInfo(peerId);
     }
 
    

@@ -14,17 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.peers.events;
+package net.segoia.event.eventbus.peers.events.register;
 
 import net.segoia.event.eventbus.CustomEvent;
 import net.segoia.event.eventbus.EventType;
+import net.segoia.event.eventbus.peers.events.NodeInfo;
 
-@EventType("PEER:RESPONSE:BIND")
-public class PeerBindResponseEvent extends CustomEvent<PeerBindResponse>{
-
-    public PeerBindResponseEvent(PeerBindResponse pbr) {
-	super(PeerBindResponseEvent.class);
-	this.data = pbr;
+@EventType("PEER:RESPONSE:REGISTERED")
+public class PeerRegisteredEvent extends CustomEvent<NodeInfo>{
+    
+    public PeerRegisteredEvent(String peerId) {
+	super(PeerRegisteredEvent.class);
+	this.data = new NodeInfo(peerId);
     }
 
 }

@@ -14,19 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.peers.events;
+package net.segoia.event.eventbus.peers.events.bind;
 
 import net.segoia.event.eventbus.CustomEvent;
 import net.segoia.event.eventbus.EventType;
 
-@EventType("PEER:REQUEST:UNREGISTER")
-public class PeerRequestUnregisterEvent extends CustomEvent<PeerInfo> {
+@EventType("PEER:BIND:ACCEPTED")
+public class PeerBindAcceptedEvent extends CustomEvent<PeerBindAccepted>{
 
-    public PeerRequestUnregisterEvent(String peerId) {
-	super(PeerRequestUnregisterEvent.class);
-	this.data = new PeerInfo(peerId);
+    public PeerBindAcceptedEvent(PeerBindAccepted pbr) {
+	super(PeerBindAcceptedEvent.class);
+	this.data = pbr;
     }
-
-   
 
 }

@@ -55,5 +55,8 @@ public class JsonUtils {
 	return jsonElement.getAsString();
     }
    
-    
+    public static <T> T copyObject(T obj) {
+	Class<T> clazz = (Class<T>)obj.getClass();
+	return fromJson(toJson(obj), clazz);
+    }
 }

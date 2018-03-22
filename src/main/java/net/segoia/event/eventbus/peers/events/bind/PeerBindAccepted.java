@@ -14,39 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.peers.events;
+package net.segoia.event.eventbus.peers.events.bind;
 
-import net.segoia.event.eventbus.peers.EventRelay;
-import net.segoia.event.eventbus.peers.PeeringRequest;
+import net.segoia.event.eventbus.peers.events.NodeInfo;
 
-public class PeerBindResponse {
-    private EventRelay relay;
-    private PeeringRequest bindRequest;
+public class PeerBindAccepted {
+    private NodeInfo nodeInfo;
 
-    public PeerBindResponse(EventRelay relay, PeeringRequest bindRequest) {
+    public PeerBindAccepted() {
 	super();
-	this.relay = relay;
-	this.bindRequest = bindRequest;
+	// TODO Auto-generated constructor stub
     }
 
-
-
-    /**
-     * @return the relay
-     */
-    public EventRelay getRelay() {
-        return relay;
+    public PeerBindAccepted(NodeInfo nodeInfo) {
+	super();
+	this.nodeInfo = nodeInfo;
     }
 
-
-
-    /**
-     * @return the bindRequest
-     */
-    public PeeringRequest getBindRequest() {
-        return bindRequest;
+    public NodeInfo getNodeInfo() {
+	return nodeInfo;
     }
-    
-    
+
+    public void setNodeInfo(NodeInfo nodeInfo) {
+	this.nodeInfo = nodeInfo;
+    }
 
 }

@@ -14,44 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.peers.events;
+package net.segoia.event.eventbus.peers.events.bind;
 
-public class PeerInfo {
-    private String peerId;
+import net.segoia.event.eventbus.peers.EventRelay;
 
-    public PeerInfo(String peerId) {
+public class PeerBindConfirmation {
+    private EventRelay relay;
+
+    public PeerBindConfirmation(EventRelay relay) {
 	super();
-	this.peerId = peerId;
+	this.relay = relay;
     }
 
     /**
-     * @return the peerId
+     * @return the relay
      */
-    public String getPeerId() {
-	return peerId;
-    }
-
-    /**
-     * @param peerId
-     *            the peerId to set
-     */
-    public void setPeerId(String peerId) {
-	this.peerId = peerId;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-	StringBuilder builder = new StringBuilder();
-	builder.append("PeerInfo [");
-	if (peerId != null)
-	    builder.append("peerId=").append(peerId);
-	builder.append("]");
-	return builder.toString();
+    public EventRelay getRelay() {
+	return relay;
     }
 
 }

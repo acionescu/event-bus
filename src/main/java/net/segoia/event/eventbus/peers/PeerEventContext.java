@@ -23,7 +23,7 @@ public class PeerEventContext extends CustomEventContext<Event>{
     private EventRelay relay;
     
     public PeerEventContext(EventRelay relay, Event event) {
-	super(event,null);
+	super(event);
 	this.relay = relay;
     }
 

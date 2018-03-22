@@ -27,7 +27,7 @@ import net.segoia.event.conditions.NotCondition;
 import net.segoia.event.conditions.OrCondition;
 import net.segoia.event.conditions.TrueCondition;
 import net.segoia.event.eventbus.EventContext;
-import net.segoia.event.eventbus.peers.events.PeerRegisterRequestEvent;
+import net.segoia.event.eventbus.peers.events.register.PeerRegisterRequestEvent;
 
 public class ConditionTest {
 

@@ -14,14 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.peers;
+package net.segoia.event.eventbus.peers.events.bind;
 
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.conditions.LooseEventMatchCondition;
 import net.segoia.event.eventbus.constants.Events;
+import net.segoia.event.eventbus.peers.EventNode;
+import net.segoia.event.eventbus.peers.EventTransceiver;
 
-public class PeeringRequest {
-    private EventNode requestingNode;
+public class PeerBindRequest {
+    private EventTransceiver transceiver;
+
     /**
      * On what kind of events this node wants to listed </br>
      * If left null, it will attempt to listen on all events </br>
@@ -41,37 +44,28 @@ public class PeeringRequest {
      */
     private boolean synchronous;
 
-    public PeeringRequest(EventNode requestingNode) {
+    public PeerBindRequest(EventTransceiver transceiver) {
 	super();
-	this.requestingNode = requestingNode;
+	this.transceiver = transceiver;
     }
 
-    public PeeringRequest(EventNode requestingNode, Condition eventsCondition) {
+    public PeerBindRequest(EventTransceiver transceiver, Condition eventsCondition) {
 	super();
-	this.requestingNode = requestingNode;
+	this.transceiver = transceiver;
 	this.eventsCondition = eventsCondition;
     }
 
-    public PeeringRequest(EventNode requestingNode, Condition eventsCondition, boolean agent) {
+    public PeerBindRequest(EventTransceiver transceiver, Condition eventsCondition, boolean agent) {
 	super();
-	this.requestingNode = requestingNode;
+	this.transceiver = transceiver;
 	this.eventsCondition = eventsCondition;
 	this.agent = agent;
     }
-    
-    
 
-    public PeeringRequest(EventNode requestingNode, boolean synchronous) {
+    public PeerBindRequest(EventTransceiver transceiver, boolean synchronous) {
 	super();
-	this.requestingNode = requestingNode;
+	this.transceiver = transceiver;
 	this.synchronous = synchronous;
-    }
-
-    /**
-     * @return the requestingNode
-     */
-    public EventNode getRequestingNode() {
-	return requestingNode;
     }
 
     /**
@@ -81,12 +75,10 @@ public class PeeringRequest {
 	return eventsCondition;
     }
 
-    /**
-     * @param requestingNode
-     *            the requestingNode to set
-     */
-    public void setRequestingNode(EventNode requestingNode) {
-	this.requestingNode = requestingNode;
+    
+
+    public EventTransceiver getTransceiver() {
+        return transceiver;
     }
 
     /**
@@ -105,11 +97,11 @@ public class PeeringRequest {
     }
 
     public boolean isSynchronous() {
-        return synchronous;
+	return synchronous;
     }
 
     public void setSynchronous(boolean synchronous) {
-        this.synchronous = synchronous;
+	this.synchronous = synchronous;
     }
 
 }

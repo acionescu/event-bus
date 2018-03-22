@@ -14,23 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.peers.events;
+package net.segoia.event.eventbus.peers.events.bind;
 
-import net.segoia.event.eventbus.peers.EventRelay;
+import net.segoia.event.eventbus.CustomEvent;
+import net.segoia.event.eventbus.EventType;
 
-public class PeerBindConfirmation {
-    private EventRelay relay;
+@EventType("PEER:BIND:REQUEST")
+public class PeerBindRequestEvent extends CustomEvent<PeerBindRequest>{
 
-    public PeerBindConfirmation(EventRelay relay) {
-	super();
-	this.relay = relay;
-    }
-
-    /**
-     * @return the relay
-     */
-    public EventRelay getRelay() {
-	return relay;
+    public PeerBindRequestEvent(PeerBindRequest pr) {
+	super(PeerBindRequestEvent.class);
+	this.data = pr;
     }
 
 }

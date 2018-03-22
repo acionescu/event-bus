@@ -26,7 +26,6 @@ import java.util.Deque;
  */
 public class EventContext {
     private Event event;
-    private EventBus eventBus;
     private Deque<Exception> errorStack;
     /**
      * A listener used to track the lifecycle of an event
@@ -37,17 +36,17 @@ public class EventContext {
      * A way to request the handling of this event by another dispatcher
      */
     private EventDispatcher delegateDispatcher;
+    
+    private EventHandle eventHandle;
 
-    public EventContext(Event event, EventBus eventBus) {
+    public EventContext(Event event) {
 	super();
 	this.event = event;
-	this.eventBus = eventBus;
     }
     
-    public EventContext(Event event, EventBus eventBus, EventListener lifecycleListener) {
+    public EventContext(Event event,  EventListener lifecycleListener) {
 	super();
 	this.event = event;
-	this.eventBus = eventBus;
 	this.lifecycleListener = lifecycleListener;
     }
 
@@ -96,9 +95,7 @@ public class EventContext {
 	return event;
     }
 
-    public EventBus bus() {
-	return eventBus;
-    }
+   
 
     /**
      * @return the event
@@ -107,23 +104,18 @@ public class EventContext {
 	return event;
     }
 
-    /**
-     * @return the eventBus
-     */
-    public EventBus getEventBus() {
-	return eventBus;
-    }
+   
 
     public EventTypeConfig getConfigForEventType() {
-	return eventBus.getConfigForEventType(event.getEt());
+	return eventHandle.getBus().getConfigForEventType(event.getEt());
     }
 
     public EventTypeConfig getConfigForEventType(boolean useDefaultIfMissing) {
-	return eventBus.getConfigForEventType(event.getEt(), useDefaultIfMissing);
+	return eventHandle.getBus().getConfigForEventType(event.getEt(), useDefaultIfMissing);
     }
 
     public EventTypeConfig getConfigForEventType(EventTypeConfig defaultConfig) {
-	return eventBus.getConfigForEventType(event.getEt(), defaultConfig);
+	return eventHandle.getBus().getConfigForEventType(event.getEt(), defaultConfig);
     }
 
     /**
@@ -133,7 +125,7 @@ public class EventContext {
      * @return
      */
     public InternalEventTracker postEvent(Event event) {
-	return eventBus.postEvent(event);
+	return eventHandle.getBus().postEvent(event);
     }
 
     /**
@@ -156,6 +148,14 @@ public class EventContext {
 	    return delegateDispatcher.dispatchEvent(this);
 	}
 	return false;
+    }
+
+    public EventHandle getEventHandle() {
+        return eventHandle;
+    }
+
+    public void setEventHandle(EventHandle eventHandle) {
+        this.eventHandle = eventHandle;
     }
     
 }

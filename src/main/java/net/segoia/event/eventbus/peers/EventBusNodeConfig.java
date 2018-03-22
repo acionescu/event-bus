@@ -19,6 +19,8 @@ package net.segoia.event.eventbus.peers;
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.conditions.LooseEventMatchCondition;
 import net.segoia.event.eventbus.constants.Events;
+import net.segoia.event.eventbus.peers.security.EventNodeSecurityConfig;
+import net.segoia.event.eventbus.peers.security.EventNodeSecurityPolicy;
 
 public class EventBusNodeConfig {
     /**
@@ -44,7 +46,7 @@ public class EventBusNodeConfig {
      */
     private boolean god;
     
-    
+    private EventNodeSecurityConfig securityConfig;
 
     /**
      * @return the autoRelayEanbled
@@ -101,5 +103,12 @@ public class EventBusNodeConfig {
     public void setGod(boolean god) {
         this.god = god;
     }
-    
+
+    public EventNodeSecurityConfig getSecurityConfig() {
+        return securityConfig;
+    }
+
+    public void setSecurityConfig(EventNodeSecurityConfig securityConfig) {
+        this.securityConfig = securityConfig;
+    }
 }

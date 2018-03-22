@@ -49,9 +49,14 @@ public class SimpleEventBus implements EventBus, Cloneable{
     }
 
     protected InternalEventTracker postEvent(EventContext ec) {
+	
 	prepareEventForPosting(ec.getEvent());
 	boolean posted = dispatchEvent(ec);
 	return new InternalEventTracker(ec, posted);
+    }
+    
+    public InternalEventTracker postEventContext(EventContext eventContext) {
+	return postEvent(eventContext, getHandle(eventContext));
     }
 
     protected void prepareEventForPosting(Event event) {
@@ -62,11 +67,11 @@ public class SimpleEventBus implements EventBus, Cloneable{
     
     
     protected EventContext buildEventContext(Event event) {
-	return new EventContext(event, this);
+	return new EventContext(event);
     }
 
     protected EventContext buildEventContext(Event event, EventListener lifecycleListener) {
-	return new EventContext(event, this, lifecycleListener);
+	return new EventContext(event, lifecycleListener);
     }
 
     @Override
@@ -78,12 +83,14 @@ public class SimpleEventBus implements EventBus, Cloneable{
     protected EventHandle getHandle(EventContext eventContext) {
 	EventRights eventRights = config.getEventRights(eventContext);
 
-	return new EventHandle(eventContext, eventRights);
+	return new EventHandle(this, eventContext, eventRights);
     }
 
     @Override
     public InternalEventTracker postEvent(EventContext eventContext, EventHandle eventHandle) {
+	eventContext.setEventHandle(eventHandle);
 	if (eventHandle.isAllowed()) {
+	   
 	    return postEvent(eventContext);
 	}
 	return new InternalEventTracker(eventContext, false);

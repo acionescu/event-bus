@@ -20,12 +20,14 @@ public class EventHandle {
     private EventContext eventContext;
     private EventRights eventRights;
     private Event event;
+    private EventBus bus;
 
-    public EventHandle(EventContext eventContext, EventRights eventRights) {
+    public EventHandle(EventBus bus, EventContext eventContext, EventRights eventRights) {
 	super();
 	this.eventContext = eventContext;
 	this.eventRights = eventRights;
 	this.event = eventContext.event();
+	this.bus=bus;
     }
 
     public boolean isAllowed() {
@@ -33,7 +35,7 @@ public class EventHandle {
     }
 
     public InternalEventTracker post() {
-	return eventContext.bus().postEvent(eventContext, this);
+	return bus.postEvent(eventContext, this);
     }
     
     public InternalEventTracker send(String to) {
@@ -60,4 +62,10 @@ public class EventHandle {
 	event.addParam(key, value);
 	return this;
     }
+
+    public EventBus getBus() {
+        return bus;
+    }
+    
+    
 }

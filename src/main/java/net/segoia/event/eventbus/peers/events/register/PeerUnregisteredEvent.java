@@ -14,17 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.peers.events;
+package net.segoia.event.eventbus.peers.events.register;
 
 import net.segoia.event.eventbus.CustomEvent;
 import net.segoia.event.eventbus.EventType;
+import net.segoia.event.eventbus.peers.events.NodeInfo;
 
-@EventType("PEER:BIND:CONFIRMED")
-public class PeerBindConfirmedEvent extends CustomEvent<PeerBindConfirmation> {
-
-    public PeerBindConfirmedEvent(PeerBindConfirmation data) {
-	super(PeerBindConfirmedEvent.class);
-	this.data = data;
+@EventType("PEER:RESPONSE:UNREGISTERED")
+public class PeerUnregisteredEvent extends CustomEvent<NodeInfo>{
+    
+    public PeerUnregisteredEvent(String peerId) {
+	super(PeerUnregisteredEvent.class);
+	this.data = new NodeInfo(peerId);
     }
+
+   
 
 }

@@ -19,11 +19,11 @@ package net.segoia.event.eventbus;
 public class CustomEventContext<E extends Event> extends EventContext{
     
     public CustomEventContext(EventContext ec) {
-	super(ec.getEvent(),ec.bus());
+	super(ec.getEvent());
     }
 
-    public CustomEventContext(Event event, EventBus eventBus) {
-	super(event, eventBus);
+    public CustomEventContext(Event event) {
+	super(event);
     }
 
     /* (non-Javadoc)
