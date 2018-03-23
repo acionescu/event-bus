@@ -34,12 +34,12 @@ import net.segoia.event.eventbus.peers.events.EventNodeInfo;
 import net.segoia.event.eventbus.peers.events.NodeTerminateEvent;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.PeerLeavingEvent;
+import net.segoia.event.eventbus.peers.events.auth.ProtocolConfirmation;
+import net.segoia.event.eventbus.peers.events.auth.PeerProtocolConfirmedEvent;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequestEvent;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindAccepted;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindAcceptedEvent;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindConfirmation;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindConfirmedEvent;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequest;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequestEvent;
 import net.segoia.event.eventbus.peers.events.register.PeerRegisterRequestEvent;
@@ -196,8 +196,8 @@ public abstract class EventNode {
 
 	});
 
-	addEventHandler(PeerBindConfirmedEvent.class, (c) -> {
-	    PeerBindConfirmation data = c.getEvent().getData();
+	addEventHandler(PeerProtocolConfirmedEvent.class, (c) -> {
+	    ProtocolConfirmation data = c.getEvent().getData();
 	    EventRelay localRelay = data.getRelay();
 	    String peerId = localRelay.getRemoteNodeId();
 	    peersRegistry.setDirectPeerRelay(peerId, localRelay);
@@ -673,7 +673,7 @@ public abstract class EventNode {
     }
 
     public void onBindConfirmed(EventRelay localRelay) {
-	PeerBindConfirmedEvent pbce = new PeerBindConfirmedEvent(new PeerBindConfirmation(localRelay));
+	PeerProtocolConfirmedEvent pbce = new PeerProtocolConfirmedEvent(new ProtocolConfirmation(localRelay));
 	/* handle this internally */
 	forwardTo(pbce, getId());
     }

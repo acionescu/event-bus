@@ -45,6 +45,10 @@ public class PeerManager {
     public void start() {
 	relay.bind();
     }
+    
+    public void onReady() {
+	
+    }
 
     public void handlePeerBindAccepted(PeerBindAccepted data) {
 	peerContext.setPeerInfo(data.getNodeInfo());
@@ -66,4 +70,5 @@ public class PeerManager {
 	return peerContext;
     }
 
+    
 }

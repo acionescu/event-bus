@@ -8,8 +8,11 @@ import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolConfig;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolDefinition;
 import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
+import net.segoia.event.eventbus.peers.events.auth.AuthRejectReason;
+import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentityType;
+import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
 import net.segoia.event.eventbus.util.JsonUtils;
 
@@ -28,8 +31,29 @@ public class EventNodeSecurityManager {
 	this.securityConfig = JsonUtils.copyObject(securityConfig);
     }
 
+    /**
+     * Override this to filter the through the peer provided identities
+     * 
+     * @param peerContext
+     * @return
+     */
+    public List<? extends NodeIdentity<?>> getValidPeerIdentities(PeerContext peerContext) {
+	return peerContext.getPeerInfo().getNodeAuth().getIdentities();
+    }
+
     public CommunicationProtocol establishPeerCommunicationProtocol(PeerContext peerContext)
-	    throws PeerCommunicationNegotiationFailedException {
+	    throws PeerCommunicationNegotiationFailedException, PeerAuthRequestRejectedException {
+
+	List<? extends NodeIdentity<? extends NodeIdentityType>> validPeerIdentities = getValidPeerIdentities(
+		peerContext);
+
+	if (validPeerIdentities.size() == 0) {
+	    /* if no valid peer identity found, throw an exception */
+	    throw new PeerAuthRequestRejectedException(
+		    new PeerAuthRejected(new AuthRejectReason("No valid peer identity provided")));
+
+	}
+
 	/* Get the most preferred matching protocol */
 
 	String channel = peerContext.getCommunicationChannel();
@@ -41,10 +65,14 @@ public class EventNodeSecurityManager {
 	ChannelCommunicationPolicy localCommPolicy = localChannelPolicy.getCommunicationPolicy();
 	ChannelCommunicationPolicy peerCommPolicy = peerChannelPolicy.getCommunicationPolicy();
 
+	List<? extends NodeIdentity<? extends NodeIdentityType>> localIdentities = securityConfig.getNodeAuth()
+		.getIdentities();
+
 	/* see if we can match a local tx strategy with a peer rx strategy */
+
 	List<StrategyIdentitiesPair> localAsTxStrategyIdentitiesPairs = getMatchingCommStrategy(
-		localCommPolicy.getSupportedTxStrategies(), peerCommPolicy.getSupportedRxStrategies(),
-		securityConfig.getNodeAuth().getIdentities(), peerContext.getPeerInfo().getNodeAuth().getIdentities());
+		localCommPolicy.getSupportedTxStrategies(), peerCommPolicy.getSupportedRxStrategies(), localIdentities,
+		validPeerIdentities);
 
 	if (localAsTxStrategyIdentitiesPairs.size() == 0) {
 	    throw new PeerCommunicationNegotiationFailedException("Can't find a supported local tx strategy");
@@ -53,7 +81,7 @@ public class EventNodeSecurityManager {
 	/* see if we can match a local rx strategy with a peer tx strategy */
 	List<StrategyIdentitiesPair> peerAsTxStrategyIdentitiesPairs = getMatchingCommStrategy(
 		peerCommPolicy.getSupportedTxStrategies(), localCommPolicy.getSupportedRxStrategies(),
-		peerContext.getPeerInfo().getNodeAuth().getIdentities(), securityConfig.getNodeAuth().getIdentities());
+		validPeerIdentities, localIdentities);
 
 	if (peerAsTxStrategyIdentitiesPairs.size() == 0) {
 	    throw new PeerCommunicationNegotiationFailedException("Can't find a supported local rx strategy");

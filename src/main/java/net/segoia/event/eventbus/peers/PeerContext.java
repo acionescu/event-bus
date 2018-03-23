@@ -2,6 +2,7 @@ package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
+import net.segoia.event.eventbus.peers.events.SessionInfo;
 
 public class PeerContext {
     private String peerId;
@@ -22,6 +23,8 @@ public class PeerContext {
      * The protocol used to communicate with the peer
      */
     private CommunicationProtocol commProtocol;
+
+    private SessionInfo sessionInfo;
 
     public PeerContext(EventRelay relay) {
 	super();
@@ -72,6 +75,14 @@ public class PeerContext {
 
     public void setCommProtocol(CommunicationProtocol commProtocol) {
 	this.commProtocol = commProtocol;
+    }
+
+    public SessionInfo getSessionInfo() {
+	return sessionInfo;
+    }
+
+    public void setSessionInfo(SessionInfo sessionInfo) {
+	this.sessionInfo = sessionInfo;
     }
 
 }

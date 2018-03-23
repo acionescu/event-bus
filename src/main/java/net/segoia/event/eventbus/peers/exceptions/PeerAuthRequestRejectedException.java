@@ -10,7 +10,7 @@ public class PeerAuthRequestRejectedException extends Exception {
     private PeerAuthRejected authRejectedData;
 
     public PeerAuthRequestRejectedException(PeerAuthRejected authRejectedData) {
-	super(authRejectedData.getReason());
+	super(authRejectedData.getReason().getMessage());
 	this.authRejectedData = authRejectedData;
     }
 

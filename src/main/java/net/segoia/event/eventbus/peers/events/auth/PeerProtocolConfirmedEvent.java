@@ -14,16 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.peers.events.bind;
+package net.segoia.event.eventbus.peers.events.auth;
 
 import net.segoia.event.eventbus.CustomEvent;
 import net.segoia.event.eventbus.EventType;
 
-@EventType("PEER:BIND:CONFIRMED")
-public class PeerBindConfirmedEvent extends CustomEvent<PeerBindConfirmation> {
+@EventType("PEER:PROTOCOL:CONFIRMED")
+public class PeerProtocolConfirmedEvent extends CustomEvent<ProtocolConfirmation> {
 
-    public PeerBindConfirmedEvent(PeerBindConfirmation data) {
-	super(PeerBindConfirmedEvent.class);
+    public PeerProtocolConfirmedEvent(ProtocolConfirmation data) {
+	super(PeerProtocolConfirmedEvent.class);
 	this.data = data;
     }
 

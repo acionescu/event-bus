@@ -11,14 +11,26 @@ import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
+import net.segoia.event.eventbus.peers.events.SessionInfo;
+import net.segoia.event.eventbus.peers.events.auth.AuthRejectReason;
+import net.segoia.event.eventbus.peers.events.auth.MessageAuthRejectedReason;
+import net.segoia.event.eventbus.peers.events.auth.PeerAuthAccepted;
+import net.segoia.event.eventbus.peers.events.auth.PeerAuthAcceptedEvent;
+import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
+import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejectedEvent;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequest;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequestEvent;
+import net.segoia.event.eventbus.peers.events.auth.PeerProtocolConfirmedEvent;
+import net.segoia.event.eventbus.peers.events.auth.ProtocolConfirmation;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequestEvent;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindAccepted;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindAcceptedEvent;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequest;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequestEvent;
+import net.segoia.event.eventbus.peers.events.session.PeerSessionStartedEvent;
+import net.segoia.event.eventbus.peers.events.session.SessionStartedData;
+import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
 import net.segoia.event.eventbus.peers.routing.RoutingTable;
 import net.segoia.util.data.SetMap;
@@ -92,7 +104,6 @@ public class PeersManager {
 
 	if (peerManager == null) {
 	    throw new RuntimeException("No peer manager found for localPeerId " + localPeerId);
-	    return;
 	}
 
 	peerManager.handlePeerBindAccepted(resp);
@@ -102,7 +113,7 @@ public class PeersManager {
 	peerManager.forwardToPeer(new PeerAuthRequestEvent(peerAuthRequest));
     }
 
-    protected void handlePeerAuthRequest(CustomEventContext<PeerAuthRequestEvent> c) {
+    public void handlePeerAuthRequest(CustomEventContext<PeerAuthRequestEvent> c) {
 	PeerAuthRequestEvent event = c.getEvent();
 	PeerAuthRequest data = event.getData();
 
@@ -112,73 +123,175 @@ public class PeersManager {
 
 	if (peerManager == null) {
 	    throw new RuntimeException("No peer manager found for localPeerId " + localPeerId);
-	    return;
 	}
 
 	peerManager.handlePeerAuthRequest(data);
 
-	
 	try {
-	    CommunicationProtocol commProtocol = hostNode.getSecurityManager().establishPeerCommunicationProtocol(peerManager.getPeerContext());
+	    CommunicationProtocol commProtocol = hostNode.getSecurityManager()
+		    .establishPeerCommunicationProtocol(peerManager.getPeerContext());
 	    CommunicationProtocol protocolProposedByPeer = data.getCommunicationProtocol();
-	    if(protocolProposedByPeer != null) {
-		if(commProtocol.equals(protocolProposedByPeer)) {
+
+	    /* set the protocol we found on the peer context */
+	    peerManager.getPeerContext().setCommProtocol(commProtocol);
+	    if (protocolProposedByPeer != null) {
+		if (commProtocol.equals(protocolProposedByPeer)) {
 		    /* The protocol chose by us matches with the one proposed by peer. All is good */
-		    peerManager.getPeerContext().setCommProtocol(commProtocol);
-		    
-		    //TODO: send auth accepted event
-		    
-		}
-		else {
+
+		    // TODO: send auth accepted event
+		    acceptPeerAuth(peerManager);
+		} else {
 		    /* Ups, the proposed protocol doesn't match with the one we found */
-		    //TODO: Propose the one we found
+
+		    /* Fail, for now */
+
+		    rejectPeerAuth(peerManager, new AuthRejectReason<CommunicationProtocol>(
+			    "Don't agree on protocol. Found a better one.", commProtocol));
+		    // TODO: Propose the one we found
+
+		    acceptPeerAuth(peerManager);
 		}
+	    } else {
+		// TODO: propose the protocol we found
+
+		acceptPeerAuth(peerManager);
 	    }
-	    else {
-		//TODO: propose the protocol we found
-	    }
-	    
-	    
+
 	} catch (PeerCommunicationNegotiationFailedException ex) {
-
+	    rejectPeerAuth(peerManager, new MessageAuthRejectedReason(ex.getMessage()));
+	} catch (PeerAuthRequestRejectedException arex) {
+	    rejectPeerAuth(peerManager, arex.getAuthRejectedData().getReason());
 	}
+    }
 
+    public void handlePeerAuthAccepted(CustomEventContext<PeerAuthAcceptedEvent> c) {
+	PeerAuthAcceptedEvent event = c.getEvent();
+	PeerManager peerManager = getPeerManagerForEvent(event);
+
+	PeerAuthAccepted data = event.getData();
+
+	CommunicationProtocol protocolFromPeer = data.getCommunicationProtocol();
+
+	PeerContext peerContext = peerManager.getPeerContext();
+	CommunicationProtocol ourProtocol = peerContext.getCommProtocol();
+
+	if (ourProtocol == null) {
+	    /* if we hanve't proposed a protocol, see if we can find a matching supported protocol */
+	    try {
+		ourProtocol = hostNode.getSecurityManager().establishPeerCommunicationProtocol(peerContext);
+	    } catch (PeerCommunicationNegotiationFailedException ex) {
+		
+	    } catch (PeerAuthRequestRejectedException arex) {
+		
+	    }
+	    
+	    /* set the protocol on peer context */
+	    peerContext.setCommProtocol(ourProtocol);
+	}
+	
+	/* check that the two protocols match */
+	
+	if(ourProtocol.equals(protocolFromPeer)) {
+	    /* yey, we have a matching protocol, send confirmation */
+	    ProtocolConfirmation protocolConfirmation = new ProtocolConfirmation(ourProtocol);
+	    peerManager.forwardToPeer(new PeerProtocolConfirmedEvent(protocolConfirmation));
+	}
+    }
+    
+    public void handleProtocolConfirmed(CustomEventContext<PeerProtocolConfirmedEvent> c) {
+	PeerProtocolConfirmedEvent event = c.getEvent();
+	PeerManager peerManager = getPeerManagerForEvent(event);
+	
+	ProtocolConfirmation data = event.getData();
+	
+	/* check again if the protocols match */
+	CommunicationProtocol ourProtocol = peerManager.getPeerContext().getCommProtocol();
+	CommunicationProtocol peerProtocol = data.getProtocol();
+	
+	if(!ourProtocol.equals(peerProtocol)) {
+	    /* ups, they don't match */
+	    
+	    //TODO: handle this
+	}
+	
+	/* if they match, initiate the session */
+	
+	SessionStartedData sessionStartedData = new SessionStartedData(generateNewSession());
+	
+	peerManager.forwardToPeer(new PeerSessionStartedEvent(sessionStartedData));
+	
+    }
+    
+    public void handleSessionStartedEvent(CustomEventContext<PeerSessionStartedEvent> c) {
+	PeerSessionStartedEvent event = c.getEvent();
+	PeerManager peerManager = getPeerManagerForEvent(event);
+	
+	SessionStartedData data = event.getData();
+	
+	peerManager.getPeerContext().setSessionInfo(data.getSessionInfo());
+	
+	peerManager.onReady();
+    }
+    
+    protected PeerManager getPeerManagerById(String peerId) {
+	return peersRegistry.getDirectPeerManager(peerId);
+    }
+
+    protected PeerManager getPeerManagerForEvent(Event event) {
+	String localPeerId = event.getLastRelay();
+	return peersRegistry.getPendingPeerManager(localPeerId);
+    }
+
+    protected void acceptPeerAuth(PeerManager peerManager) {
+	PeerAuthAccepted peerAuthAccepted = new PeerAuthAccepted();
+	peerAuthAccepted.setCommunicationProtocol(peerManager.getPeerContext().getCommProtocol());
+	peerManager.forwardToPeer(new PeerAuthAcceptedEvent(peerAuthAccepted));
+    }
+
+    protected void rejectPeerAuth(PeerManager peerManager, AuthRejectReason reason) {
+	PeerAuthRejected peerAuthRejected = new PeerAuthRejected(reason);
+	peerManager.forwardToPeer(new PeerAuthRejectedEvent(peerAuthRejected));
+    }
+    
+    protected String getLocalNodeId() {
+	return hostNode.getId();
     }
 
     protected void forwardToAll(Event event) {
 	EventContext ec = new EventContext(event, null);
-	for (PeerManager peerContext : peersRegistry.getDirectPeers().values()) {
-	    EventRelay r = peerContext.getRelay();
-	    r.onLocalEvent(ec);
+	for (PeerManager peerManager : peersRegistry.getDirectPeers().values()) {
+//	    EventRelay r = peerManager.getRelay();
+//	    r.onLocalEvent(ec);
+	    peerManager.forwardToPeer(event);
 	}
     }
 
     protected void forwardTo(Event event, String to) {
 	event.to(to);
-	if (getId().equals(to)) {
+	if (hostNode.getId().equals(to)) {
 	    postInternally(event);
 	    return;
 	}
 
 	EventContext ec = new EventContext(event, null);
 	/* first check if the destination is one of the peers */
-	EventRelay peerRelay = peersRegistry.getDirectPeerRelay(to);
+	PeerManager peerManager = peersRegistry.getDirectPeerManager(to);
 	/* if it is, forward the event */
-	if (peerRelay != null) {
-	    peerRelay.onLocalEvent(ec);
+	if (peerManager != null) {
+	    peerManager.forwardToPeer(event);
 	}
 	/* otherwise, set destination and forward it to the peers */
-	else if (!event.wasRelayedBy(getId())) {
+	else if (!event.wasRelayedBy(hostNode.getId())) {
 	    forwardToAll(event);
 	}
     }
 
     protected EventRelay getRelayForPeer(String peerId) {
 	/* check direct peers */
-	EventRelay peerRelay = getDirectPeerRelay(peerId);
+	EventRelay peerRelay = getDirectPeer(peerId);
 	if (peerRelay == null) {
 	    /* check remote peers */
-	    peerRelay = getRemotePeerRelay(peerId);
+	    peerRelay = getRemotePeerManager(peerId);
 	}
 
 	return peerRelay;
@@ -186,7 +299,7 @@ public class PeersManager {
 
     protected void forwardTo(Event event, Set<String> peerIds) {
 	/* check if if we are targeted by the event as well */
-	if (peerIds.contains(getId())) {
+	if (peerIds.contains(getLocalNodeId())) {
 	    postInternally(event);
 	    return;
 	}
@@ -202,7 +315,7 @@ public class PeersManager {
 	for (String cto : peerIds) {
 	    String cvia = null;
 	    /* if this is a direct peer or us, use targeted peer id as via */
-	    if (getDirectPeerRelay(cto) != null || getId().equals(cto)) {
+	    if (getDirectPeer(cto) != null || getLocalNodeId().equals(cto)) {
 		cvia = cto;
 	    } else {
 		/* if it's a remote peer, we should have a via in the routing table */
@@ -214,7 +327,7 @@ public class PeersManager {
 		 * if we can't find a via for a remote node, then forward to all, however this should not happen under
 		 * normal conditions
 		 */
-		System.err.println(getId() + ": Couldn't find a via for " + cto + " , forwarding to all");
+		System.err.println(getLocalNodeId() + ": Couldn't find a via for " + cto + " , forwarding to all");
 		event.setForwardTo(peerIds);
 		forwardToAll(event);
 		return;
@@ -239,7 +352,7 @@ public class PeersManager {
 		if (!isEventForwardingAllowed(ec, via)) {
 		    continue;
 		}
-		EventRelay viaRelay = getDirectPeerRelay(via);
+		EventRelay viaRelay = getDirectPeer(via).getPeerContext().getRelay();
 
 		/* clone event, rewrite forwardTo and send it directly */
 		Event ce = event.clone();
@@ -264,20 +377,20 @@ public class PeersManager {
     protected Set<String> getKnownPeers(EventContext ec) {
 
 	Stream<String> dpStream = peersRegistry.getDirectPeers().entrySet().stream()
-		.filter((e) -> e.getValue().getRelay().isForwardingAllowed(ec)).map((e) -> e.getKey());
+		.filter((e) -> e.getValue().getPeerContext().getRelay().isForwardingAllowed(ec)).map((e) -> e.getKey());
 	Stream<String> rpStream = peersRegistry.getRemotePeers().entrySet().stream()
-		.filter((e) -> e.getValue().getRelay().isForwardingAllowed(ec)).map((e) -> e.getKey());
+		.filter((e) -> e.getValue().getPeerContext().getRelay().isForwardingAllowed(ec)).map((e) -> e.getKey());
 	Set<String> targetedPeers = Stream.concat(dpStream, rpStream).collect(Collectors.toSet());
 
 	return targetedPeers;
     }
 
-    protected EventRelay getDirectPeerRelay(String id) {
-	return peersRegistry.getDirectPeerRelay(id);
+    protected PeerManager getDirectPeer(String id) {
+	return peersRegistry.getDirectPeerManager(id);
     }
 
-    protected EventRelay getRemotePeerRelay(String id) {
-	return peersRegistry.getRemotePeerRelay(id);
+    protected PeerManager getRemotePeerManager(String id) {
+	return peersRegistry.getRemotePeerManager(id);
     }
 
     public boolean isEventForwardingAllowed(EventContext ec, String peerId) {
@@ -300,6 +413,10 @@ public class PeersManager {
 	}
 
 	return false;
+    }
+    
+    protected SessionInfo generateNewSession() {
+	return new SessionInfo(generateSessionId(), generateSecurityToken());
     }
 
     protected static String generatePeerId() {

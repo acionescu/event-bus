@@ -14,23 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.peers.events.bind;
+package net.segoia.event.eventbus.peers.events.auth;
 
-import net.segoia.event.eventbus.peers.EventRelay;
+import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 
-public class PeerBindConfirmation {
-    private EventRelay relay;
+public class ProtocolConfirmation {
+    private CommunicationProtocol protocol;
 
-    public PeerBindConfirmation(EventRelay relay) {
+    public ProtocolConfirmation() {
 	super();
-	this.relay = relay;
     }
 
-    /**
-     * @return the relay
-     */
-    public EventRelay getRelay() {
-	return relay;
+    public ProtocolConfirmation(CommunicationProtocol protocol) {
+	super();
+	this.protocol = protocol;
+    }
+
+    public CommunicationProtocol getProtocol() {
+	return protocol;
+    }
+
+    public void setProtocol(CommunicationProtocol protocol) {
+	this.protocol = protocol;
     }
 
 }
