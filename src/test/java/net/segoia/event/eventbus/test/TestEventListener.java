@@ -24,11 +24,11 @@ import net.segoia.event.conditions.Condition;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.EventHandle;
-import net.segoia.event.eventbus.EventListener;
+import net.segoia.event.eventbus.EventContextListener;
 import net.segoia.event.eventbus.constants.Events;
 import net.segoia.util.data.ListMap;
 
-public class TestEventListener implements EventListener {
+public class TestEventListener implements EventContextListener {
     /**
      * If set to true will create an echo event for every event received, setting it as cause
      */

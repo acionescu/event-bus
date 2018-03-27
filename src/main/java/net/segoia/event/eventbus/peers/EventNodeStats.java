@@ -17,9 +17,9 @@
 package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.EventContext;
-import net.segoia.event.eventbus.EventListener;
+import net.segoia.event.eventbus.EventContextListener;
 
-public class EventNodeStats implements EventListener{
+public class EventNodeStats implements EventContextListener{
     private long eventsHandledCount;
 
     @Override

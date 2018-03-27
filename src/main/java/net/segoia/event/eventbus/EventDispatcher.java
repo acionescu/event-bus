@@ -30,9 +30,9 @@ public interface EventDispatcher {
 
     boolean dispatchEvent(EventContext ec);
 
-    void registerListener(EventListener listener);
+    void registerListener(EventContextListener listener);
 
-    void registerListener(EventListener listener, int priority);
+    void registerListener(EventContextListener listener, int priority);
 
-    void removeListener(EventListener listener);
+    void removeListener(EventContextListener listener);
 }

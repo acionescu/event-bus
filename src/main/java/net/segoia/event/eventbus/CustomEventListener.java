@@ -16,7 +16,7 @@
  */
 package net.segoia.event.eventbus;
 
-public interface CustomEventListener<E extends Event> extends EventListener{
+public interface CustomEventListener<E extends Event> extends EventContextListener{
 
     /* (non-Javadoc)
      * @see net.segoia.event.eventbus.EventListener#onEvent(net.segoia.event.eventbus.EventContext)

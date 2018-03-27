@@ -18,35 +18,63 @@ package net.segoia.event.eventbus;
 
 import net.segoia.event.conditions.Condition;
 
-public class FilteringEventDispatcher extends SimpleEventDispatcher implements EventListener {
+public class FilteringEventDispatcher implements EventDispatcher, EventContextListener {
     private Condition condition;
-    
-    public FilteringEventDispatcher(Condition condition) {
+    private EventDispatcher dispatcher;
+
+    public FilteringEventDispatcher(Condition condition, EventDispatcher dispatcher) {
 	super();
 	this.condition = condition;
+	this.dispatcher = dispatcher;
     }
 
-
     public void onEvent(EventContext ec) {
-	if(condition.test(ec)) {
+	if (condition.test(ec)) {
 	    dispatchEvent(ec);
 	}
 
     }
 
-
     @Override
     public void init() {
 	// TODO Auto-generated method stub
-	
-    }
 
+    }
 
     @Override
     public void terminate() {
 	// TODO Auto-generated method stub
-	
+
     }
 
-    
+    @Override
+    public void start() {
+	dispatcher.start();
+    }
+
+    @Override
+    public void stop() {
+	dispatcher.stop();
+    }
+
+    @Override
+    public boolean dispatchEvent(EventContext ec) {
+	return dispatcher.dispatchEvent(ec);
+    }
+
+    @Override
+    public void registerListener(EventContextListener listener) {
+	dispatcher.registerListener(listener);
+    }
+
+    @Override
+    public void registerListener(EventContextListener listener, int priority) {
+	dispatcher.registerListener(listener, priority);
+    }
+
+    @Override
+    public void removeListener(EventContextListener listener) {
+	dispatcher.removeListener(listener);
+    }
+
 }

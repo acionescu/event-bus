@@ -28,10 +28,10 @@ import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContextDispatcher;
 import net.segoia.event.eventbus.EventDispatcher;
 import net.segoia.event.eventbus.EventHandle;
-import net.segoia.event.eventbus.EventListener;
+import net.segoia.event.eventbus.EventContextListener;
 import net.segoia.event.eventbus.FilteringEventBus;
 import net.segoia.event.eventbus.InternalEventTracker;
-import net.segoia.event.eventbus.SimpleEventDispatcher;
+import net.segoia.event.eventbus.BlockingEventDispatcher;
 import net.segoia.event.eventbus.builders.DefaultComponentEventBuilder;
 import net.segoia.event.eventbus.config.json.EventBusJsonConfig;
 import net.segoia.event.eventbus.config.json.EventBusJsonConfigLoader;
@@ -73,7 +73,7 @@ public class EBus {
 
 		AsyncEventDispatcher mainNodeDispatcher = new AsyncEventDispatcher(new EventContextDispatcher(),
 			    1000);
-		bus.setEventDispatcher(new DelegatingEventDispatcher(new SimpleEventDispatcher(), mainLoopDispatcher));
+		bus.setEventDispatcher(new DelegatingEventDispatcher(new BlockingEventDispatcher(), mainLoopDispatcher));
 		//mainNodeDispatcher.start();
 		
 		
@@ -97,7 +97,7 @@ public class EBus {
 		Map<String, EventListenerJsonConfig> listeners = ebusJsonConfig.getListeners();
 		if (listeners != null) {
 		    for (EventListenerJsonConfig lc : listeners.values()) {
-			EventListener listenerInstance = lc.getInstance();
+			EventContextListener listenerInstance = lc.getInstance();
 			listenerInstance.init();
 
 			Condition lcond = lc.getCondition();
@@ -154,7 +154,7 @@ public class EBus {
     }
 
     public static FilteringEventBus buildSingleThreadedAsyncFilteringEventBus(int cacheCapacity) {
-	return buildAsyncFilteringEventBus(cacheCapacity, 1, new SimpleEventDispatcher());
+	return buildAsyncFilteringEventBus(cacheCapacity, 1, new BlockingEventDispatcher());
     }
 
     /**

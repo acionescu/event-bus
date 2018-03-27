@@ -20,7 +20,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 /**
- * This carries an {@link Event} to all the interested {@link EventListener} objects
+ * This carries an {@link Event} to all the interested {@link EventContextListener} objects
  * @author adi
  *
  */
@@ -30,7 +30,7 @@ public class EventContext {
     /**
      * A listener used to track the lifecycle of an event
      */
-    private EventListener lifecycleListener; 
+    private EventContextListener lifecycleListener; 
     
     /**
      * A way to request the handling of this event by another dispatcher
@@ -44,7 +44,7 @@ public class EventContext {
 	this.event = event;
     }
     
-    public EventContext(Event event,  EventListener lifecycleListener) {
+    public EventContext(Event event,  EventContextListener lifecycleListener) {
 	super();
 	this.event = event;
 	this.lifecycleListener = lifecycleListener;
@@ -59,7 +59,7 @@ public class EventContext {
 	}
     }
 
-    public void visitListener(EventListener listener) {
+    public void visitListener(EventContextListener listener) {
 	try {
 	    listener.onEvent(this);
 	} catch (Exception e) {

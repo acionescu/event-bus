@@ -18,43 +18,47 @@ package net.segoia.event.eventbus;
 
 /**
  * This is a simple {@link EventBus} implementation that will process the posted events sequentially, by delegating to
- * the registered {@link EventListener}(s). </br>
+ * the registered {@link EventContextListener}(s). </br>
  * The event will be passed to each listener in the order of priority. </br>
  * More listeners may have the same priority in which case they will be called in the order of registration
  * 
  * @author adi
  *
  */
-public class SimpleEventBus implements EventBus, Cloneable{
-    protected EventDispatcher eventDispatcher = new SimpleEventDispatcher();
+public class SimpleEventBus implements EventBus, Cloneable {
+    protected SimpleEventProcessor processor;
     private EventBusConfig config = new EventBusConfig();
-    
+
     public SimpleEventBus(EventDispatcher eventDispatcher) {
+	processor = new SimpleEventProcessor(eventDispatcher);
+    }
+
+    public SimpleEventBus(SimpleEventProcessor processor) {
 	super();
-	this.eventDispatcher = eventDispatcher;
+	this.processor = processor;
     }
 
     public SimpleEventBus() {
-	super();
+	this(new BlockingEventDispatcher());
     }
 
     public InternalEventTracker postEvent(Event event) {
 	EventContext ec = buildEventContext(event);
-	return postEvent(ec,getHandle(ec) );
+	return postEvent(ec, getHandle(ec));
     }
-    
-    protected InternalEventTracker postEvent(Event event, EventListener lifecycleEventListener) {
+
+    protected InternalEventTracker postEvent(Event event, EventContextListener lifecycleEventListener) {
 	EventContext ec = buildEventContext(event, lifecycleEventListener);
 	return postEvent(ec, getHandle(ec));
     }
 
     protected InternalEventTracker postEvent(EventContext ec) {
-	
+
 	prepareEventForPosting(ec.getEvent());
-	boolean posted = dispatchEvent(ec);
+	boolean posted = processor.processEvent(ec);
 	return new InternalEventTracker(ec, posted);
     }
-    
+
     public InternalEventTracker postEventContext(EventContext eventContext) {
 	return postEvent(eventContext, getHandle(eventContext));
     }
@@ -64,13 +68,11 @@ public class SimpleEventBus implements EventBus, Cloneable{
 	event.close();
     }
 
-    
-    
     protected EventContext buildEventContext(Event event) {
 	return new EventContext(event);
     }
 
-    protected EventContext buildEventContext(Event event, EventListener lifecycleListener) {
+    protected EventContext buildEventContext(Event event, EventContextListener lifecycleListener) {
 	return new EventContext(event, lifecycleListener);
     }
 
@@ -90,27 +92,10 @@ public class SimpleEventBus implements EventBus, Cloneable{
     public InternalEventTracker postEvent(EventContext eventContext, EventHandle eventHandle) {
 	eventContext.setEventHandle(eventHandle);
 	if (eventHandle.isAllowed()) {
-	   
+
 	    return postEvent(eventContext);
 	}
 	return new InternalEventTracker(eventContext, false);
-    }
-
-    protected boolean dispatchEvent(EventContext ec) {
-	return eventDispatcher.dispatchEvent(ec);
-    }
-
-    public void registerListener(EventListener listener) {
-	eventDispatcher.registerListener(listener);
-    }
-
-    public void removeListener(EventListener listener) {
-	eventDispatcher.removeListener(listener);
-    }
-
-    public void registerListener(EventListener listener, int priority) {
-	eventDispatcher.registerListener(listener, priority);
-
     }
 
     /**
@@ -148,13 +133,15 @@ public class SimpleEventBus implements EventBus, Cloneable{
 	return config.getConfigForEventType(eventType);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#clone()
      */
     @Override
-    public SimpleEventBus clone(){
+    public SimpleEventBus clone() {
 	try {
-	    return (SimpleEventBus)super.clone();
+	    return (SimpleEventBus) super.clone();
 	} catch (CloneNotSupportedException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
@@ -162,27 +149,29 @@ public class SimpleEventBus implements EventBus, Cloneable{
 	return null;
     }
 
-    /**
-     * @return the eventDispatcher
-     */
-    public EventDispatcher getEventDispatcher() {
-        return eventDispatcher;
-    }
-
-    /**
-     * @param eventDispatcher the eventDispatcher to set
-     */
-    public void setEventDispatcher(EventDispatcher eventDispatcher) {
-        this.eventDispatcher = eventDispatcher;
-    }
-
     @Override
     public void start() {
-	eventDispatcher.start();
+	processor.start();
     }
 
     @Override
     public void stop() {
-	eventDispatcher.stop();
+	processor.stop();
     }
+
+    @Override
+    public void registerListener(EventContextListener listener) {
+	processor.registerListener(listener);
+    }
+
+    @Override
+    public void registerListener(EventContextListener listener, int priority) {
+	processor.registerListener(listener, priority);
+    }
+
+    @Override
+    public void removeListener(EventContextListener listener) {
+	processor.removeListener(listener);
+    }
+
 }

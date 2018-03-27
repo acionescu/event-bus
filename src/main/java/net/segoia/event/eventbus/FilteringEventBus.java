@@ -16,24 +16,21 @@
  */
 package net.segoia.event.eventbus;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.segoia.event.conditions.Condition;
-import net.segoia.event.conditions.EventClassMatchCondition;
-import net.segoia.event.conditions.StrictEventMatchCondition;
-import net.segoia.event.eventbus.peers.CustomEventListener;
 import net.segoia.event.eventbus.peers.EventHandler;
 
 public class FilteringEventBus extends SimpleEventBus {
-    private Map<Condition, FilteringEventDispatcher> conditionedListeners = new HashMap<>();
-    
+
     public FilteringEventBus() {
 	super();
     }
 
     public FilteringEventBus(EventDispatcher eventDispatcher) {
-	super(eventDispatcher);
+	super(new BlockingFilteringEventProcessor(eventDispatcher));
+    }
+
+    protected FilteringEventProcessor getProcessor() {
+	return (FilteringEventProcessor) processor;
     }
 
     /**
@@ -42,8 +39,9 @@ public class FilteringEventBus extends SimpleEventBus {
      * @param condition
      * @param listener
      */
-    public void registerListener(Condition condition, EventListener listener) {
-	getListenerForCondition(condition,-1).registerListener(listener);
+    public void registerListener(Condition condition, EventContextListener listener) {
+	// getListenerForCondition(condition,-1).registerListener(listener);
+	getProcessor().registerListener(condition, listener);
     }
 
     /**
@@ -54,80 +52,72 @@ public class FilteringEventBus extends SimpleEventBus {
      * @param priority
      *            - this is the priority of this listener among other listeners registered for the same condition
      */
-    public void registerListener(Condition condition, EventListener listener, int priority) {
-	getListenerForCondition(condition,-1).registerListener(listener, priority);
+    public void registerListener(Condition condition, EventContextListener listener, int priority) {
+	// getListenerForCondition(condition,-1).registerListener(listener, priority);
+	getProcessor().registerListener(condition, listener, priority);
     }
 
     /**
-     * Registers a listener for a particular condition with a given priority for the condition listener and the final listener 
+     * Registers a listener for a particular condition with a given priority for the condition listener and the final
+     * listener
+     * 
      * @param condition
-     * @param cPriority - the priority of the condition filter among other event bus top level listeners
+     * @param cPriority
+     *            - the priority of the condition filter among other event bus top level listeners
      * @param listener
-     * @param lPriority - final listener priority, among other listeners registered for this condition
+     * @param lPriority
+     *            - final listener priority, among other listeners registered for this condition
      */
-    public void registerListener(Condition condition, int cPriority, EventListener listener, int lPriority) {
-	getListenerForCondition(condition, cPriority).registerListener(listener, lPriority);
+    public void registerListener(Condition condition, int cPriority, EventContextListener listener, int lPriority) {
+	// getListenerForCondition(condition, cPriority).registerListener(listener, lPriority);
+	getProcessor().registerListener(condition, cPriority, listener, lPriority);
     }
-    
+
     /**
      * Registers a listener for a particular condition with a given priority for the condition listener
+     * 
      * @param condition
      * @param cPriority
      * @param listener
      */
-    public void registerListener(Condition condition, int cPriority, EventListener listener) {
-	getListenerForCondition(condition, cPriority).registerListener(listener);
+    public void registerListener(Condition condition, int cPriority, EventContextListener listener) {
+	// getListenerForCondition(condition, cPriority).registerListener(listener);
+	getProcessor().registerListener(condition, cPriority, listener);
     }
 
-    private FilteringEventDispatcher getListenerForCondition(Condition condition, int priority) {
-	FilteringEventDispatcher l = conditionedListeners.get(condition);
-	if (l == null) {
-	    l = new FilteringEventDispatcher(condition);
-	    conditionedListeners.put(condition, l);
-	    if (priority >= 0) {
-		registerListener(l, priority);
-	    } else {
-		registerListener(l);
-	    }
-	}
-	return l;
-    }
-    
-    
     public <E extends Event> void addEventHandler(EventHandler<E> handler) {
-	registerListener(getCustomEventListener(handler));
+	// registerListener(getCustomEventListener(handler));
+	getProcessor().addEventHandler(handler);
     }
-    
+
     public <E extends Event> void addEventHandler(EventHandler<E> handler, int priority) {
-	registerListener(getCustomEventListener(handler),priority);
+	// registerListener(getCustomEventListener(handler), priority);
+	getProcessor().addEventHandler(handler, priority);
     }
-    
+
     public <E extends Event> void addEventHandler(Condition condition, EventHandler<E> handler) {
-	registerListener(condition, getCustomEventListener(handler));
+	// registerListener(condition, getCustomEventListener(handler));
+	getProcessor().addEventHandler(condition, handler);
     }
-    
+
     public <E extends Event> void addEventHandler(Class<E> eventClass, EventHandler<E> handler) {
-	addEventHandler(new EventClassMatchCondition(eventClass), handler);
+	// addEventHandler(new EventClassMatchCondition(eventClass), handler);
+	getProcessor().addEventHandler(eventClass, handler);
     }
 
     public <E extends Event> void addEventHandler(String eventType, EventHandler<E> handler) {
-	addEventHandler(new StrictEventMatchCondition(eventType), handler);
+	// addEventHandler(new StrictEventMatchCondition(eventType), handler);
+	getProcessor().addEventHandler(eventType, handler);
     }
-    
-    
-    private <E extends Event>  CustomEventListener<E> getCustomEventListener(EventHandler<E> handler){
-	return new CustomEventListener<>(handler);
-    }
-    
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.segoia.event.eventbus.SimpleEventBus#clone()
      */
     @Override
-    public FilteringEventBus clone(){
-	return (FilteringEventBus)super.clone();
+    public FilteringEventBus clone() {
+	return (FilteringEventBus) super.clone();
     }
 
-    
-    
 }

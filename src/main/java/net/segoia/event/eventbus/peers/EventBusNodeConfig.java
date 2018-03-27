@@ -20,7 +20,7 @@ import net.segoia.event.conditions.Condition;
 import net.segoia.event.conditions.LooseEventMatchCondition;
 import net.segoia.event.eventbus.constants.Events;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityConfig;
-import net.segoia.event.eventbus.peers.security.EventNodeSecurityPolicy;
+import net.segoia.event.eventbus.peers.util.EventNodeHelper;
 
 public class EventBusNodeConfig {
     /**
@@ -47,6 +47,12 @@ public class EventBusNodeConfig {
     private boolean god;
     
     private EventNodeSecurityConfig securityConfig;
+    
+    /**
+     * A helper class
+     */
+    private EventNodeHelper helper;
+    
 
     /**
      * @return the autoRelayEanbled
@@ -111,4 +117,14 @@ public class EventBusNodeConfig {
     public void setSecurityConfig(EventNodeSecurityConfig securityConfig) {
         this.securityConfig = securityConfig;
     }
+
+    public EventNodeHelper getHelper() {
+        return helper;
+    }
+
+    public void setHelper(EventNodeHelper helper) {
+        this.helper = helper;
+    }
+    
+    
 }

@@ -17,13 +17,13 @@
 package net.segoia.event.eventbus.listeners.logging;
 
 import net.segoia.event.eventbus.EventContext;
-import net.segoia.event.eventbus.EventListener;
+import net.segoia.event.eventbus.EventContextListener;
 import net.segoia.event.eventbus.EventTypeConfig;
 import net.segoia.util.logging.Logger;
 import net.segoia.util.logging.LoggerFactory;
 import net.segoia.util.logging.MasterLogManager;
 
-public class LoggingEventListener implements EventListener {
+public class LoggingEventListener implements EventContextListener {
     private Logger logger;
     private LoggerFactory loggerFactory;
     private String defaultLoggerName = LoggingEventListener.class.getSimpleName();

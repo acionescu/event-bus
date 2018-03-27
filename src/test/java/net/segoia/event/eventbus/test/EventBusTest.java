@@ -32,7 +32,7 @@ import net.segoia.event.eventbus.FilteringEventBus;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventBus;
 import net.segoia.event.eventbus.EventContext;
-import net.segoia.event.eventbus.EventListener;
+import net.segoia.event.eventbus.EventContextListener;
 import net.segoia.event.eventbus.SimpleEventBus;
 
 public class EventBusTest {

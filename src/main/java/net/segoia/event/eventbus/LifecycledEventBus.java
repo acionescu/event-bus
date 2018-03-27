@@ -30,7 +30,7 @@ public class LifecycledEventBus extends FilteringEventBus {
 	super(eventDispatcher);
     }
 
-    public InternalEventTracker postEvent(Event event, EventListener lifecycleEventListener) {
+    public InternalEventTracker postEvent(Event event, EventContextListener lifecycleEventListener) {
 	return super.postEvent(event, lifecycleEventListener);
     }
 

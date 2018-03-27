@@ -42,19 +42,19 @@ public class EventContextDispatcher implements EventDispatcher{
     }
 
     @Override
-    public void registerListener(EventListener listener) {
+    public void registerListener(EventContextListener listener) {
 	// TODO Auto-generated method stub
 	
     }
 
     @Override
-    public void registerListener(EventListener listener, int priority) {
+    public void registerListener(EventContextListener listener, int priority) {
 	// TODO Auto-generated method stub
 	
     }
 
     @Override
-    public void removeListener(EventListener listener) {
+    public void removeListener(EventContextListener listener) {
 	// TODO Auto-generated method stub
 	
     }

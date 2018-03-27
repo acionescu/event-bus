@@ -17,10 +17,10 @@
 package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.EventContext;
-import net.segoia.event.eventbus.EventListener;
+import net.segoia.event.eventbus.EventContextListener;
 import net.segoia.event.eventbus.FilteringEventBus;
 
-public class LocalEventBusRelay extends EventRelay implements EventListener{
+public class LocalEventBusRelay extends EventRelay implements EventContextListener{
     private FilteringEventBus bus;
 
     public LocalEventBusRelay(String id, EventNode parentNode, FilteringEventBus bus) {

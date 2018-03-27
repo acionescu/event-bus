@@ -19,21 +19,20 @@ package net.segoia.event.eventbus.peers;
 import net.segoia.event.eventbus.CustomEventContext;
 import net.segoia.event.eventbus.Event;
 
-public class PeerEventContext extends CustomEventContext<Event>{
-    private EventRelay relay;
-    
-    public PeerEventContext(EventRelay relay, Event event) {
+public class PeerEventContext<E extends Event> extends CustomEventContext<E> {
+    private PeerManager peerManager;
+
+    public PeerEventContext(Event event, PeerManager peerManager) {
 	super(event);
-	this.relay = relay;
+	this.peerManager = peerManager;
     }
 
-    /**
-     * @return the relay
-     */
-    public EventRelay getRelay() {
-        return relay;
+    public PeerManager getPeerManager() {
+	return peerManager;
     }
-
-
     
+    public EventNodeContext getNodeContext() {
+	return peerManager.getPeerContext().getNodeContext();
+    }
+
 }

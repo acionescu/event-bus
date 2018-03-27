@@ -19,9 +19,9 @@ package net.segoia.event.eventbus.peers;
 import net.segoia.event.eventbus.CustomEventContext;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
-import net.segoia.event.eventbus.EventListener;
+import net.segoia.event.eventbus.EventContextListener;
 
-public class CustomEventListener<E extends Event> implements EventListener {
+public class CustomEventListener<E extends Event> implements EventContextListener {
     private EventHandler<E> eventHandler;
 
     public CustomEventListener(EventHandler<E> eventHandler) {

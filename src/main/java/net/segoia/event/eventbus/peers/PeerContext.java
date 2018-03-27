@@ -6,10 +6,13 @@ import net.segoia.event.eventbus.peers.events.SessionInfo;
 
 public class PeerContext {
     private String peerId;
+    
 
     /**
      * The relay through which the current node communicates with the peer node
      */
+    private EventTransceiver transceiver;
+    
     private EventRelay relay;
 
     private NodeInfo peerInfo;
@@ -25,17 +28,19 @@ public class PeerContext {
     private CommunicationProtocol commProtocol;
 
     private SessionInfo sessionInfo;
+    
+    private boolean remoteAgent;
+    
+    private EventNodeContext nodeContext;
 
-    public PeerContext(EventRelay relay) {
-	super();
-	this.relay = relay;
-    }
 
-    public PeerContext(String peerId, EventRelay relay) {
+    public PeerContext(String peerId, EventTransceiver transceiver) {
 	super();
 	this.peerId = peerId;
-	this.relay = relay;
+	this.transceiver = transceiver;
     }
+    
+    
 
     public EventRelay getRelay() {
 	return relay;
@@ -83,6 +88,26 @@ public class PeerContext {
 
     public void setSessionInfo(SessionInfo sessionInfo) {
 	this.sessionInfo = sessionInfo;
+    }
+
+    public boolean isRemoteAgent() {
+        return remoteAgent;
+    }
+
+    public void setRemoteAgent(boolean remoteAgent) {
+        this.remoteAgent = remoteAgent;
+    }
+
+
+
+    public EventNodeContext getNodeContext() {
+        return nodeContext;
+    }
+
+
+
+    public void setNodeContext(EventNodeContext nodeContext) {
+        this.nodeContext = nodeContext;
     }
 
 }

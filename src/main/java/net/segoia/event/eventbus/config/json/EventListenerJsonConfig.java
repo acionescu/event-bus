@@ -17,22 +17,22 @@
 package net.segoia.event.eventbus.config.json;
 
 import net.segoia.event.conditions.Condition;
-import net.segoia.event.eventbus.EventListener;
+import net.segoia.event.eventbus.EventContextListener;
 import net.segoia.event.eventbus.FilteringEventBus;
 
 public class EventListenerJsonConfig{
     
-    private EventListener instance;
+    private EventContextListener instance;
     private Condition condition;
     /**
      * The priority of the condition filter among other event bus top level listeners
-     * @see FilteringEventBus#registerListener(Condition, int, EventListener, int)
+     * @see FilteringEventBus#registerListener(Condition, int, EventContextListener, int)
      */
     private int condPriority=-1;
     /**
      * The priority of this listener among other listeners registered for this condition, or among other top level 
      * listeners in case no condition was specified
-     * @see FilteringEventBus#registerListener(Condition, int, EventListener, int)
+     * @see FilteringEventBus#registerListener(Condition, int, EventContextListener, int)
      */
     private int priority=-1;
     
@@ -55,13 +55,13 @@ public class EventListenerJsonConfig{
     /**
      * @return the instance
      */
-    public EventListener getInstance() {
+    public EventContextListener getInstance() {
         return instance;
     }
     /**
      * @param instance the instance to set
      */
-    public void setInstance(EventListener instance) {
+    public void setInstance(EventContextListener instance) {
         this.instance = instance;
     }
 

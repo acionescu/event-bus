@@ -25,17 +25,17 @@ public abstract class EventDispatcherWrapper implements EventDispatcher{
     }
 
     @Override
-    public void registerListener(EventListener listener) {
+    public void registerListener(EventContextListener listener) {
 	nestedDispatcher.registerListener(listener);
     }
 
     @Override
-    public void registerListener(EventListener listener, int priority) {
+    public void registerListener(EventContextListener listener, int priority) {
 	nestedDispatcher.registerListener(listener, priority);
     }
 
     @Override
-    public void removeListener(EventListener listener) {
+    public void removeListener(EventContextListener listener) {
 	nestedDispatcher.registerListener(listener);
 
     }

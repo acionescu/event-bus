@@ -72,7 +72,7 @@ public class LocalEventBusNode extends EventNode{
 	    /* if it comes from us, peek */
 	    handleEvent(event);
 	}
-	super.forwardToAll(event);
+	super.forwardToDirectPeers(event);
     }
 
     /* (non-Javadoc)

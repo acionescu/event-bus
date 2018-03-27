@@ -19,40 +19,32 @@ package net.segoia.event.eventbus.peers;
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindRequest;
+import net.segoia.event.eventbus.EventListener;
 
-public abstract class EventRelay {
+/**
+ * Implements a certain communication protocol over an {@link EventTransceiver}
+ * 
+ * @author adi
+ *
+ */
+public abstract class EventRelay extends AbstractEventTransceiver implements EventListener {
     protected EventTransceiver transceiver;
     private String id;
-    
-    private EventNode parentNode;
-    
+
     private Condition forwardingCondition;
-    
-    /**
-     * the request from which this relay was created 
-     */
-    private PeerBindRequest peeringRequest;
-    
-    private boolean active;
 
-    public EventRelay(String id,EventNode parentNode) {
+    public EventRelay(String id) {
 	this.id = id;
-	this.parentNode = parentNode;
     }
 
-    public EventRelay(String id, EventNode parentNode, EventTransceiver tranceiver) {
-	this(id, parentNode);
-	this.transceiver = tranceiver;
-	
+    public EventRelay(String id, EventTransceiver transceiver) {
+	this(id);
+	this.transceiver = transceiver;
+
     }
-    
-    public EventRelay(EventNode parentNode, EventTransceiver tranceiver) {
-	this.parentNode = parentNode;
-	this.transceiver = tranceiver;
-	
-    }
-    
+
+   
+
     public String getChannel() {
 	return transceiver.getChannel();
     }
@@ -65,120 +57,89 @@ public abstract class EventRelay {
     }
 
     public void bind() {
-	transceiver.setActive(this);
-    }
-    
-    /**
-     * Connects this relay with a remote relay
-     * 
-     * @param peerRelay
-     */
-    public void bind(EventRelay peerRelay) {
-	this.transceiver = peerRelay;
-	peerRelay.transceiver = this;
-	parentNode.onBindConfirmed(this);
-    }
 
-    public void onLocalEvent(EventContext ec) {
-	forwardEvent(ec);
+	transceiver.setRemoteEventListener(this);
     }
+    //
+    // public void onLocalEvent(EventContext ec) {
+    // forwardEvent(ec);
+    // }
 
-    public void onRemoteEvent(Event event) {
+    public void onEvent(Event event) {
 	receiveEvent(event);
     }
 
-    protected void forwardEvent(EventContext ec) {
-	if (parentNode.isEventForwardingAllowed(ec, transceiver.getParentNodeId()) && isForwardingAllowed(ec)) {
-	    Event event = ec.event();
-	    /* We need to copy this event before sending */
-	    sendEvent(event.clone());
-	}
-	else {
-	    System.out.println("Discarding event: "+ec.getEvent());
-	}
-    }
+    // protected void forwardEvent(EventContext ec) {
+    // if (parentNode.isEventForwardingAllowed(ec, transceiver.getParentNodeId()) && isForwardingAllowed(ec)) {
+    // Event event = ec.event();
+    // /* We need to copy this event before sending */
+    // sendEvent(event.clone());
+    // } else {
+    // System.out.println("Discarding event: " + ec.getEvent());
+    // }
+    // }
 
     protected boolean isForwardingAllowed(EventContext ec) {
 	return (forwardingCondition != null && forwardingCondition.test(ec));
     }
 
-    protected void sendEvent(Event event) {
+    public void sendEvent(Event event) {
 	event.addRelay(getParentNodeId());
-	transceiver.sentEvent(event);
+	transceiver.sendEvent(event);
     }
 
-    protected void receiveEvent(Event event) {
+    public void receiveEvent(Event event) {
 	event.addRelay(getId());
-	parentNode.onRemoteEvent(new PeerEventContext(this, event));
+	getRemoteEventListener().onEvent(event);
     }
 
     protected void setForwardingCondition(Condition condition) {
 	forwardingCondition = condition;
     }
-    
-    
-    
 
-    /**
-     * @return the peeringRequest
-     */
-    public PeerBindRequest getPeeringRequest() {
-        return peeringRequest;
-    }
-
-    /**
-     * @param peeringRequest the peeringRequest to set
-     */
-    public void setPeeringRequest(PeerBindRequest peeringRequest) {
-        this.peeringRequest = peeringRequest;
-        if(peeringRequest != null) {
-            setForwardingCondition(peeringRequest.getEventsCondition());
-        }
-    }
-    
-    public boolean isRemoteNodeAgent() {
-	if(peeringRequest != null) {
-	    return peeringRequest.isAgent();
-	}
-	return false;
-    }
+    // /**
+    // * @param peeringRequest
+    // * the peeringRequest to set
+    // */
+    // public void setPeeringRequest(PeerBindRequest peeringRequest) {
+    // this.peeringRequest = peeringRequest;
+    // if (peeringRequest != null) {
+    // setForwardingCondition(peeringRequest.getEventsCondition());
+    // }
+    // }
 
     public String getParentNodeId() {
 	return parentNode.getId();
     }
 
-    public String getRemoteNodeId() {
-	return transceiver.getParentNodeId();
+    // public void bindAccepted(EventNode node) {
+    // /* only the parent node can call this */
+    // if (parentNode == node) {
+    // doStart();
+    // }
+    // }
+
+    // private void doStart() {
+    // if (!active) {
+    // active = true;
+    // start();
+    // transceiver.onRemoteStarted(this);
+    // }
+    // }
+
+    // private void onRemoteStarted(EventRelay peerRelay) {
+    // if (this.transceiver == peerRelay) {
+    // doStart();
+    // }
+    // }
+
+    public void start() {
+	transceiver.init();
     }
-
-    public void bindAccepted(EventNode node) {
-	/* only the parent node can call this */
-	if (parentNode == node) {
-	    doStart();
-	}
-    }
-
-    private void doStart() {
-	if (!active) {
-	    active = true;
-	    start();
-	    transceiver.onRemoteStarted(this);
-	}
-    }
-
-    private void onRemoteStarted(EventRelay peerRelay) {
-	if (this.transceiver == peerRelay) {
-	    doStart();
-	}
-    }
-
-    protected abstract void init();
-
-    protected abstract void start();
 
     public void terminate() {
 	if (transceiver != null) {
-	    transceiver.onRemoteLeaving(this);
+	    transceiver.terminate();
 	}
 	cleanUp();
     }
@@ -187,14 +148,6 @@ public abstract class EventRelay {
 
     protected void onRemoteLeaving(EventRelay peerRelay) {
 	parentNode.onPeerLeaving(peerRelay.getParentNodeId());
-    }
-
-    public PeerEventListener getPeerEventListener() {
-        return peerEventListener;
-    }
-
-    public void setPeerEventListener(PeerEventListener peerEventListener) {
-        this.peerEventListener = peerEventListener;
     }
 
 }
