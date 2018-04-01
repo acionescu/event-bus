@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This will receive events in an async manner, store them in an internal cache, and delegate them to the nested
@@ -35,6 +36,7 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
     private ExecutorService threadPool;
     private Thread dispatcherThread;
     private boolean running;
+    private boolean gracefullStop;
 
     /**
      * This will only accept events if it is open
@@ -87,33 +89,40 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 		@Override
 		public void run() {
 		    while (running) {
-			try {
-			    /* get next event, or wait for one to become available */
-			    EventContext ec = eventQueue.takeFirst();
-			    if (!running) {
-				break;
-			    }
-			    /* once we have an event, delegate it to the nested dispatcher in a worker thread */
-			    threadPool.submit(new Runnable() {
 
-				@Override
-				public void run() {
-				    nestedDispatcher.dispatchEvent(ec);
-
+			do {
+			    try {
+				/* get next event, or wait for one to become available */
+				EventContext ec = eventQueue.takeFirst();
+				if (!running) {
+				    if (!gracefullStop || (gracefullStop && eventQueue.isEmpty())) {
+					break;
+				    }
 				}
-			    });
+				
+				/* once we have an event, delegate it to the nested dispatcher in a worker thread */
+				threadPool.submit(new Runnable() {
 
-			} catch (InterruptedException e) {
-			    // TODO Auto-generated catch block
-			    e.printStackTrace();
-			}
+				    @Override
+				    public void run() {
+					nestedDispatcher.dispatchEvent(ec);
 
+				    }
+				});
+
+			    } catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			    }
+			} while (!eventQueue.isEmpty());
 		    }
 		}
 	    });
-	    
+
+	    // dispatcherThread.setDaemon(false);
+
 	    super.start();
-	    
+
 	    /* make sure we accept events */
 	    open();
 	    /* we need to move to running state before starting the dispatcher thread */
@@ -130,7 +139,7 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
     }
 
     public void stop() {
-	
+
 	running = false;
 	open = false;
 	try {
@@ -139,6 +148,35 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 	} catch (InterruptedException e) {
 	    e.printStackTrace();
 	}
+	super.stop();
+    }
+
+    public void processAllAndStop() {
+	open = false;
+	gracefullStop = true;
+	running = false;
+	try {
+	    /* this is a hack to escape waiting on an empty queue */
+	    eventQueue.putLast(new EventContext(null, null));
+	} catch (InterruptedException e) {
+	    e.printStackTrace();
+	}
+
+	try {
+	    dispatcherThread.join();
+	} catch (InterruptedException e1) {
+	    // TODO Auto-generated catch block
+	    e1.printStackTrace();
+	}
+	
+	threadPool.shutdown();
+	try {
+	    threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+	} catch (InterruptedException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+
 	super.stop();
     }
 

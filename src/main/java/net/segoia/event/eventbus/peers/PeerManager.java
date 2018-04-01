@@ -21,11 +21,16 @@ import net.segoia.event.eventbus.peers.manager.states.server.PeerBindRequestedSt
  * @author adi
  *
  */
-public class PeerManager implements EventListener{
+public class PeerManager implements PeerEventListener{
     private PeerContext peerContext;
     private String peerId;
 
     private PeerState state;
+    
+    /**
+     * The state in which the communication with the peer is established and can implement whatever app logic is needed
+     */
+    private PeerState acceptedState;
 
     /* when functioning as client, states */
     public static PeerState BIND_TO_PEER = new BindToPeerState();
@@ -75,12 +80,18 @@ public class PeerManager implements EventListener{
 	/* the peer is the server, we are the client, so we need to initiate connection */
 	if (peerContext.isInServerMode()) {
 	    goToState(BIND_TO_PEER);
+	    if(acceptedState == null) {
+		acceptedState = ACCEPTED_BY_PEER;
+	    }
 	} else {
 	    /* we are the server and a client requested to bind to us */
 	    goToState(PEER_BIND_REQUESTED);
+	    if(acceptedState == null) {
+		acceptedState = PEER_ACCEPTED;
+	    }
 	}
     }
-
+    
     public void terminate() {
 
     }
@@ -90,7 +101,7 @@ public class PeerManager implements EventListener{
     }
 
     public void onReady() {
-
+	goToState(acceptedState);
     }
 
     public void handlePeerBindAccepted(PeerBindAccepted data) {
@@ -122,12 +133,20 @@ public class PeerManager implements EventListener{
     }
 
     @Override
-    public void onEvent(Event event) {
+    public void onPeerEvent(Event event) {
 	handleEventFromPeer(event);
     }
     
+    
+    
     public EventNodeContext getNodeContext() {
 	return peerContext.getNodeContext();
+    }
+
+    @Override
+    public void onPeerLeaving() {
+	
+	
     }
 
 }

@@ -25,32 +25,17 @@ import java.util.Set;
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.conditions.EventClassMatchCondition;
 import net.segoia.event.conditions.StrictEventMatchCondition;
+import net.segoia.event.eventbus.BlockingEventDispatcher;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.EventDispatcher;
 import net.segoia.event.eventbus.FilteringEventBus;
-import net.segoia.event.eventbus.BlockingEventDispatcher;
-import net.segoia.event.eventbus.constants.EventParams;
-import net.segoia.event.eventbus.constants.Events;
 import net.segoia.event.eventbus.peers.events.EventNodeInfo;
-import net.segoia.event.eventbus.peers.events.NodeTerminateEvent;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
-import net.segoia.event.eventbus.peers.events.PeerLeavingEvent;
-import net.segoia.event.eventbus.peers.events.auth.ProtocolConfirmation;
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejectedEvent;
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequestEvent;
-import net.segoia.event.eventbus.peers.events.auth.PeerProtocolConfirmedEvent;
+import net.segoia.event.eventbus.peers.events.NodeTerminateEvent;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequestEvent;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindAccepted;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindAcceptedEvent;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequest;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindRequestEvent;
-import net.segoia.event.eventbus.peers.events.register.PeerRegisterRequestEvent;
-import net.segoia.event.eventbus.peers.events.register.PeerRegisterRequestEvent.Data;
-import net.segoia.event.eventbus.peers.events.register.PeerRegisteredEvent;
-import net.segoia.event.eventbus.peers.events.register.PeerRequestUnregisterEvent;
-import net.segoia.event.eventbus.peers.events.register.PeerUnregisteredEvent;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityConfig;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
 import net.segoia.event.eventbus.util.EBus;
@@ -94,7 +79,7 @@ public abstract class EventNode {
     private EventNodeContext context;
 
     private List<EventNodeAgent> agents = new ArrayList<>();
-
+    
     public EventNode(boolean autoinit, EventBusNodeConfig config) {
 	this.config = config;
 	this.autoinit = autoinit;
@@ -148,7 +133,7 @@ public abstract class EventNode {
 	addAgent(peersManager);
 	peersManager.init(context);
     }
-    
+
     protected synchronized void addAgent(EventNodeAgent agent) {
 	agents.add(agent);
     }
@@ -168,8 +153,12 @@ public abstract class EventNode {
 	    // internalBus = EBus.buildSingleThreadedAsyncFilteringEventBus(100, new EventNodeDispatcher());
 
 	    /* by default this node will function on the main loop bus */
-	    internalBus = EBus.buildFilteringEventBusOnMainLoop(new EventNodeDispatcher());
+	    internalBus = buildInternalBus();
 	}
+    }
+    
+    protected FilteringEventBus buildInternalBus() {
+	return EBus.buildFilteringEventBusOnMainLoop(new EventNodeDispatcher());
     }
 
     /**
@@ -189,9 +178,6 @@ public abstract class EventNode {
      * Override this to register handlers, but don't forget to call super or you'll lose basic functionality
      */
     protected void registerHandlers() {
-
-
-
 
 	addEventHandler(NodeTerminateEvent.class, (c) -> {
 	    EventNodeInfo nodeInfo = c.getEvent().getData();
@@ -214,25 +200,24 @@ public abstract class EventNode {
 
 	});
 
-	
-
-//	/*
-//	 * if autorelay enabled, then forward the event to the peers marked as agents, that weren't already targeted by
-//	 * the event
-//	 */
-//	addEventHandler((c) -> {
-//	    Event event = c.getEvent();
-//
-//	    if (!config.isAutoRelayEnabled() || event.wasRelayedBy(getId())) {
-//		return;
-//	    }
-//
-//	    peersRegistry.getAgents().forEach((peerId) -> {
-//		if (!event.getForwardTo().contains(peerId) && !peerId.equals(event.to())) {
-//		    getDirectPeerManager(peerId).onLocalEvent(c);
-//		}
-//	    });
-//	});
+	// /*
+	// * if autorelay enabled, then forward the event to the peers marked as agents, that weren't already targeted
+	// by
+	// * the event
+	// */
+	// addEventHandler((c) -> {
+	// Event event = c.getEvent();
+	//
+	// if (!config.isAutoRelayEnabled() || event.wasRelayedBy(getId())) {
+	// return;
+	// }
+	//
+	// peersRegistry.getAgents().forEach((peerId) -> {
+	// if (!event.getForwardTo().contains(peerId) && !peerId.equals(event.to())) {
+	// getDirectPeerManager(peerId).onLocalEvent(c);
+	// }
+	// });
+	// });
 
     };
 
@@ -317,9 +302,6 @@ public abstract class EventNode {
     // onPeerRemoved(peerId);
     // }
 
- 
-
- 
     // /**
     // * Called for all events, remote or internally generated
     // *
@@ -389,7 +371,7 @@ public abstract class EventNode {
 	if (destination != null) {
 	    forUs = destination.equals(getId());
 	    if (!forUs) {
-		forwardTo(event, destination);
+		peersManager.forwardTo(event, destination);
 	    }
 	} else {
 	    /* see if this has forwardTo peers */
@@ -400,7 +382,7 @@ public abstract class EventNode {
 
 		/* forward to the others if any */
 		if (forwardTo.size() > 0) {
-		    forwardTo(event, forwardTo);
+		    peersManager.forwardTo(event, forwardTo);
 		}
 
 	    } else {
@@ -433,8 +415,6 @@ public abstract class EventNode {
 	postInternally(pc.getEvent());
     }
 
-
-
     /**
      * @return the id
      */
@@ -460,6 +440,16 @@ public abstract class EventNode {
     public NodeInfo getNodeInfo() {
 	return nodeInfo;
     }
+    
+    public boolean isInitialized() {
+        return initialized;
+    }
+    
+    public void stop() {
+	internalBus.stop();
+    }
+
+
 
     class EventNodeDispatcher extends BlockingEventDispatcher {
 

@@ -19,7 +19,6 @@ package net.segoia.event.eventbus.peers;
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
-import net.segoia.event.eventbus.EventListener;
 
 /**
  * Implements a certain communication protocol over an {@link EventTransceiver}
@@ -27,7 +26,7 @@ import net.segoia.event.eventbus.EventListener;
  * @author adi
  *
  */
-public abstract class EventRelay extends AbstractEventTransceiver implements EventListener {
+public abstract class EventRelay extends AbstractEventTransceiver implements PeerEventListener {
     protected EventTransceiver transceiver;
     private String id;
 
@@ -42,8 +41,6 @@ public abstract class EventRelay extends AbstractEventTransceiver implements Eve
 	this.transceiver = transceiver;
 
     }
-
-   
 
     public String getChannel() {
 	return transceiver.getChannel();
@@ -65,7 +62,7 @@ public abstract class EventRelay extends AbstractEventTransceiver implements Eve
     // forwardEvent(ec);
     // }
 
-    public void onEvent(Event event) {
+    public void onPeerEvent(Event event) {
 	receiveEvent(event);
     }
 
@@ -84,13 +81,13 @@ public abstract class EventRelay extends AbstractEventTransceiver implements Eve
     }
 
     public void sendEvent(Event event) {
-	event.addRelay(getParentNodeId());
+	event.addRelay(getId());
 	transceiver.sendEvent(event);
     }
 
     public void receiveEvent(Event event) {
 	event.addRelay(getId());
-	getRemoteEventListener().onEvent(event);
+	getRemoteEventListener().onPeerEvent(event);
     }
 
     protected void setForwardingCondition(Condition condition) {
@@ -107,10 +104,6 @@ public abstract class EventRelay extends AbstractEventTransceiver implements Eve
     // setForwardingCondition(peeringRequest.getEventsCondition());
     // }
     // }
-
-    public String getParentNodeId() {
-	return parentNode.getId();
-    }
 
     // public void bindAccepted(EventNode node) {
     // /* only the parent node can call this */
@@ -146,8 +139,9 @@ public abstract class EventRelay extends AbstractEventTransceiver implements Eve
 
     protected abstract void cleanUp();
 
-    protected void onRemoteLeaving(EventRelay peerRelay) {
-	parentNode.onPeerLeaving(peerRelay.getParentNodeId());
+    @Override
+    public void onPeerLeaving() {
+	getRemoteEventListener().onPeerLeaving();
     }
 
 }

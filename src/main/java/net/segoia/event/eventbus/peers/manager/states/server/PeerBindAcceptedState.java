@@ -106,6 +106,7 @@ public class PeerBindAcceptedState extends PeerState{
     protected void acceptPeerAuth(PeerManager peerManager) {
 	PeerAuthAccepted peerAuthAccepted = new PeerAuthAccepted();
 	peerAuthAccepted.setCommunicationProtocol(peerManager.getPeerContext().getCommProtocol());
+	peerManager.goToState(PeerManager.PEER_AUTH_ACCEPTED);
 	peerManager.forwardToPeer(new PeerAuthAcceptedEvent(peerAuthAccepted));
     }
 

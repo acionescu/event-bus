@@ -32,6 +32,10 @@ public class FilteringEventBus extends SimpleEventBus {
     protected FilteringEventProcessor getProcessor() {
 	return (FilteringEventProcessor) processor;
     }
+    
+    public void setEventDispatcher(EventDispatcher eventDispatcher) {
+	setProcessor(new BlockingFilteringEventProcessor(eventDispatcher));
+    }
 
     /**
      * Registers a listener for a particular condition with no special priority

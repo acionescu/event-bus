@@ -1,19 +1,15 @@
 package net.segoia.event.eventbus.peers;
 
-import net.segoia.event.eventbus.EventListener;
-
 public abstract class AbstractEventTransceiver implements EventTransceiver {
-   
-    private EventListener remoteEventListener;
 
-   
-    public void setRemoteEventListener(EventListener remoteEventListener) {
-	this.remoteEventListener=remoteEventListener;
-    }
+    private PeerEventListener remoteEventListener;
 
-    protected EventListener getRemoteEventListener() {
+    public PeerEventListener getRemoteEventListener() {
 	return remoteEventListener;
     }
-   
-    
+
+    public void setRemoteEventListener(PeerEventListener remoteEventListener) {
+	this.remoteEventListener = remoteEventListener;
+    }
+
 }

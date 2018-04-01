@@ -1,0 +1,5 @@
+{
+	"node": {
+		"className": "net.segoia.event.eventbus.peers.DefaultEventNode"
+	}
+}

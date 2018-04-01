@@ -13,7 +13,7 @@ public interface EventTransceiver {
     void init();
     void sendEvent(Event event);
     void receiveEvent(Event event);
-    void setRemoteEventListener(EventListener eventListener);
+    void setRemoteEventListener(PeerEventListener eventListener);
     void terminate();
     /**
      * 

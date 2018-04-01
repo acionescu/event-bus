@@ -51,6 +51,8 @@ import net.segoia.event.conditions.StrictEventMatchCondition;
 public class EventBusJsonConfigLoader {
     private static Map<String, JsonDeserializer<?>> jsonDeserializers = new HashMap<String, JsonDeserializer<?>>();
 
+    private static final Gson gson;
+
     static {
 	/* defaul deserializer for strict conditions */
 	jsonDeserializers.put(null, new JsonDeserializer<Condition>() {
@@ -161,9 +163,7 @@ public class EventBusJsonConfigLoader {
 
 	    }
 	});
-    }
 
-    public static EventBusJsonConfig load(Reader reader) {
 	GsonBuilder gb = new GsonBuilder();
 
 	gb.registerTypeAdapter(Condition.class, new JsonDeserializer<Condition>() {
@@ -236,10 +236,17 @@ public class EventBusJsonConfigLoader {
 	    }
 	});
 
-	final Gson gson = gb.create();
+	gson = gb.create();
+    }
+
+    public static EventBusJsonConfig loadEBusConfig(Reader reader) {
 
 	EventBusJsonConfig ebusConfig = gson.fromJson(reader, EventBusJsonConfig.class);
 
 	return ebusConfig;
+    }
+
+    public static <T> T load(Reader reader, Class<T> clazz) {
+	return gson.fromJson(reader, clazz);
     }
 }

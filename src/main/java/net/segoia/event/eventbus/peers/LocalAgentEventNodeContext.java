@@ -23,6 +23,10 @@ public class LocalAgentEventNodeContext {
     public <E extends Event> void addEventHandler(String eventType, EventHandler<E> handler) {
 	nodeContext.getNode().addEventHandler(eventType, handler);
     }
+    
+    public <E extends Event> void addEventHandler(EventHandler<E> handler) {
+	nodeContext.getNode().addEventHandler(handler);
+    }
 
     public void postEvent(Event event) {
 	nodeContext.getNode().postInternally(event);

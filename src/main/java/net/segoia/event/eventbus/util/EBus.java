@@ -17,35 +17,36 @@
 package net.segoia.event.eventbus.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Map;
 
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.conditions.TrueCondition;
 import net.segoia.event.eventbus.AsyncEventDispatcher;
+import net.segoia.event.eventbus.BlockingEventDispatcher;
 import net.segoia.event.eventbus.DelegatingEventDispatcher;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContextDispatcher;
+import net.segoia.event.eventbus.EventContextListener;
 import net.segoia.event.eventbus.EventDispatcher;
 import net.segoia.event.eventbus.EventHandle;
-import net.segoia.event.eventbus.EventContextListener;
 import net.segoia.event.eventbus.FilteringEventBus;
 import net.segoia.event.eventbus.InternalEventTracker;
-import net.segoia.event.eventbus.BlockingEventDispatcher;
 import net.segoia.event.eventbus.builders.DefaultComponentEventBuilder;
 import net.segoia.event.eventbus.config.json.EventBusJsonConfig;
 import net.segoia.event.eventbus.config.json.EventBusJsonConfigLoader;
 import net.segoia.event.eventbus.config.json.EventListenerJsonConfig;
 import net.segoia.event.eventbus.peers.EventBusNodeConfig;
 import net.segoia.event.eventbus.peers.EventNode;
-import net.segoia.event.eventbus.peers.LocalEventBusNode;
+import net.segoia.event.eventbus.peers.NodeManager;
 
 public class EBus {
     private static final String jsonConfigFile = "ebus.json";
 
     private static FilteringEventBus bus = new FilteringEventBus();
 
-    private static LocalEventBusNode mainNode;
+    private static EventNode mainNode;
     
     public static boolean debugEnabled;
 
@@ -62,7 +63,7 @@ public class EBus {
 	if (cfgFile.exists()) {
 	    
 	    try {
-		EventBusJsonConfig ebusJsonConfig = EventBusJsonConfigLoader.load(new FileReader(cfgFile));
+		EventBusJsonConfig ebusJsonConfig = EventBusJsonConfigLoader.loadEBusConfig(new FileReader(cfgFile));
 		
 		debugEnabled = ebusJsonConfig.isDebugEnabled();
 
@@ -86,7 +87,7 @@ public class EBus {
 
 		    /* autorelay all events to the peers */
 		    nc.setAutoRelayEnabled(true);
-		    mainNode = new LocalEventBusNode(bus, nc);
+		    mainNode = loadNode("main_node.json").getNode();
 		    bus.start();
 		    
 		    /* start main loop dispatcher */
@@ -118,6 +119,19 @@ public class EBus {
 	   
 	}
     }
+    
+    public static NodeManager loadNode(String file) {
+	File nodeFile = new File(EBus.class.getClassLoader().getResource(file).getFile());
+	
+	try {
+	    return EventBusJsonConfigLoader.load(new FileReader(nodeFile), NodeManager.class);
+	} catch (FileNotFoundException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+	return null;
+    }
+    
 
     public static InternalEventTracker postEvent(Event event) {
 	return bus.postEvent(event);
@@ -167,5 +181,9 @@ public class EBus {
 	FilteringEventBus b = new FilteringEventBus(new DelegatingEventDispatcher(eventDispatcher, mainLoopDispatcher));
 	b.start();
 	return b;
+    }
+    
+    public static void processAllFromMainLoopAndStop() {
+	mainLoopDispatcher.processAllAndStop();
     }
 }

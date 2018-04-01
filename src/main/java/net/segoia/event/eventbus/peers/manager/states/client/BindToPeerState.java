@@ -32,7 +32,6 @@ public class BindToPeerState extends PeerState {
     protected void registerPeerEventHandlers() {
 	registerPeerEventProcessor(PeerBindAcceptedEvent.class, (c) -> {
 	    handlePeerBindAccepted(c);
-	    
 	});
     }
     
@@ -52,6 +51,7 @@ public class BindToPeerState extends PeerState {
 
 	PeerAuthRequest peerAuthRequest = new PeerAuthRequest(c.getNodeContext().getNodeInfo());
 
+	peerManager.goToState(PeerManager.AUTH_TO_PEER);
 	peerManager.forwardToPeer(new PeerAuthRequestEvent(peerAuthRequest));
     }
 

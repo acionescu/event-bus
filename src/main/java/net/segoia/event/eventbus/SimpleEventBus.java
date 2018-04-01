@@ -97,6 +97,14 @@ public class SimpleEventBus implements EventBus, Cloneable {
 	}
 	return new InternalEventTracker(eventContext, false);
     }
+    
+    protected SimpleEventProcessor getProcessor() {
+	return processor;
+    }
+
+    protected void setProcessor(SimpleEventProcessor processor) {
+	this.processor = processor;
+    }
 
     /**
      * @return the config

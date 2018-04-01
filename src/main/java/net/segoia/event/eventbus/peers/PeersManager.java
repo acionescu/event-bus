@@ -10,34 +10,17 @@ import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.constants.EventParams;
 import net.segoia.event.eventbus.constants.Events;
-import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.events.PeerLeavingEvent;
-import net.segoia.event.eventbus.peers.events.SessionInfo;
-import net.segoia.event.eventbus.peers.events.auth.AuthRejectReason;
-import net.segoia.event.eventbus.peers.events.auth.MessageAuthRejectedReason;
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthAccepted;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthAcceptedEvent;
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejectedEvent;
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequest;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequestEvent;
 import net.segoia.event.eventbus.peers.events.auth.PeerProtocolConfirmedEvent;
-import net.segoia.event.eventbus.peers.events.auth.ProtocolConfirmation;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequestEvent;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindAccepted;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindAcceptedEvent;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequest;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequestEvent;
-import net.segoia.event.eventbus.peers.events.register.PeerRegisterRequestEvent;
-import net.segoia.event.eventbus.peers.events.register.PeerRegisteredEvent;
-import net.segoia.event.eventbus.peers.events.register.PeerRequestUnregisterEvent;
-import net.segoia.event.eventbus.peers.events.register.PeerUnregisteredEvent;
-import net.segoia.event.eventbus.peers.events.register.PeerRegisterRequestEvent.Data;
 import net.segoia.event.eventbus.peers.events.session.PeerSessionStartedEvent;
-import net.segoia.event.eventbus.peers.events.session.SessionStartedData;
-import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
-import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
 import net.segoia.event.eventbus.peers.routing.RoutingTable;
 import net.segoia.util.data.SetMap;
 
@@ -172,72 +155,15 @@ public class PeersManager extends GlobalEventNodeAgent {
     }
 
     public void handlePeerAuthAccepted(CustomEventContext<PeerAuthAcceptedEvent> c) {
-	PeerAuthAcceptedEvent event = c.getEvent();
-	PeerManager peerManager = getPeerManagerForEvent(event);
-
-	PeerAuthAccepted data = event.getData();
-
-	CommunicationProtocol protocolFromPeer = data.getCommunicationProtocol();
-
-	PeerContext peerContext = peerManager.getPeerContext();
-	CommunicationProtocol ourProtocol = peerContext.getCommProtocol();
-
-	if (ourProtocol == null) {
-	    /* if we hanve't proposed a protocol, see if we can find a matching supported protocol */
-	    try {
-		ourProtocol = nodeContext.getSecurityManager().establishPeerCommunicationProtocol(peerContext);
-	    } catch (PeerCommunicationNegotiationFailedException ex) {
-
-	    } catch (PeerAuthRequestRejectedException arex) {
-
-	    }
-
-	    /* set the protocol on peer context */
-	    peerContext.setCommProtocol(ourProtocol);
-	}
-
-	/* check that the two protocols match */
-
-	if (ourProtocol.equals(protocolFromPeer)) {
-	    /* yey, we have a matching protocol, send confirmation */
-	    ProtocolConfirmation protocolConfirmation = new ProtocolConfirmation(ourProtocol);
-	    peerManager.forwardToPeer(new PeerProtocolConfirmedEvent(protocolConfirmation));
-	}
+	
     }
 
     public void handleProtocolConfirmed(CustomEventContext<PeerProtocolConfirmedEvent> c) {
-	PeerProtocolConfirmedEvent event = c.getEvent();
-	PeerManager peerManager = getPeerManagerForEvent(event);
-
-	ProtocolConfirmation data = event.getData();
-
-	/* check again if the protocols match */
-	CommunicationProtocol ourProtocol = peerManager.getPeerContext().getCommProtocol();
-	CommunicationProtocol peerProtocol = data.getProtocol();
-
-	if (!ourProtocol.equals(peerProtocol)) {
-	    /* ups, they don't match */
-
-	    // TODO: handle this
-	}
-
-	/* if they match, initiate the session */
-
-	SessionStartedData sessionStartedData = new SessionStartedData(generateNewSession());
-
-	peerManager.forwardToPeer(new PeerSessionStartedEvent(sessionStartedData));
-
+	
     }
 
     public void handleSessionStartedEvent(CustomEventContext<PeerSessionStartedEvent> c) {
-	PeerSessionStartedEvent event = c.getEvent();
-	PeerManager peerManager = getPeerManagerForEvent(event);
-
-	SessionStartedData data = event.getData();
-
-	peerManager.getPeerContext().setSessionInfo(data.getSessionInfo());
-
-	peerManager.onReady();
+	
     }
 
     protected PeerManager getPeerManagerById(String peerId) {
@@ -413,9 +339,7 @@ public class PeersManager extends GlobalEventNodeAgent {
 	return false;
     }
 
-    protected SessionInfo generateNewSession() {
-	return new SessionInfo(nodeContext.generateSessionId(), nodeContext.generateSecurityToken());
-    }
+    
 
     protected void updateRoute(Event event) {
 	String from = event.from();
@@ -475,6 +399,12 @@ public class PeersManager extends GlobalEventNodeAgent {
 	Event nne = Events.builder().ebus().peer().newPeer().build();
 	nne.addParam("peerId", peerId);
 	forwardToDirectPeers(nne);
+    }
+
+    @Override
+    protected void agentInit() {
+	// TODO Auto-generated method stub
+	
     }
 
   

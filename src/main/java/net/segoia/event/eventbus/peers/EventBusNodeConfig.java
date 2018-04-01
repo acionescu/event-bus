@@ -46,12 +46,12 @@ public class EventBusNodeConfig {
      */
     private boolean god;
     
-    private EventNodeSecurityConfig securityConfig;
+    private EventNodeSecurityConfig securityConfig=new EventNodeSecurityConfig();
     
     /**
      * A helper class
      */
-    private EventNodeHelper helper;
+    private EventNodeHelper helper=new EventNodeHelper();
     
 
     /**
