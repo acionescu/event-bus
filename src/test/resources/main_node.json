@@ -1,5 +1,19 @@
 {
 	"node": {
-		"className": "net.segoia.event.eventbus.peers.DefaultEventNode"
+		"className": "net.segoia.event.eventbus.peers.DefaultEventNode",
+		"config": {
+			"securityConfig": {
+				"nodeAuth": {
+					"identities": [{
+						"className": "net.segoia.event.eventbus.peers.events.auth.id.PlainNodeIdentity"
+					}]
+				},
+				"securityPolicy":{
+					"channelsSecurity":{"TEST_LOCAL":{
+					
+					}}
+				}
+			}
+		}
 	}
 }

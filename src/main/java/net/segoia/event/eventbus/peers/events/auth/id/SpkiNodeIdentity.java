@@ -1,7 +1,11 @@
 package net.segoia.event.eventbus.peers.events.auth.id;
 
-public class SPkiNodeIdentity extends NodeIdentity<SpkiNodeIdentityType> {
+public class SpkiNodeIdentity extends NodeIdentity<SpkiNodeIdentityType> {
     private String publicKey;
+
+    public SpkiNodeIdentity() {
+	super(new SpkiNodeIdentityType());
+    }
 
     public String getPublicKey() {
 	return publicKey;

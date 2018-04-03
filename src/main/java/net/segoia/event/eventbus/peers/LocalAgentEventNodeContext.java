@@ -29,7 +29,7 @@ public class LocalAgentEventNodeContext {
     }
 
     public void postEvent(Event event) {
-	nodeContext.getNode().postInternally(event);
+	nodeContext.postEvent(event);
     }
 
 }

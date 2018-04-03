@@ -1,9 +1,6 @@
 package net.segoia.event.eventbus.peers.manager.states.server;
 
 import net.segoia.event.eventbus.peers.PeerManager;
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequestEvent;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindAccepted;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindAcceptedEvent;
 import net.segoia.event.eventbus.peers.manager.states.PeerState;
 
 public class PeerBindRequestedState extends PeerState{

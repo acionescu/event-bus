@@ -127,7 +127,7 @@ public abstract class EventRelay extends AbstractEventTransceiver implements Pee
     // }
 
     public void start() {
-	transceiver.init();
+	transceiver.start();
     }
 
     public void terminate() {

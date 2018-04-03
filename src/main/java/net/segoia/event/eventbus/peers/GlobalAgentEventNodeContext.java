@@ -5,7 +5,7 @@ import java.util.Set;
 import net.segoia.event.eventbus.Event;
 
 /**
- * A context that are aware of peer events as well as local events
+ * A context that is aware of peer events as well as local events
  * @author adi
  *
  */

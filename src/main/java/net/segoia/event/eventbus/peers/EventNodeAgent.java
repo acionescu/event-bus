@@ -6,8 +6,12 @@ public abstract class EventNodeAgent {
 	registerHandlers();
 	agentInit();
     }
+
     protected abstract void agentInit();
+
     public abstract void terminate();
+
     protected abstract void config();
+
     protected abstract void registerHandlers();
 }

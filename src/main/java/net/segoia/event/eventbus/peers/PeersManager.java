@@ -8,9 +8,12 @@ import java.util.stream.Stream;
 import net.segoia.event.eventbus.CustomEventContext;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
-import net.segoia.event.eventbus.constants.EventParams;
 import net.segoia.event.eventbus.constants.Events;
+import net.segoia.event.eventbus.peers.events.NewPeerEvent;
+import net.segoia.event.eventbus.peers.events.PeerAcceptedEvent;
+import net.segoia.event.eventbus.peers.events.PeerInfo;
 import net.segoia.event.eventbus.peers.events.PeerLeavingEvent;
+import net.segoia.event.eventbus.peers.events.PeerLeftEvent;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthAcceptedEvent;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejectedEvent;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequestEvent;
@@ -32,12 +35,6 @@ public class PeersManager extends GlobalEventNodeAgent {
     public void init(EventNodeContext hostNodeContext) {
 	this.nodeContext = hostNodeContext;
 	initGlobalContext(new GlobalAgentEventNodeContext(hostNodeContext, this));
-    }
-
-    @Override
-    protected void init() {
-	// TODO Auto-generated method stub
-
     }
 
     @Override
@@ -77,32 +74,46 @@ public class PeersManager extends GlobalEventNodeAgent {
 	});
 
 	context.addEventHandler("EBUS:PEER:NEW", (c) -> {
-	    Event event = c.getEvent();
-	    String peerId = (String) event.getParam(EventParams.peerId);
-	    String lastRelay = event.getLastRelay();
-	    if (lastRelay != null) {
-		routingTable.addRoute(peerId, lastRelay);
-	    }
+	    // Event event = c.getEvent();
+	    // String peerId = (String) event.getParam(EventParams.peerId);
+	    // String lastRelay = event.getLastRelay();
+	    // if (lastRelay != null) {
+	    // routingTable.addRoute(peerId, lastRelay);
+	    // }
 
 	});
 
 	context.addEventHandler("EBUS:PEER:REMOVED", (c) -> {
-	    Event event = c.getEvent();
-	    String removedPeerId = (String) event.getParam(EventParams.peerId);
-	    String lastRelay = event.getLastRelay();
-	    if (lastRelay != null) {
-		routingTable.removeAllFor(removedPeerId);
-	    }
+	    // Event event = c.getEvent();
+	    // String removedPeerId = (String) event.getParam(EventParams.peerId);
+	    // String lastRelay = event.getLastRelay();
+	    // if (lastRelay != null) {
+	    // routingTable.removeAllFor(removedPeerId);
+	    // }
 	});
-	
+
 	context.addEventHandler(PeerLeavingEvent.class, (c) -> {
-	    String peerId = c.getEvent().getData().getNodeId();
+	    PeerInfo data = c.getEvent().getData();
+	    String peerId = data.getPeerId();
 	    removePeer(peerId);
-	    onPeerRemoved(peerId);
+	    onPeerRemoved(data);
 	});
-	
+
+	context.addEventHandler(PeerAcceptedEvent.class, (c) -> {
+	    handlePeerAccepted(c);
+	});
+
     }
-    
+
+    protected void handlePeerAccepted(CustomEventContext<PeerAcceptedEvent> c) {
+	/* mark the peer as direct */
+	PeerInfo data = c.getEvent().getData();
+	peersRegistry.setPendingPeerAsDirectPeer(data.getPeerId());
+
+	/* Notify everybody that we have a new peer */
+	context.postEvent(new NewPeerEvent(data));
+    }
+
     public void handleConnectToPeerRequest(CustomEventContext<ConnectToPeerRequestEvent> c) {
 	ConnectToPeerRequest data = c.getEvent().getData();
 
@@ -139,15 +150,14 @@ public class PeersManager extends GlobalEventNodeAgent {
 
 	peerManager.start();
 
-	
     }
 
     public void handlePeerBindAccepted(CustomEventContext<PeerBindAcceptedEvent> c) {
-	
+
     }
 
     public void handlePeerAuthRequest(CustomEventContext<PeerAuthRequestEvent> c) {
-	
+
     }
 
     public void handlePeerAuthRejected(CustomEventContext<PeerAuthRejectedEvent> c) {
@@ -155,15 +165,15 @@ public class PeersManager extends GlobalEventNodeAgent {
     }
 
     public void handlePeerAuthAccepted(CustomEventContext<PeerAuthAcceptedEvent> c) {
-	
+
     }
 
     public void handleProtocolConfirmed(CustomEventContext<PeerProtocolConfirmedEvent> c) {
-	
+
     }
 
     public void handleSessionStartedEvent(CustomEventContext<PeerSessionStartedEvent> c) {
-	
+
     }
 
     protected PeerManager getPeerManagerById(String peerId) {
@@ -174,8 +184,6 @@ public class PeersManager extends GlobalEventNodeAgent {
 	String localPeerId = event.getLastRelay();
 	return peersRegistry.getPendingPeerManager(localPeerId);
     }
-
-    
 
     protected String getLocalNodeId() {
 	return nodeContext.getLocalNodeId();
@@ -339,8 +347,6 @@ public class PeersManager extends GlobalEventNodeAgent {
 	return false;
     }
 
-    
-
     protected void updateRoute(Event event) {
 	String from = event.from();
 	String via = event.getLastRelay();
@@ -356,8 +362,7 @@ public class PeersManager extends GlobalEventNodeAgent {
      * @param peerId
      */
     public void onPeerLeaving(String peerId) {
-	/* process this through the internal bus */
-	context.postEvent(new PeerLeavingEvent(peerId));
+
     }
 
     /**
@@ -367,19 +372,23 @@ public class PeersManager extends GlobalEventNodeAgent {
      * 
      * @param peerNode
      */
-    protected void onPeerRemoved(String peerId) {
-	Event nne = Events.builder().ebus().peer().peerRemoved().build();
-	nne.addParam(EventParams.peerId, peerId);
-	forwardToDirectPeers(nne);
+    protected void onPeerRemoved(PeerInfo peerInfo) {
+	context.postEvent(new PeerLeftEvent(peerInfo));
     }
 
     protected void removePeer(String peerId) {
-	PeerManager peerManager = peersRegistry.getDirectPeerManager(peerId);
+	PeerManager peerManager = peersRegistry.removeDirectPeer(peerId);
 	if (peerManager != null) {
 	    /* call cleanUp not terminate */
 	    peerManager.cleanUp();
 	}
-	peersRegistry.removeDirectPeer(peerId);
+	/* remove also pending peers */
+	peerManager = peersRegistry.removePendingPeer(peerId);
+	if (peerManager != null) {
+	    /* call cleanUp not terminate */
+	    peerManager.cleanUp();
+	}
+
 	routingTable.removeAllFor(peerId);
     }
 
@@ -404,9 +413,7 @@ public class PeersManager extends GlobalEventNodeAgent {
     @Override
     protected void agentInit() {
 	// TODO Auto-generated method stub
-	
-    }
 
-  
+    }
 
 }

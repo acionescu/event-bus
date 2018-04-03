@@ -37,7 +37,8 @@
 				"className": "net.segoia.event.eventbus.listeners.logging.LoggingEventListener",
 				"loggerFactory": {
 					"className": "net.segoia.util.logging.Log4jLoggerFactory"
-				}
+				},
+				"printAsJson":true
 			},
 			"priority": 0
 		},

@@ -1,5 +1,6 @@
 package net.segoia.event.eventbus.peers;
 
+import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.SessionInfo;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
@@ -59,6 +60,10 @@ public class EventNodeContext {
     
     public SessionInfo generateNewSession() {
 	return new SessionInfo(generateSessionId(), generateSecurityToken());
+    }
+    
+    public void postEvent(Event event) {
+	node.postInternally(event);
     }
 
 }

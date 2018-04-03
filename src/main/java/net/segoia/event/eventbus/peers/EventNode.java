@@ -36,6 +36,7 @@ import net.segoia.event.eventbus.peers.events.NodeTerminateEvent;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequestEvent;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequest;
+import net.segoia.event.eventbus.peers.events.bind.PeerBindRequestEvent;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityConfig;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
 import net.segoia.event.eventbus.util.EBus;
@@ -79,7 +80,7 @@ public abstract class EventNode {
     private EventNodeContext context;
 
     private List<EventNodeAgent> agents = new ArrayList<>();
-    
+
     public EventNode(boolean autoinit, EventBusNodeConfig config) {
 	this.config = config;
 	this.autoinit = autoinit;
@@ -94,7 +95,7 @@ public abstract class EventNode {
     }
 
     public EventNode() {
-	this(true);
+	this(false);
     }
 
     public EventNode(EventBusNodeConfig config) {
@@ -121,11 +122,12 @@ public abstract class EventNode {
 
 	EventNodeSecurityConfig securityConfig = config.getSecurityConfig();
 
-	securityManager = new EventNodeSecurityManager(securityConfig);
-
 	nodeInfo = new NodeInfo(config.getHelper().generatePeerId());
+	
 	nodeInfo.setNodeAuth(securityConfig.getNodeAuth());
 	nodeInfo.setSecurityPolicy(securityConfig.getSecurityPolicy());
+
+	securityManager = new EventNodeSecurityManager(securityConfig);
 
 	context = new EventNodeContext(this, securityManager);
 
@@ -156,7 +158,7 @@ public abstract class EventNode {
 	    internalBus = buildInternalBus();
 	}
     }
-    
+
     protected FilteringEventBus buildInternalBus() {
 	return EBus.buildFilteringEventBusOnMainLoop(new EventNodeDispatcher());
     }
@@ -243,6 +245,10 @@ public abstract class EventNode {
 
     public void registerToPeer(ConnectToPeerRequest request) {
 	postInternally(new ConnectToPeerRequestEvent(request));
+    }
+
+    public void registerPeer(PeerBindRequest request) {
+	postInternally(new PeerBindRequestEvent(request));
     }
 
     // public void registerPeer(EventNode peerNode) {
@@ -440,16 +446,14 @@ public abstract class EventNode {
     public NodeInfo getNodeInfo() {
 	return nodeInfo;
     }
-    
+
     public boolean isInitialized() {
-        return initialized;
+	return initialized;
     }
-    
+
     public void stop() {
 	internalBus.stop();
     }
-
-
 
     class EventNodeDispatcher extends BlockingEventDispatcher {
 

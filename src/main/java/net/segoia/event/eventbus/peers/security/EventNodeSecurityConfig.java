@@ -5,8 +5,6 @@ import net.segoia.event.eventbus.peers.events.auth.NodeAuth;
 public class EventNodeSecurityConfig {
     private NodeAuth nodeAuth;
     private EventNodeSecurityPolicy securityPolicy;
-    
-    
 
     public NodeAuth getNodeAuth() {
 	return nodeAuth;

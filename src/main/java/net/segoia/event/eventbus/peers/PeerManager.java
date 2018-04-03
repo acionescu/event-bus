@@ -1,8 +1,10 @@
 package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.Event;
-import net.segoia.event.eventbus.EventListener;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
+import net.segoia.event.eventbus.peers.events.PeerAcceptedEvent;
+import net.segoia.event.eventbus.peers.events.PeerInfo;
+import net.segoia.event.eventbus.peers.events.PeerLeavingEvent;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequest;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindAccepted;
 import net.segoia.event.eventbus.peers.manager.states.PeerState;
@@ -21,12 +23,13 @@ import net.segoia.event.eventbus.peers.manager.states.server.PeerBindRequestedSt
  * @author adi
  *
  */
-public class PeerManager implements PeerEventListener{
+public class PeerManager implements PeerEventListener {
     private PeerContext peerContext;
     private String peerId;
-
-    private PeerState state;
+    private String peerType;
     
+    private PeerState state;
+
     /**
      * The state in which the communication with the peer is established and can implement whatever app logic is needed
      */
@@ -52,8 +55,10 @@ public class PeerManager implements PeerEventListener{
 	/* listen on events from peer */
 	relay.setRemoteEventListener(this);
 	peerContext.setRelay(relay);
-
+	this.peerType = transceiver.getClass().getSimpleName();
 	this.peerId = peerId;
+	/* bind relay to transceiver */
+	relay.bind();
     }
 
     public void goToState(PeerState newState) {
@@ -79,19 +84,22 @@ public class PeerManager implements PeerEventListener{
     public void start() {
 	/* the peer is the server, we are the client, so we need to initiate connection */
 	if (peerContext.isInServerMode()) {
-	    goToState(BIND_TO_PEER);
-	    if(acceptedState == null) {
+	    if (acceptedState == null) {
 		acceptedState = ACCEPTED_BY_PEER;
 	    }
+	    goToState(BIND_TO_PEER);
+
 	} else {
 	    /* we are the server and a client requested to bind to us */
-	    goToState(PEER_BIND_REQUESTED);
-	    if(acceptedState == null) {
+	    if (acceptedState == null) {
 		acceptedState = PEER_ACCEPTED;
 	    }
+
+	    goToState(PEER_BIND_REQUESTED);
+
 	}
     }
-    
+
     public void terminate() {
 
     }
@@ -102,6 +110,11 @@ public class PeerManager implements PeerEventListener{
 
     public void onReady() {
 	goToState(acceptedState);
+	postEvent(new PeerAcceptedEvent(new PeerInfo(peerId, peerType, peerContext.getPeerInfo())));
+    }
+
+    protected void postEvent(Event event) {
+	peerContext.getNodeContext().postEvent(event);
     }
 
     public void handlePeerBindAccepted(PeerBindAccepted data) {
@@ -136,17 +149,14 @@ public class PeerManager implements PeerEventListener{
     public void onPeerEvent(Event event) {
 	handleEventFromPeer(event);
     }
-    
-    
-    
+
     public EventNodeContext getNodeContext() {
 	return peerContext.getNodeContext();
     }
 
     @Override
     public void onPeerLeaving() {
-	
-	
+	postEvent(new PeerLeavingEvent(new PeerInfo(peerId, peerType, peerContext.getPeerInfo())));
     }
 
 }

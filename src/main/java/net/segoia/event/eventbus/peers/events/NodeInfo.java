@@ -19,6 +19,11 @@ package net.segoia.event.eventbus.peers.events;
 import net.segoia.event.eventbus.peers.events.auth.NodeAuth;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityPolicy;
 
+/**
+ * Public information about a node
+ * @author adi
+ *
+ */
 public class NodeInfo {
     private String nodeId;
     private NodeAuth nodeAuth;
@@ -38,19 +43,19 @@ public class NodeInfo {
     }
 
     public NodeAuth getNodeAuth() {
-        return nodeAuth;
+	return nodeAuth;
     }
 
     public void setNodeAuth(NodeAuth nodeAuth) {
-        this.nodeAuth = nodeAuth;
+	this.nodeAuth = nodeAuth;
     }
 
     public EventNodeSecurityPolicy getSecurityPolicy() {
-        return securityPolicy;
+	return securityPolicy;
     }
 
     public void setSecurityPolicy(EventNodeSecurityPolicy securityPolicy) {
-        this.securityPolicy = securityPolicy;
+	this.securityPolicy = securityPolicy;
     }
 
 }

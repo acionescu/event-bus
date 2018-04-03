@@ -22,6 +22,17 @@ public class EventNodePeersRegistry {
      * The ids of direct peers registered as agents
      */
     private Set<String> agents = new HashSet<>();
+    
+    
+    public boolean setPendingPeerAsDirectPeer(String peerId) {
+	PeerManager pm = removePeer(pendingPeers, peerId);
+	if(pm == null) {
+	    return false;
+	}
+	setPeerManager(directPeers, pm);
+	return true;
+    }
+    
 
     public PeerManager getPendingPeerManager(String peerId) {
 	return getPeerManger(pendingPeers, peerId);
@@ -58,6 +69,10 @@ public class EventNodePeersRegistry {
 
     public PeerManager removeDirectPeer(String peerId) {
 	return removePeer(directPeers, peerId);
+    }
+    
+    public PeerManager removePendingPeer(String peerId) {
+	return removePeer(pendingPeers, peerId);
     }
 
     private PeerManager removePeer(Map<String, PeerManager> targetMap, String peerId) {

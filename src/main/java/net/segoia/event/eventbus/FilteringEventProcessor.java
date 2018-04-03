@@ -11,10 +11,21 @@ import net.segoia.event.eventbus.peers.EventHandler;
 
 public class FilteringEventProcessor extends SimpleEventProcessor {
     private Map<Condition, FilteringEventDispatcher> conditionedListeners = new HashMap<>();
+    
+    private CustomEventContextListenerFactory eventListenerFactory = new DefaultCustomEventContextListenerFactory();
 
     public FilteringEventProcessor() {
 	super();
     }
+    
+    
+
+    public FilteringEventProcessor(CustomEventContextListenerFactory eventListenerFactory) {
+	super();
+	this.eventListenerFactory = eventListenerFactory;
+    }
+
+
 
     public FilteringEventProcessor(EventDispatcher eventDispatcher) {
 	super(eventDispatcher);
@@ -107,6 +118,7 @@ public class FilteringEventProcessor extends SimpleEventProcessor {
     }
 
     protected <E extends Event> CustomEventListener<E> getCustomEventListener(EventHandler<E> handler) {
-	return new CustomEventListener<>(handler);
+//	return new CustomEventListener<>(handler);
+	return eventListenerFactory.build(handler);
     }
 }

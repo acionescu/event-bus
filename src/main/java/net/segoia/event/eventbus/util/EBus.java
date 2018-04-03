@@ -119,12 +119,19 @@ public class EBus {
 	   
 	}
     }
-    
     public static NodeManager loadNode(String file) {
+	return loadNode(file,true);
+    }
+    
+    public static NodeManager loadNode(String file, boolean init) {
 	File nodeFile = new File(EBus.class.getClassLoader().getResource(file).getFile());
 	
 	try {
-	    return EventBusJsonConfigLoader.load(new FileReader(nodeFile), NodeManager.class);
+	    NodeManager nm = EventBusJsonConfigLoader.load(new FileReader(nodeFile), NodeManager.class);
+	    if(init) {
+		nm.getNode().lazyInit();
+	    }
+	    return nm;
 	} catch (FileNotFoundException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
@@ -185,5 +192,9 @@ public class EBus {
     
     public static void processAllFromMainLoopAndStop() {
 	mainLoopDispatcher.processAllAndStop();
+    }
+    
+    public static void waitToProcessAllOnMainLoop() {
+	mainLoopDispatcher.waitToProcessAll();
     }
 }

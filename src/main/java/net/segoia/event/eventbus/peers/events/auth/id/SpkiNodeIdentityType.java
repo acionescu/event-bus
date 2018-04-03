@@ -1,6 +1,8 @@
 package net.segoia.event.eventbus.peers.events.auth.id;
 
 public class SpkiNodeIdentityType extends NodeIdentityType {
+    public static final String TYPE="SPKI";
+    
     /**
      * The transformation used to generate the key
      */
@@ -13,7 +15,7 @@ public class SpkiNodeIdentityType extends NodeIdentityType {
     private int keySize;
 
     public SpkiNodeIdentityType() {
-	super("SPKI");
+	super(TYPE);
     }
 
     protected SpkiNodeIdentityType(String type) {

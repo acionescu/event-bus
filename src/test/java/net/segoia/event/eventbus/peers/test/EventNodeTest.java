@@ -11,6 +11,12 @@ import net.segoia.event.eventbus.peers.DefaultEventNode;
 import net.segoia.event.eventbus.peers.EventNode;
 import net.segoia.event.eventbus.peers.LocalAgentEventNodeContext;
 import net.segoia.event.eventbus.peers.LocalEventNodeAgent;
+import net.segoia.event.eventbus.peers.events.NewPeerEvent;
+import net.segoia.event.eventbus.peers.events.PeerLeftEvent;
+import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
+import net.segoia.event.eventbus.peers.test.vo.ClientTestEventTransceiver;
+import net.segoia.event.eventbus.peers.test.vo.ServerTestEventTransceiver;
+import net.segoia.event.eventbus.peers.test.vo.TestLocalEventNodeAgent;
 import net.segoia.event.eventbus.util.EBus;
 
 public class EventNodeTest {
@@ -65,9 +71,57 @@ public class EventNodeTest {
 
 	mainNode.registerLocalAgent(localAgent);
 
-	EBus.processAllFromMainLoopAndStop();
+	EBus.waitToProcessAllOnMainLoop();
 
 	Assert.assertTrue(testEvent.equals(gotEvents.get(0)));
     }
 
+    
+    @Test
+    public void testPeering() {
+	/* build a peer node with the same configuration as the main node */
+	final EventNode peerNode = EBus.loadNode("main_node.json").getNode();
+	
+	final EventNode mainNode = EBus.getMainNode();
+	
+	ServerTestEventTransceiver serverTransceiver = new ServerTestEventTransceiver(mainNode);
+	
+	ClientTestEventTransceiver clientTransceiver = new ClientTestEventTransceiver(serverTransceiver);
+	
+	clientTransceiver.setSendAsync(true);
+	serverTransceiver.setSendAsync(true);
+	
+	TestLocalEventNodeAgent serverLocalAgent = new TestLocalEventNodeAgent();
+	mainNode.registerLocalAgent(serverLocalAgent);
+	
+	/* initiate peering */
+	peerNode.registerToPeer(new ConnectToPeerRequest(clientTransceiver));
+	
+	/* wait for all events to pe handled */
+	EBus.waitToProcessAllOnMainLoop();
+	
+	List<Event> receivedEvents = serverLocalAgent.getReceivedEvents();
+	
+	Assert.assertTrue(receivedEvents.size() > 0);
+	
+	/* the last event received should be the new peer event */
+	Event lastReceivedEvent = receivedEvents.get(receivedEvents.size()-1);
+	Assert.assertTrue(lastReceivedEvent instanceof NewPeerEvent);
+	
+	NewPeerEvent newPeerEvent = (NewPeerEvent)lastReceivedEvent;
+	
+	/* simulate the peer node leaving */
+	clientTransceiver.terminate();
+	/* wait for all events to be handled */
+	EBus.waitToProcessAllOnMainLoop();
+	
+	/* check if the peer left event is triggered on server side*/
+	lastReceivedEvent = receivedEvents.get(receivedEvents.size()-1);
+	Assert.assertTrue(lastReceivedEvent instanceof PeerLeftEvent);
+	
+	PeerLeftEvent peerLeftEvent = (PeerLeftEvent)lastReceivedEvent;
+	/* check that it's the same peer that was added */
+	Assert.assertTrue(newPeerEvent.getData().getPeerId().equals(peerLeftEvent.getData().getPeerId()));
+	
+    }
 }

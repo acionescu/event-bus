@@ -21,6 +21,7 @@ public class PeerBindAcceptedState extends PeerState{
 
     @Override
     public void onEnterState(PeerManager peerManager) {
+	
 	PeerBindAccepted resp = new PeerBindAccepted(peerManager.getNodeContext().getNodeInfo());
 
 	PeerBindAcceptedEvent respEvent = new PeerBindAcceptedEvent(resp);

@@ -22,7 +22,7 @@ import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.EventContextListener;
 
 public class CustomEventListener<E extends Event> implements EventContextListener {
-    private EventHandler<E> eventHandler;
+    protected EventHandler<E> eventHandler;
 
     public CustomEventListener(EventHandler<E> eventHandler) {
 	super();
@@ -40,6 +40,7 @@ public class CustomEventListener<E extends Event> implements EventContextListene
 
     }
 
+    
     /*
      * (non-Javadoc)
      * 

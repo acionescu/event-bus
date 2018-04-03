@@ -21,10 +21,6 @@ import net.segoia.event.eventbus.peers.events.NodeInfo;
 public class PeerBindAccepted {
     private NodeInfo nodeInfo;
 
-    public PeerBindAccepted() {
-	super();
-	// TODO Auto-generated constructor stub
-    }
 
     public PeerBindAccepted(NodeInfo nodeInfo) {
 	super();

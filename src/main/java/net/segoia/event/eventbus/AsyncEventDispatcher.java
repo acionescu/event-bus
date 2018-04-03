@@ -17,10 +17,12 @@
 package net.segoia.event.eventbus;
 
 import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,15 +35,26 @@ import java.util.concurrent.TimeUnit;
 public class AsyncEventDispatcher extends EventDispatcherWrapper {
 
     private BlockingDeque<EventContext> eventQueue;
-    private ExecutorService threadPool;
+    private ThreadPoolExecutor threadPool;
     private Thread dispatcherThread;
     private boolean running;
     private boolean gracefullStop;
 
     /**
+     * The future for the last event submitted for processing
+     */
+    private Future<?> lastFuture;
+
+    private Object idleSignal = new Object();
+
+    /**
      * This will only accept events if it is open
      */
     private boolean open;
+
+    private long totalEventsQueued;
+
+    private long totalEventsProcessed;
 
     /**
      * Builds an async {@link EventDispatcher} with a fixed capacity event cache and specified number of worker threads
@@ -55,7 +68,7 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 	super(nestedDispatcher);
 	this.nestedDispatcher = nestedDispatcher;
 	eventQueue = new LinkedBlockingDeque<>(cacheCapacity);
-	threadPool = Executors.newFixedThreadPool(workerThreads, new ThreadFactory() {
+	threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(workerThreads, new ThreadFactory() {
 	    private ThreadFactory tf = Executors.defaultThreadFactory();
 
 	    @Override
@@ -99,16 +112,20 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 					break;
 				    }
 				}
-				
+
 				/* once we have an event, delegate it to the nested dispatcher in a worker thread */
-				threadPool.submit(new Runnable() {
+				lastFuture = threadPool.submit(new Runnable() {
 
 				    @Override
 				    public void run() {
-					nestedDispatcher.dispatchEvent(ec);
 
+					nestedDispatcher.dispatchEvent(ec);
+					totalEventsProcessed++;
+					if(totalEventsProcessed == totalEventsQueued) {
+					    notifyIdleWaiters();
+					}
 				    }
-				});
+				}, ec);
 
 			    } catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -151,6 +168,25 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 	super.stop();
     }
 
+    private void notifyIdleWaiters() {
+	synchronized (idleSignal) {
+
+	    idleSignal.notifyAll();
+
+	}
+    }
+
+    public void waitToProcessAll() {
+	synchronized (idleSignal) {
+	    try {
+		idleSignal.wait();
+	    } catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
+	}
+    }
+
     public void processAllAndStop() {
 	open = false;
 	gracefullStop = true;
@@ -168,7 +204,7 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 	    // TODO Auto-generated catch block
 	    e1.printStackTrace();
 	}
-	
+
 	threadPool.shutdown();
 	try {
 	    threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
@@ -188,6 +224,7 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 	try {
 	    eventQueue.putLast(ec);
 	    posted = true;
+	    totalEventsQueued++;
 	} catch (InterruptedException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();

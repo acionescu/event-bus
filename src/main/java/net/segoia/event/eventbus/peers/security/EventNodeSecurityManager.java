@@ -8,6 +8,7 @@ import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolConfig;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolDefinition;
 import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
+import net.segoia.event.eventbus.peers.comm.PlainCommunicationProtocol;
 import net.segoia.event.eventbus.peers.events.auth.AuthRejectReason;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
@@ -64,6 +65,12 @@ public class EventNodeSecurityManager {
 
 	ChannelCommunicationPolicy localCommPolicy = localChannelPolicy.getCommunicationPolicy();
 	ChannelCommunicationPolicy peerCommPolicy = peerChannelPolicy.getCommunicationPolicy();
+	
+	/* if now communication policy is set, use plain protocol */
+	if(localCommPolicy == null && peerCommPolicy == null) {
+	    return new PlainCommunicationProtocol();
+	}
+	
 
 	List<? extends NodeIdentity<? extends NodeIdentityType>> localIdentities = securityConfig.getNodeAuth()
 		.getIdentities();
