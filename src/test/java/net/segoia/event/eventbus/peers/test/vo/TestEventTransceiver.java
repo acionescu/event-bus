@@ -8,7 +8,7 @@ public abstract class TestEventTransceiver extends AbstractEventTransceiver {
     /**
      * keep the pair transceiver instance
      */
-    private TestEventTransceiver pairTransceiver;
+    private transient TestEventTransceiver pairTransceiver;
 
     private boolean sendAsync;
 

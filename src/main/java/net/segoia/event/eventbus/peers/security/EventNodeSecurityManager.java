@@ -1,8 +1,11 @@
 package net.segoia.event.eventbus.peers.security;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.peers.PeerContext;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolConfig;
@@ -15,10 +18,11 @@ import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentityType;
 import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
-import net.segoia.event.eventbus.util.JsonUtils;
 
 public class EventNodeSecurityManager {
     private EventNodeSecurityConfig securityConfig;
+
+    private Map<Integer, PrivateIdentityData> privateIdentities = new HashMap<>();
 
     public EventNodeSecurityManager() {
 	super();
@@ -26,14 +30,46 @@ public class EventNodeSecurityManager {
 
     public EventNodeSecurityManager(EventNodeSecurityConfig securityConfig) {
 	super();
-	/**
-	 * Make a copy of the security policy so that it can't be changed without us knowing
-	 */
-	this.securityConfig = JsonUtils.copyObject(securityConfig);
+
+	this.securityConfig = securityConfig;// JsonUtils.copyObject(securityConfig);
+	loadIdentities();
+    }
+
+    private void loadIdentities() {
+	List<PrivateIdentityDataLoader<?>> identityLoaders = securityConfig.getIdentityLoaders();
+	if (identityLoaders == null) {
+	    return;
+	}
+
+	List nodeIdentities = securityConfig.getNodeAuth().getIdentities();
+
+	if (nodeIdentities == null) {
+	    nodeIdentities = new ArrayList<>();
+	    securityConfig.getNodeAuth().setIdentities(nodeIdentities);
+	}
+
+	for (PrivateIdentityDataLoader<?> l : identityLoaders) {
+	    l.load();
+	    PrivateIdentityData<?> data = (PrivateIdentityData) l.getData();
+
+	    /* save private identity under the index of the position in the node identities */
+	    int index = nodeIdentities.size();
+	    privateIdentities.put(index, data);
+	    data.setIndex(index);
+
+	    NodeIdentity publicNodeIdentity = data.getPublicNodeIdentity();
+
+	    nodeIdentities.add(publicNodeIdentity);
+	}
+    }
+    
+    
+    public Event processOutgoingEvent(CommProtocolContext context) {
+	
     }
 
     /**
-     * Override this to filter the through the peer provided identities
+     * Override this to filter through the peer provided identities
      * 
      * @param peerContext
      * @return
@@ -65,12 +101,11 @@ public class EventNodeSecurityManager {
 
 	ChannelCommunicationPolicy localCommPolicy = localChannelPolicy.getCommunicationPolicy();
 	ChannelCommunicationPolicy peerCommPolicy = peerChannelPolicy.getCommunicationPolicy();
-	
+
 	/* if now communication policy is set, use plain protocol */
-	if(localCommPolicy == null && peerCommPolicy == null) {
+	if (localCommPolicy == null && peerCommPolicy == null) {
 	    return new PlainCommunicationProtocol();
 	}
-	
 
 	List<? extends NodeIdentity<? extends NodeIdentityType>> localIdentities = securityConfig.getNodeAuth()
 		.getIdentities();

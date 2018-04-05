@@ -26,7 +26,7 @@ import java.util.Deque;
  */
 public class EventContext {
     private Event event;
-    private Deque<Exception> errorStack;
+    private Deque<Throwable> errorStack;
     /**
      * A listener used to track the lifecycle of an event
      */
@@ -62,9 +62,11 @@ public class EventContext {
     public void visitListener(EventContextListener listener) {
 	try {
 	    listener.onEvent(this);
-	} catch (Exception e) {
+	} catch (Throwable e) {
 	    pushError(e);
+	    System.err.println(listener.getClass()+" failed processing "+event.getEt()+" with error "+e.getMessage());
 	    e.printStackTrace();
+	    throw e;
 	}
     }
     
@@ -72,7 +74,7 @@ public class EventContext {
 	return (lifecycleListener != null);
     }
 
-    private void pushError(Exception e) {
+    private void pushError(Throwable e) {
 	if (errorStack == null) {
 	    initErrorStack();
 	}
@@ -87,7 +89,7 @@ public class EventContext {
 	return (errorStack != null);
     }
     
-    public Deque<Exception> getErrorStack(){
+    public Deque<Throwable> getErrorStack(){
 	return errorStack;
     }
 

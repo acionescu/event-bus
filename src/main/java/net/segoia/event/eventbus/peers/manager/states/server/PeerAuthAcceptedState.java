@@ -47,18 +47,23 @@ public class PeerAuthAcceptedState extends PeerState {
 	CommunicationProtocol ourProtocol = peerManager.getPeerContext().getCommProtocol();
 	CommunicationProtocol peerProtocol = data.getProtocol();
 
-	if (!ourProtocol.equals(peerProtocol)) {
+	if (ourProtocol.equals(peerProtocol)) {
+	    /* if they match, initiate the session */
+
+	    SessionStartedData sessionStartedData = new SessionStartedData(
+		    peerManager.getNodeContext().generateNewSession());
+	    peerManager.onReady();
+	    
+	    
+	    
+	    peerManager.forwardToPeer(new PeerSessionStartedEvent(sessionStartedData));
+	}
+
+	else {
 	    /* ups, they don't match */
 
 	    // TODO: handle this
 	}
-
-	/* if they match, initiate the session */
-
-	SessionStartedData sessionStartedData = new SessionStartedData(
-		peerManager.getNodeContext().generateNewSession());
-	peerManager.onReady();
-	peerManager.forwardToPeer(new PeerSessionStartedEvent(sessionStartedData));
 
     }
 

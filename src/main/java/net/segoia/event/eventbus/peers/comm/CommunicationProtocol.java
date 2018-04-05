@@ -1,7 +1,7 @@
 package net.segoia.event.eventbus.peers.comm;
 
 /**
- * Defines the comunication protocol between two nodes
+ * Defines the communication protocol between two nodes
  * 
  * @author adi
  *

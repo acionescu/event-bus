@@ -38,20 +38,16 @@ public class LoggingEventListener implements EventContextListener {
 	this.logger = logger;
     }
 
-    
     @Override
     public void init() {
-	if(loggerFactory != null) {
+	if (loggerFactory != null) {
 	    logger = MasterLogManager.getLogger(defaultLoggerName, loggerFactory);
-	}
-	else {
+	} else {
 	    logger = MasterLogManager.getLogger(defaultLoggerName);
 	}
-	
+
     }
 
-    
-    
     @Override
     public void onEvent(EventContext ec) {
 	log(ec);
@@ -59,69 +55,73 @@ public class LoggingEventListener implements EventContextListener {
 
     protected boolean log(EventContext ec) {
 	EventTypeConfig etc = ec.getConfigForEventType(true);
-	
+
 	if (!etc.isLoggingOn()) {
+
 	    return false;
 	}
 
 	String out = null;
-	if(printAsJson) {
+	if (printAsJson) {
+
 	    out = ec.getEvent().toJson();
-	}
-	else {
+
+	} else {
 	    out = ec.getEvent().toString();
 	}
-	
+	System.out.println("Logging event " + ec.getEvent().getEt());
 	return logger.trace(etc.getLoggingLevel(), out, null);
     }
 
-    
     @Override
     public void terminate() {
 	// TODO Auto-generated method stub
-	
+
     }
 
     /**
      * @return the logger
      */
     public Logger getLogger() {
-        return logger;
+	return logger;
     }
 
     /**
      * @return the loggerFactory
      */
     public LoggerFactory getLoggerFactory() {
-        return loggerFactory;
+	return loggerFactory;
     }
 
     /**
      * @return the defaultLoggerName
      */
     public String getDefaultLoggerName() {
-        return defaultLoggerName;
+	return defaultLoggerName;
     }
 
     /**
-     * @param logger the logger to set
+     * @param logger
+     *            the logger to set
      */
     public void setLogger(Logger logger) {
-        this.logger = logger;
+	this.logger = logger;
     }
 
     /**
-     * @param loggerFactory the loggerFactory to set
+     * @param loggerFactory
+     *            the loggerFactory to set
      */
     public void setLoggerFactory(LoggerFactory loggerFactory) {
-        this.loggerFactory = loggerFactory;
+	this.loggerFactory = loggerFactory;
     }
 
     /**
-     * @param defaultLoggerName the defaultLoggerName to set
+     * @param defaultLoggerName
+     *            the defaultLoggerName to set
      */
     public void setDefaultLoggerName(String defaultLoggerName) {
-        this.defaultLoggerName = defaultLoggerName;
+	this.defaultLoggerName = defaultLoggerName;
     }
 
 }

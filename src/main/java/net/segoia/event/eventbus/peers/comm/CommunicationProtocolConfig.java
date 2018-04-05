@@ -4,11 +4,11 @@ public class CommunicationProtocolConfig {
     /**
      * Position in the identities list of the selected server identity to be used
      */
-    private int serverNodeIdentity;
+    private int serverNodeIdentity=-1;
     /**
      * Position in the identities list of the selected client identity to be used
      */
-    private int clientNodeIdentity;
+    private int clientNodeIdentity=-1;
 
     public CommunicationProtocolConfig() {
 	super();

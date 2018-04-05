@@ -13,6 +13,10 @@ import net.segoia.event.eventbus.peers.LocalAgentEventNodeContext;
 import net.segoia.event.eventbus.peers.LocalEventNodeAgent;
 import net.segoia.event.eventbus.peers.events.NewPeerEvent;
 import net.segoia.event.eventbus.peers.events.PeerLeftEvent;
+import net.segoia.event.eventbus.peers.events.auth.NodeAuth;
+import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
+import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentityType;
+import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.test.vo.ClientTestEventTransceiver;
 import net.segoia.event.eventbus.peers.test.vo.ServerTestEventTransceiver;
@@ -123,5 +127,46 @@ public class EventNodeTest {
 	/* check that it's the same peer that was added */
 	Assert.assertTrue(newPeerEvent.getData().getPeerId().equals(peerLeftEvent.getData().getPeerId()));
 	
+    }
+    
+    @Test
+    public void testPeeringWithSecurity() {
+	
+	final EventNode peerNode1 = EBus.loadNode("peer1_node.json").getNode();
+	
+	NodeAuth nodeAuth = peerNode1.getNodeInfo().getNodeAuth();
+	
+	List<? extends NodeIdentity<? extends NodeIdentityType>> nodeIdentities = nodeAuth.getIdentities();
+	/* we should have at least one identity */
+	Assert.assertTrue(nodeIdentities.size() > 0);
+	
+	Assert.assertTrue(nodeIdentities.get(0) instanceof SpkiNodeIdentity);
+	
+//	SpkiNodeIdentity peer1I1 = (SpkiNodeIdentity)nodeIdentities.get(0);
+	
+	final EventNode peerNode2 = EBus.loadNode("peer2_node.json").getNode();
+	
+	
+	ServerTestEventTransceiver serverTransceiver = new ServerTestEventTransceiver(peerNode1);
+	
+	ClientTestEventTransceiver clientTransceiver = new ClientTestEventTransceiver(serverTransceiver);
+	
+	clientTransceiver.setSendAsync(true);
+	serverTransceiver.setSendAsync(true);
+	
+	TestLocalEventNodeAgent serverLocalAgent = new TestLocalEventNodeAgent();
+	
+	peerNode1.registerLocalAgent(serverLocalAgent);
+	serverLocalAgent.setLoggingOn(true);
+	
+	
+	/* initiate peering */
+	peerNode2.registerToPeer(new ConnectToPeerRequest(clientTransceiver));
+	
+	
+	/* wait for all events to pe handled */
+	EBus.waitToProcessAllOnMainLoop(20);
+	
+	System.out.println(serverLocalAgent.getReceivedEvents().size());
     }
 }

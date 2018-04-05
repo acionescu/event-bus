@@ -1,0 +1,80 @@
+{
+	"node": {
+		"className": "net.segoia.event.eventbus.peers.DefaultEventNode",
+		"config": {
+			"securityConfig": {
+				"nodeAuth": {
+					
+				},
+				"securityPolicy":{
+					"channelsSecurity":{"TEST_LOCAL":{
+						"communicationPolicy":{
+							"supportedTxStrategies":[{
+								"txNodeIdentityType":{
+									"className":"net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentityType",
+									"algorithm":"RSA",
+									"keySize":1024
+								},
+								"rxNodeIdentityType":{
+									"className":"net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentityType",
+									"algorithm":"RSA",
+									"keySize":1024
+								},
+								"directTxStrategy":{
+									"operations":[
+									{
+										"className":"net.segoia.event.eventbus.peers.comm.SignCommOperationDef",
+										"hashingAlgorithm":"SHA256withRSA"
+									},
+									{
+										"className":"net.segoia.event.eventbus.peers.comm.EncryptCommOperationDef",
+										"transformation":"RSA/ECB/PKCS1Padding"
+									}
+									]
+								}
+							}],
+							"supportedRxStrategies":[
+							{
+								"txNodeIdentityType":{
+									"className":"net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentityType",
+									"algorithm":"RSA",
+									"keySize":1024
+								},
+								"rxNodeIdentityType":{
+									"className":"net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentityType",
+									"algorithm":"RSA",
+									"keySize":1024
+								},
+								"directTxStrategy":{
+									"operations":[
+									{
+										"className":"net.segoia.event.eventbus.peers.comm.SignCommOperationDef",
+										"hashingAlgorithm":"SHA256withRSA"
+									},
+									{
+										"className":"net.segoia.event.eventbus.peers.comm.EncryptCommOperationDef",
+										"transformation":"RSA/ECB/PKCS1Padding"
+									}
+									]
+								}
+							}
+							]
+						}
+					}}
+				},
+				
+				"identityLoaders": [
+				{
+					"className":"net.segoia.event.eventbus.peers.security.SpkiPrivateIdentityDataLoader",
+					"indentityDef":{
+						"path":"/home/adi/workspace/projects/event-bus/src/test/resources/keys",
+						"name":"peer2_id",
+						"algorithm": "RSA",
+						"keySize": 1024
+					}
+				}
+				]
+			}
+		}
+	}
+}

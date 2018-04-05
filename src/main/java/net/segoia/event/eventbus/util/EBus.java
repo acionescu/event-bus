@@ -197,4 +197,8 @@ public class EBus {
     public static void waitToProcessAllOnMainLoop() {
 	mainLoopDispatcher.waitToProcessAll();
     }
+    
+    public static void waitToProcessAllOnMainLoop(int sleep) {
+	mainLoopDispatcher.waitToProcessAll(sleep);
+    }
 }

@@ -3,15 +3,13 @@ package net.segoia.event.eventbus;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
-
 import net.segoia.util.data.ListMap;
 import net.segoia.util.data.ListTreeMapFactory;
 
 public class SimpleEventDispatcher implements EventDispatcher {
     private boolean stopOnError = true;
-    private Exception lastError;
-    private List<Exception> errors = new ArrayList<>();
+    private Throwable lastError;
+    private List<Throwable> errors = new ArrayList<>();
     private ListMap<Integer, EventContextListener> listeners = new ListMap<Integer, EventContextListener>(
 	    new ListTreeMapFactory<Integer, EventContextListener>());
 
@@ -30,7 +28,7 @@ public class SimpleEventDispatcher implements EventDispatcher {
     @Override
     public boolean dispatchEvent(EventContext ec) {
 	if (lastError != null && stopOnError) {
-	    throw new RuntimeException("Dispatche is stopped due to error", lastError);
+	    throw new RuntimeException("Dispatcher is stopped due to error", lastError);
 	}
 
 	/* clear errors before dispatch */
@@ -39,12 +37,12 @@ public class SimpleEventDispatcher implements EventDispatcher {
 	for (List<EventContextListener> list : listeners.values()) {
 	    for (EventContextListener el : list) {
 		try {
+		    // System.out.println("visiting listener "+el+" for event "+ec.getEvent().getEt());
 		    ec.visitListener(el);
-		} catch (Exception e) {
-		    e.printStackTrace();
-		    errors.add(e);
+		} catch (Throwable e) {
 		    lastError = e;
 		    if (stopOnError) {
+			System.err.println("Dispatcher stopping due to errror "+e.getMessage());
 			return false;
 		    }
 		}
@@ -77,19 +75,19 @@ public class SimpleEventDispatcher implements EventDispatcher {
 	this.stopOnError = stopOnError;
     }
 
-    public Exception getLastError() {
+    public Throwable getLastError() {
 	return lastError;
     }
 
-    public void setLastError(Exception lastError) {
+    public void setLastError(Throwable lastError) {
 	this.lastError = lastError;
     }
 
-    public List<Exception> getErrors() {
+    public List<Throwable> getErrors() {
 	return errors;
     }
 
-    public void setErrors(List<Exception> errors) {
+    public void setErrors(List<Throwable> errors) {
 	this.errors = errors;
     }
 

@@ -121,13 +121,12 @@ public abstract class EventNode {
     protected void nodeConfig() {
 
 	EventNodeSecurityConfig securityConfig = config.getSecurityConfig();
+	securityManager = new EventNodeSecurityManager(securityConfig);
 
 	nodeInfo = new NodeInfo(config.getHelper().generatePeerId());
-	
+
 	nodeInfo.setNodeAuth(securityConfig.getNodeAuth());
 	nodeInfo.setSecurityPolicy(securityConfig.getSecurityPolicy());
-
-	securityManager = new EventNodeSecurityManager(securityConfig);
 
 	context = new EventNodeContext(this, securityManager);
 

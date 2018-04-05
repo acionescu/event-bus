@@ -6,14 +6,20 @@ import java.util.List;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.peers.LocalAgentEventNodeContext;
 import net.segoia.event.eventbus.peers.LocalEventNodeAgent;
+import net.segoia.event.eventbus.util.EBus;
 
 public class TestLocalEventNodeAgent extends LocalEventNodeAgent{
     private List<Event> receivedEvents=new ArrayList<>();
+    private boolean loggingOn;
 
     @Override
     protected void registerHandlers(LocalAgentEventNodeContext context) {
 	context.addEventHandler((c)->{
 	    receivedEvents.add(c.getEvent());
+	    if(loggingOn) {
+		EBus.postEvent(c.getEvent());
+//		System.out.println("done logging from thread "+Thread.currentThread().getId()+ " "+c.getEvent().getEt());
+	    }
 	});
     }
 
@@ -37,6 +43,14 @@ public class TestLocalEventNodeAgent extends LocalEventNodeAgent{
 
     public List<Event> getReceivedEvents() {
         return receivedEvents;
+    }
+
+    public boolean isLoggingOn() {
+        return loggingOn;
+    }
+
+    public void setLoggingOn(boolean loggingOn) {
+        this.loggingOn = loggingOn;
     }
     
     

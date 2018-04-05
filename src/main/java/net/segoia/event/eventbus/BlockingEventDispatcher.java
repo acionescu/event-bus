@@ -25,30 +25,28 @@ import net.segoia.util.data.ListMap;
 import net.segoia.util.data.ListTreeMapFactory;
 
 /**
- * This dispatcher will call the {@link EventContext#visitListener(EventContextListener)} method sequentially for all the
- * registered listeners </br>
+ * This dispatcher will call the {@link EventContext#visitListener(EventContextListener)} method sequentially for all
+ * the registered listeners </br>
  * All processing will be done in a single Thread, so each visitListener call will block execution until finished
  * 
  * @author adi
  *
  */
 public class BlockingEventDispatcher extends SimpleEventDispatcher {
-   
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-    
+    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     private ListMap<Integer, EventContextListener> pendingListeners = new ListMap<Integer, EventContextListener>(
 	    new ListTreeMapFactory<Integer, EventContextListener>());
 
     public boolean dispatchEvent(EventContext ec) {
-	
+
 	ReadLock readLock = lock.readLock();
-	
+
 	readLock.lock();
 
 	if (pendingListeners.size() > 0) {
-	    
+
 	    ListMap<Integer, EventContextListener> mergeListeners = new ListMap<Integer, EventContextListener>(
 		    new ListTreeMapFactory<Integer, EventContextListener>());
 
@@ -62,7 +60,9 @@ public class BlockingEventDispatcher extends SimpleEventDispatcher {
 
 	try {
 	    return super.dispatchEvent(ec);
-	} finally {
+	}
+
+	finally {
 	    readLock.unlock();
 	}
     }
@@ -71,7 +71,7 @@ public class BlockingEventDispatcher extends SimpleEventDispatcher {
 	WriteLock writeLock = lock.writeLock();
 	if (writeLock.tryLock()) {
 
-//	    writeLock.lock();
+	    // writeLock.lock();
 	    super.registerListener(listener);
 	    writeLock.unlock();
 	} else {
@@ -92,7 +92,7 @@ public class BlockingEventDispatcher extends SimpleEventDispatcher {
 	ListMap<Integer, EventContextListener> recipient = super.getListeners();
 	boolean locked = false;
 	if (writeLock.tryLock()) {
-//	    writeLock.lock();
+	    // writeLock.lock();
 	    locked = true;
 	} else {
 	    recipient = pendingListeners;

@@ -17,7 +17,6 @@
 package net.segoia.event.eventbus;
 
 import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -98,40 +97,54 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 	if (!running) {
 
 	    dispatcherThread = new Thread(new Runnable() {
-
 		@Override
 		public void run() {
 		    while (running) {
 
-			do {
-			    try {
-				/* get next event, or wait for one to become available */
-				EventContext ec = eventQueue.takeFirst();
-				if (!running) {
-				    if (!gracefullStop || (gracefullStop && eventQueue.isEmpty())) {
-					break;
-				    }
+			// do {
+			try {
+			    /* get next event, or wait for one to become available */
+			    EventContext ec = eventQueue.takeFirst();
+			    if (!running) {
+				if (!gracefullStop || (gracefullStop && eventQueue.isEmpty())) {
+				    break;
 				}
-
-				/* once we have an event, delegate it to the nested dispatcher in a worker thread */
-				lastFuture = threadPool.submit(new Runnable() {
-
-				    @Override
-				    public void run() {
-
-					nestedDispatcher.dispatchEvent(ec);
-					totalEventsProcessed++;
-					if(totalEventsProcessed == totalEventsQueued) {
-					    notifyIdleWaiters();
-					}
-				    }
-				}, ec);
-
-			    } catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			    }
-			} while (!eventQueue.isEmpty());
+
+			    /* once we have an event, delegate it to the nested dispatcher in a worker thread */
+			    lastFuture = threadPool.submit(new Runnable() {
+
+				@Override
+				public void run() {
+				    // System.out.println(Thread.currentThread().getId() + ": Start processing "
+				    // + (totalEventsProcessed + 1) + " " + ec.getEvent().getEt() + "
+				    // "+threadPool.getCompletedTaskCount());
+
+				    try {
+					nestedDispatcher.dispatchEvent(ec);
+
+				    } catch (Exception e) {
+
+					// System.out.println("ERROR: " + e.getMessage());
+					e.printStackTrace();
+				    }
+				    totalEventsProcessed = threadPool.getCompletedTaskCount() + 1;
+				    // System.out
+				    // .println("Processed " + totalEventsProcessed + "/" + totalEventsQueued);
+				    // System.out.println("Thread pool stats " + threadPool.getCompletedTaskCount()
+				    // + "/" + threadPool.getTaskCount());
+				    if (totalEventsProcessed == totalEventsQueued) {
+					notifyIdleWaiters();
+				    }
+				    // System.out.println("Remaining " + threadPool.getQueue().size());
+				}
+			    });
+
+			} catch (InterruptedException e) {
+			    // TODO Auto-generated catch block
+			    e.printStackTrace();
+			}
+			// } while (!eventQueue.isEmpty());
 		    }
 		}
 	    });
@@ -170,9 +183,7 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 
     private void notifyIdleWaiters() {
 	synchronized (idleSignal) {
-
 	    idleSignal.notifyAll();
-
 	}
     }
 
@@ -185,6 +196,16 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 		e.printStackTrace();
 	    }
 	}
+    }
+
+    public void waitToProcessAll(int sleep) {
+	try {
+	    Thread.sleep(sleep);
+	} catch (InterruptedException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+	waitToProcessAll();
     }
 
     public void processAllAndStop() {

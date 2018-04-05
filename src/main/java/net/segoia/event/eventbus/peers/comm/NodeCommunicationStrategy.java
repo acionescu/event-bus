@@ -7,52 +7,52 @@ public class NodeCommunicationStrategy {
      * The required tx node identity type for this strategy
      */
     private NodeIdentityType txNodeIdentityType;
-    
+
     /**
      * The required rx node identity type for this strategy
      */
     private NodeIdentityType rxNodeIdentityType;
-    
+
     /**
      * Defines the strategy used to send data to a direct peer
      */
-    private String directTxStrategy;
+    private CommStrategy directTxStrategy;
 
     /**
      * Defines the strategy used to relay events between peers
      */
-    private String relayCommStrategy;
+    private CommStrategy relayCommStrategy;
 
-    public String getDirectTxStrategy() {
+    public CommStrategy getDirectTxStrategy() {
 	return directTxStrategy;
     }
 
-    public void setDirectTxStrategy(String directTxStrategy) {
+    public void setDirectTxStrategy(CommStrategy directTxStrategy) {
 	this.directTxStrategy = directTxStrategy;
     }
 
-    public String getRelayCommStrategy() {
+    public CommStrategy getRelayCommStrategy() {
 	return relayCommStrategy;
     }
 
-    public void setRelayCommStrategy(String relayCommStrategy) {
+    public void setRelayCommStrategy(CommStrategy relayCommStrategy) {
 	this.relayCommStrategy = relayCommStrategy;
     }
 
     public NodeIdentityType getTxNodeIdentityType() {
-        return txNodeIdentityType;
+	return txNodeIdentityType;
     }
 
     public void setTxNodeIdentityType(NodeIdentityType txNodeIdentityType) {
-        this.txNodeIdentityType = txNodeIdentityType;
+	this.txNodeIdentityType = txNodeIdentityType;
     }
 
     public NodeIdentityType getRxNodeIdentityType() {
-        return rxNodeIdentityType;
+	return rxNodeIdentityType;
     }
 
     public void setRxNodeIdentityType(NodeIdentityType rxNodeIdentityType) {
-        this.rxNodeIdentityType = rxNodeIdentityType;
+	this.rxNodeIdentityType = rxNodeIdentityType;
     }
 
     @Override
@@ -60,9 +60,9 @@ public class NodeCommunicationStrategy {
 	final int prime = 31;
 	int result = 1;
 	result = prime * result + ((directTxStrategy == null) ? 0 : directTxStrategy.hashCode());
-	result = prime * result + ((txNodeIdentityType == null) ? 0 : txNodeIdentityType.hashCode());
-	result = prime * result + ((rxNodeIdentityType == null) ? 0 : rxNodeIdentityType.hashCode());
 	result = prime * result + ((relayCommStrategy == null) ? 0 : relayCommStrategy.hashCode());
+	result = prime * result + ((rxNodeIdentityType == null) ? 0 : rxNodeIdentityType.hashCode());
+	result = prime * result + ((txNodeIdentityType == null) ? 0 : txNodeIdentityType.hashCode());
 	return result;
     }
 
@@ -80,23 +80,22 @@ public class NodeCommunicationStrategy {
 		return false;
 	} else if (!directTxStrategy.equals(other.directTxStrategy))
 	    return false;
-	if (txNodeIdentityType == null) {
-	    if (other.txNodeIdentityType != null)
+	if (relayCommStrategy == null) {
+	    if (other.relayCommStrategy != null)
 		return false;
-	} else if (!txNodeIdentityType.equals(other.txNodeIdentityType))
+	} else if (!relayCommStrategy.equals(other.relayCommStrategy))
 	    return false;
 	if (rxNodeIdentityType == null) {
 	    if (other.rxNodeIdentityType != null)
 		return false;
 	} else if (!rxNodeIdentityType.equals(other.rxNodeIdentityType))
 	    return false;
-	if (relayCommStrategy == null) {
-	    if (other.relayCommStrategy != null)
+	if (txNodeIdentityType == null) {
+	    if (other.txNodeIdentityType != null)
 		return false;
-	} else if (!relayCommStrategy.equals(other.relayCommStrategy))
+	} else if (!txNodeIdentityType.equals(other.txNodeIdentityType))
 	    return false;
 	return true;
     }
 
-   
 }

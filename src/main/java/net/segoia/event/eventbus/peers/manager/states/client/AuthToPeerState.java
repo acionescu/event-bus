@@ -58,7 +58,7 @@ public class AuthToPeerState extends PeerState{
 	    try {
 		ourProtocol = peerManager.getNodeContext().getSecurityManager().establishPeerCommunicationProtocol(peerContext);
 	    } catch (PeerCommunicationNegotiationFailedException ex) {
-
+		
 	    } catch (PeerAuthRequestRejectedException arex) {
 
 	    }

@@ -23,7 +23,7 @@ import net.segoia.event.eventbus.peers.EventNode;
 import net.segoia.event.eventbus.peers.EventTransceiver;
 
 public class PeerBindRequest {
-    private EventTransceiver transceiver;
+    private transient EventTransceiver transceiver;
 
     /**
      * On what kind of events this node wants to listed </br>
