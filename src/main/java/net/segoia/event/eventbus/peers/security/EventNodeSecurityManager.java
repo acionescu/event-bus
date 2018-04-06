@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.peers.PeerContext;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolConfig;
@@ -16,6 +15,7 @@ import net.segoia.event.eventbus.peers.events.auth.AuthRejectReason;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentityType;
+import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
 import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
 
@@ -23,6 +23,10 @@ public class EventNodeSecurityManager {
     private EventNodeSecurityConfig securityConfig;
 
     private Map<Integer, PrivateIdentityData> privateIdentities = new HashMap<>();
+
+    private Map<Class<? extends NodeIdentity>, PublicIdentityManagerFactory<?>> publicIdentityBuilders;
+
+    private Map<CommManagerKey, CommManagerBuilder> commManagerBuilders;
 
     public EventNodeSecurityManager() {
 	super();
@@ -33,6 +37,33 @@ public class EventNodeSecurityManager {
 
 	this.securityConfig = securityConfig;// JsonUtils.copyObject(securityConfig);
 	loadIdentities();
+	initPublicIdentityBuilders();
+	initCommBuilders();
+    }
+
+    private void initPublicIdentityBuilders() {
+	if (publicIdentityBuilders == null) {
+	    publicIdentityBuilders = new HashMap<>();
+	}
+
+	publicIdentityBuilders.put(SpkiNodeIdentity.class, new PublicIdentityManagerFactory<SpkiNodeIdentity>() {
+
+	    @Override
+	    public PublicIdentityManager build(SpkiNodeIdentity nodeidentity) {
+		return new SpkiPublicIdentityManagerImpl(nodeidentity);
+	    }
+
+	});
+    }
+    
+    private void initCommBuilders() {
+	if(commManagerBuilders == null) {
+	    commManagerBuilders = new HashMap<>();
+	}
+	
+	
+	
+	commManagerBuilders.put(new CommManagerKey("SPKI", "SPKI"), new SpkiSpkiCommManagerBuilder());
     }
 
     private void loadIdentities() {
@@ -62,10 +93,56 @@ public class EventNodeSecurityManager {
 	    nodeIdentities.add(publicNodeIdentity);
 	}
     }
-    
-    
-    public Event processOutgoingEvent(CommProtocolContext context) {
-	
+
+    public CommManager getCommManager(PeerCommContext context) {
+	/*
+	 * Create a public identity manager for peer and save it on peerContext
+	 * 
+	 */
+
+	PublicIdentityManager peerIdentity = getPeerIdentity(context);
+	PrivateIdentityData<NodeIdentity<? extends NodeIdentityType>> ourIdentity = getOurIdentity(context);
+
+	CommProtocolContext commProtocolContext = new CommProtocolContext(ourIdentity, peerIdentity,
+		context.getTxStrategy(), context.getRxStrategy());
+
+	CommManagerKey commManagerKey = new CommManagerKey(ourIdentity.getPublicNodeIdentity().getType().getType(),
+		peerIdentity.getType());
+
+	CommManagerBuilder commManagerBuilder = commManagerBuilders.get(commManagerKey);
+
+	CommManager commManager = commManagerBuilder.build(commProtocolContext);
+
+	return commManager;
+
+    }
+
+    private PrivateIdentityData<NodeIdentity<? extends NodeIdentityType>> getOurIdentity(PeerCommContext pcc) {
+	PrivateIdentityData privateIdentityData = privateIdentities.get(pcc.getOurIdentityIndex());
+	return privateIdentityData;
+    }
+
+    private PublicIdentityManager getPeerIdentity(PeerCommContext pcc) {
+	PeerContext peerContext = pcc.getPeerContext();
+	PublicIdentityManager peerIdentityManager = peerContext.getPeerIdentityManager();
+	if (peerIdentityManager != null) {
+	    return peerIdentityManager;
+	}
+	List<? extends NodeIdentity<? extends NodeIdentityType>> peerIdentities = peerContext.getPeerInfo()
+		.getNodeAuth().getIdentities();
+
+	NodeIdentity<? extends NodeIdentityType> nodeIdentity = peerIdentities.get(pcc.getPeerIdentityIndex());
+
+	PublicIdentityManagerFactory ib = publicIdentityBuilders.get(nodeIdentity.getClass());
+
+	if (ib == null) {
+	    return null;
+	}
+
+	peerIdentityManager = ib.build(nodeIdentity);
+
+	peerContext.setPeerIdentityManager(peerIdentityManager);
+	return peerIdentityManager;
     }
 
     /**

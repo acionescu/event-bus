@@ -3,21 +3,21 @@ package net.segoia.event.eventbus.peers.security;
 import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
 
 public class VerifySignatureOperationContext extends OperationContext {
-    private String signature;
     private SignCommOperationDef opDef;
+    private SignCommOperationOutput signOutput;
 
-    public VerifySignatureOperationContext(byte[] data, String signature, SignCommOperationDef opDef) {
-	super(data);
-	this.signature = signature;
+    public VerifySignatureOperationContext(SignCommOperationDef opDef, SignCommOperationOutput signOutput) {
+	super();
 	this.opDef = opDef;
-    }
-
-    public String getSignature() {
-	return signature;
+	this.signOutput = signOutput;
     }
 
     public SignCommOperationDef getOpDef() {
 	return opDef;
+    }
+
+    public SignCommOperationOutput getSignOutput() {
+        return signOutput;
     }
 
 }

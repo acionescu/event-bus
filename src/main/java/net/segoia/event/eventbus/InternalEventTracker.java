@@ -30,7 +30,7 @@ public class InternalEventTracker extends EventTracker{
 	return eventContext.hasErrors();
     }
     
-    public Exception getFirstError() {
+    public Throwable getFirstError() {
 	return eventContext.getErrorStack().pop();
     }
 }

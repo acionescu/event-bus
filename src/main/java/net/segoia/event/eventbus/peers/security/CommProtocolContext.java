@@ -1,59 +1,41 @@
 package net.segoia.event.eventbus.peers.security;
 
 import net.segoia.event.eventbus.Event;
-import net.segoia.event.eventbus.peers.PeerContext;
 import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
 
 public class CommProtocolContext {
-    private Event event;
-    private int ourIdentityIndex;
-    private int peerIdentityIndex;
-    private NodeCommunicationStrategy commStrategy;
-    private PeerContext peerContext;
+    private PrivateIdentityData<?> ourIdentity;
+    private PublicIdentityManager peerIdentity;
+    private NodeCommunicationStrategy txStrategy;
+    private NodeCommunicationStrategy rxStrategy;
+   
 
-    public CommProtocolContext(Event event, int ourIdentityIndex, int peerIdentityIndex,
-	    NodeCommunicationStrategy commStrategy, PeerContext peerContext) {
+    public CommProtocolContext(PrivateIdentityData<?> ourIdentity, PublicIdentityManager peerIdentity,
+	    NodeCommunicationStrategy txStrategy, NodeCommunicationStrategy rxStrategy) {
 	super();
-	this.event = event;
-	this.ourIdentityIndex = ourIdentityIndex;
-	this.peerIdentityIndex = peerIdentityIndex;
-	this.commStrategy = commStrategy;
-	this.peerContext = peerContext;
+	this.ourIdentity = ourIdentity;
+	this.peerIdentity = peerIdentity;
+	this.txStrategy = txStrategy;
+	this.rxStrategy = rxStrategy;
     }
 
-    public CommProtocolContext(int ourIdentityIndex, int peerIdentityIndex, PeerContext peerContext) {
-	super();
-	this.ourIdentityIndex = ourIdentityIndex;
-	this.peerIdentityIndex = peerIdentityIndex;
-	this.peerContext = peerContext;
+    public PrivateIdentityData<?> getOurIdentity() {
+	return ourIdentity;
     }
 
-    public Event getEvent() {
-	return event;
+    public PublicIdentityManager getPeerIdentity() {
+	return peerIdentity;
     }
 
-    public int getOurIdentityIndex() {
-	return ourIdentityIndex;
+    public NodeCommunicationStrategy getTxStrategy() {
+        return txStrategy;
     }
 
-    public int getPeerIdentityIndex() {
-	return peerIdentityIndex;
+    public NodeCommunicationStrategy getRxStrategy() {
+        return rxStrategy;
     }
+    
+    
 
-    public NodeCommunicationStrategy getCommStrategy() {
-	return commStrategy;
-    }
-
-    public PeerContext getPeerContext() {
-	return peerContext;
-    }
-
-    public void setEvent(Event event) {
-	this.event = event;
-    }
-
-    public void setCommStrategy(NodeCommunicationStrategy commStrategy) {
-	this.commStrategy = commStrategy;
-    }
 
 }

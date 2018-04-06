@@ -1,13 +1,9 @@
 package net.segoia.event.eventbus.peers.comm;
 
-import java.util.List;
-
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.peers.DefaultEventRelay;
 import net.segoia.event.eventbus.peers.EventTransceiver;
 import net.segoia.event.eventbus.peers.PeerContext;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentityType;
 
 public class CommProtocolRelay extends DefaultEventRelay {
     private PeerContext peerContext;

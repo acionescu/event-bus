@@ -1,6 +1,5 @@
 package net.segoia.event.eventbus.peers.security;
 
-public class OperationContext {
-    
+public class CommManagerContext {
 
 }
