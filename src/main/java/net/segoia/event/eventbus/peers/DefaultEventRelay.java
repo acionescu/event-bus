@@ -28,12 +28,6 @@ public class DefaultEventRelay extends EventRelay {
     }
 
     @Override
-    public void init() {
-	// TODO Auto-generated method stub
-
-    }
-
-    @Override
     protected void cleanUp() {
 	// TODO Auto-generated method stub
 

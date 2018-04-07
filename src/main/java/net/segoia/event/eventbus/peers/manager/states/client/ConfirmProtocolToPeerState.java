@@ -10,8 +10,7 @@ public class ConfirmProtocolToPeerState extends PeerState {
 
     @Override
     public void onEnterState(PeerManager peerManager) {
-	// TODO Auto-generated method stub
-
+	
     }
 
     @Override
@@ -40,7 +39,7 @@ public class ConfirmProtocolToPeerState extends PeerState {
 	SessionStartedData data = event.getData();
 
 	peerManager.getPeerContext().setSessionInfo(data.getSessionInfo());
-
+	
 	peerManager.onReady();
     }
 

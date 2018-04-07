@@ -9,11 +9,16 @@ import net.segoia.event.eventbus.Event;
  */
 public interface EventTransceiver {
     void start();
-    void init();
+    
     void terminate();
-    void sendEvent(Event event);
-    void receiveEvent(Event event);
-    void setRemoteEventListener(PeerEventListener eventListener);
+    
+//    void sendEvent(Event event);
+//    void receiveEvent(Event event);
+//    void setRemoteEventListener(PeerEventListener eventListener);
+    
+    void sendData(byte[] data);
+    void receiveData(byte[] data);
+    void setRemoteDataListener(PeerDataListener dataListener);
     
     /**
      * Called when the communication with the peer is interrupted without us initiating it

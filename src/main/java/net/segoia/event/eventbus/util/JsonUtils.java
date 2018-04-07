@@ -25,8 +25,13 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
 
+import net.segoia.event.eventbus.peers.comm.CommOperationDef;
+import net.segoia.event.eventbus.peers.comm.EncryptCommOperationDef;
+import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentityType;
 import net.segoia.event.eventbus.peers.events.auth.id.PlainNodeIdentity;
@@ -36,10 +41,10 @@ import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentityType;
 
 public class JsonUtils {
     public static Gson gs;
-    
+
     static {
 	GsonBuilder gsonBuilder = new GsonBuilder();
-	
+
 	gsonBuilder.registerTypeAdapter(NodeIdentityType.class, new JsonDeserializer<NodeIdentityType>() {
 
 	    @Override
@@ -64,6 +69,19 @@ public class JsonUtils {
 	    }
 	});
 	
+	gsonBuilder.registerTypeAdapter(NodeIdentityType.class, new JsonSerializer<NodeIdentityType>() {
+
+	    @Override
+	    public JsonElement serialize(NodeIdentityType src, Type typeOfSrc, JsonSerializationContext context) {
+		switch(src.getType()) {
+		case PlainNodeIdentityType.TYPE : return context.serialize(src, PlainNodeIdentityType.class);
+		case SpkiNodeIdentityType.TYPE : return context.serialize(src, SpkiNodeIdentityType.class);
+		default:
+		    throw new JsonParseException("Type not supported for serialization "+src.getClass()+" "+src.getType());
+		}
+	    }
+	});
+
 	gsonBuilder.registerTypeAdapter(NodeIdentity.class, new JsonDeserializer<NodeIdentity>() {
 
 	    @Override
@@ -74,9 +92,9 @@ public class JsonUtils {
 		if (typeElem == null) {
 		    throw new JsonParseException("Unknown type for object " + json.toString());
 		}
-		
+
 		typeElem = typeElem.getAsJsonObject().get("type");
-		
+
 		if (typeElem == null) {
 		    throw new JsonParseException("Unknown type for object " + json.toString());
 		}
@@ -93,28 +111,60 @@ public class JsonUtils {
 		}
 	    }
 	});
+	
+	gsonBuilder.registerTypeAdapter(NodeIdentity.class, new JsonSerializer<NodeIdentity>() {
 
-//	gsonBuilder.registerTypeAdapter(NodeIdentityType.class, new JsonSerializer<NodeIdentityType>() {
-//
-//	    @Override
-//	    public JsonElement serialize(DataSource src, Type typeOfSrc, JsonSerializationContext context) {
-//		String type = src.getType();
-//
-//		switch (type) {
-//		case DataSource.TYPES.MAP:
-//		    return context.serialize(src, MapDataSource.class);
-//		case DataSource.TYPES.SERVER:
-//		    return context.serialize(src, ServerDataSource.class);
-//		default:
-//		    throw new JsonParseException("Unknown type for DataSource object " + type);
-//		}
-//	    }
-//	});
-	
+	    @Override
+	    public JsonElement serialize(NodeIdentity src, Type typeOfSrc, JsonSerializationContext context) {
+		switch(src.getType().getType()) {
+		case PlainNodeIdentityType.TYPE : return context.serialize(src, PlainNodeIdentity.class);
+		case SpkiNodeIdentityType.TYPE : return context.serialize(src, SpkiNodeIdentity.class);
+		default:
+		    throw new JsonParseException("Type not supported for serialization "+src.getClass()+" "+src.getType());
+		}
+	    }
+	});
+
+	gsonBuilder.registerTypeAdapter(CommOperationDef.class, new JsonDeserializer<CommOperationDef>() {
+
+	    @Override
+	    public CommOperationDef deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+		    throws JsonParseException {
+		JsonObject jo = json.getAsJsonObject();
+		JsonElement typeElem = jo.get("type");
+		if (typeElem == null) {
+		    throw new JsonParseException("Unknown type for object " + json.toString());
+		}
+
+		String type = typeElem.getAsString();
+
+		switch (type) {
+		case SignCommOperationDef.TYPE:
+		    return context.deserialize(json, SignCommOperationDef.class);
+		case EncryptCommOperationDef.TYPE:
+		    return context.deserialize(json, EncryptCommOperationDef.class);
+		default:
+		    throw new JsonParseException("Unknown type for object " + json.toString());
+		}
+	    }
+	});
+
+	gsonBuilder.registerTypeAdapter(CommOperationDef.class, new JsonSerializer<CommOperationDef>() {
+
+	    @Override
+	    public JsonElement serialize(CommOperationDef src, Type typeOfSrc, JsonSerializationContext context) {
+		switch(src.getType()) {
+		case SignCommOperationDef.TYPE : return context.serialize(src, SignCommOperationDef.class);
+		case EncryptCommOperationDef.TYPE : return context.serialize(src, EncryptCommOperationDef.class);
+		default:
+		    throw new JsonParseException("Type not supported for serialization "+src.getClass()+" "+src.getType());
+		}
+	    }
+	});
+
 	gs = gsonBuilder.create();
-	
+
     }
-    
 
     public static <T> T fromJson(String json, Class<T> classOfT) throws JsonSyntaxException {
 	if (json == null) {
@@ -134,21 +184,21 @@ public class JsonUtils {
     public static String toJson(Object obj) {
 	return gs.toJson(obj);
     }
-    
-    public static Gson gs(){
+
+    public static Gson gs() {
 	return gs;
     }
-    
-    public static String getString(JsonObject jo, String prop){
+
+    public static String getString(JsonObject jo, String prop) {
 	JsonElement jsonElement = jo.get(prop);
-	if(jsonElement == null){
+	if (jsonElement == null) {
 	    return null;
 	}
 	return jsonElement.getAsString();
     }
-   
+
     public static <T> T copyObject(T obj) {
-	Class<T> clazz = (Class<T>)obj.getClass();
+	Class<T> clazz = (Class<T>) obj.getClass();
 	return fromJson(toJson(obj), clazz);
     }
 }

@@ -16,6 +16,8 @@
  */
 package net.segoia.event.eventbus.peers;
 
+import java.io.UnsupportedEncodingException;
+
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
@@ -26,11 +28,13 @@ import net.segoia.event.eventbus.EventContext;
  * @author adi
  *
  */
-public abstract class EventRelay extends AbstractEventTransceiver implements PeerEventListener {
+public abstract class EventRelay implements PeerDataListener {
     protected EventTransceiver transceiver;
     private String id;
 
     private Condition forwardingCondition;
+
+    private PeerEventListener remoteEventListener;
 
     public EventRelay(String id) {
 	this.id = id;
@@ -55,15 +59,37 @@ public abstract class EventRelay extends AbstractEventTransceiver implements Pee
 
     public void bind() {
 
-	transceiver.setRemoteEventListener(this);
+	transceiver.setRemoteDataListener(this);
     }
+
+    public void bind(EventTransceiver transceiver) {
+	this.transceiver = transceiver;
+	bind();
+    }
+
     //
     // public void onLocalEvent(EventContext ec) {
     // forwardEvent(ec);
     // }
 
-    public void onPeerEvent(Event event) {
-	receiveEvent(event);
+    public PeerEventListener getRemoteEventListener() {
+	return remoteEventListener;
+    }
+
+    public void setRemoteEventListener(PeerEventListener remoteEventListener) {
+	this.remoteEventListener = remoteEventListener;
+    }
+
+    public void onPeerData(byte[] data) {
+	try {
+	    String json = new String(data, "UTF-8");
+
+	    Event event = Event.fromJson(json);
+	    receiveEvent(event);
+	} catch (UnsupportedEncodingException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
     }
 
     // protected void forwardEvent(EventContext ec) {
@@ -80,9 +106,23 @@ public abstract class EventRelay extends AbstractEventTransceiver implements Pee
 	return (forwardingCondition != null && forwardingCondition.test(ec));
     }
 
+    protected byte[] eventToData(Event event) {
+	try {
+	    return event.toJson().getBytes("UTF-8");
+	} catch (UnsupportedEncodingException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+	return null;
+    }
+
+    public void sendData(byte[] data) {
+	transceiver.sendData(data);
+    }
+
     public void sendEvent(Event event) {
 	event.addRelay(getId());
-	transceiver.sendEvent(event);
+	sendData(eventToData(event));
     }
 
     public void receiveEvent(Event event) {
@@ -142,6 +182,10 @@ public abstract class EventRelay extends AbstractEventTransceiver implements Pee
     @Override
     public void onPeerLeaving() {
 	getRemoteEventListener().onPeerLeaving();
+    }
+
+    public EventTransceiver getTransceiver() {
+        return transceiver;
     }
 
 }

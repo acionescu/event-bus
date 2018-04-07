@@ -54,7 +54,8 @@ public class PeerAuthAcceptedState extends PeerState {
 		    peerManager.getNodeContext().generateNewSession());
 	    peerManager.onReady();
 	    
-	    
+	    /* start using the protocol before sending the session started event */
+	    peerManager.onProtocolConfirmed();
 	    
 	    peerManager.forwardToPeer(new PeerSessionStartedEvent(sessionStartedData));
 	}

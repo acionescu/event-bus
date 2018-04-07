@@ -1,20 +1,17 @@
 package net.segoia.event.eventbus.peers.security;
 
-import java.nio.charset.Charset;
 import java.util.List;
 
-import net.segoia.event.eventbus.Event;
-import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.peers.comm.CommOperationDef;
 
-public class SpkiSpkiCommManager extends CommManager<SpkiPrivateIdentityData, SpkiPublicIdentityManager> {
+public class SpkiSpkiCommManager extends AbstractCommManager<SpkiPrivateIdentityData, SpkiPublicIdentityManager> {
     private CommManagerConfig config;
 
     @Override
-    public Event processsOutgoingEvent(EventContext eventContext) throws CommOperationException {
+    public CommDataContext processsOutgoingData(CommDataContext context) throws CommOperationException {
 	List<CommOperationDef> operations = getTxStrategy().getDirectTxStrategy().getOperations();
 
-	byte[] data = eventContext.getEvent().toJson().getBytes(Charset.forName("UTF-8"));
+	byte[] data = context.getData();
 
 	OperationOutput currentContext = new OperationOutput(data);
 
@@ -22,16 +19,12 @@ public class SpkiSpkiCommManager extends CommManager<SpkiPrivateIdentityData, Sp
 	    CommOperation op = config.getTxOperation(oDef);
 	    currentContext = op.operate(buildContext(oDef, currentContext));
 	}
-	return opContextToEvent(currentContext);
+	return new CommDataContext(currentContext.getFullOutputData());
     }
 
     @Override
-    public Event processIncomingEvent(EventContext context) {
+    public CommDataContext processIncomingData(CommDataContext context) {
 	// TODO Auto-generated method stub
-	return null;
-    }
-
-    protected Event opContextToEvent(OperationContext opContext) {
 	return null;
     }
 
@@ -39,6 +32,14 @@ public class SpkiSpkiCommManager extends CommManager<SpkiPrivateIdentityData, Sp
 	    OperationOutput inputContext) {
 	OperationContext opContext = config.getTxOpContextBuilder(def).buildContext(def, inputContext);
 	return new SpkiSpkiCommOperationContext<>(opContext, getOurIdentity(), getPeerIdentity());
+    }
+
+    public CommManagerConfig getConfig() {
+	return config;
+    }
+
+    public void setConfig(CommManagerConfig config) {
+	this.config = config;
     }
 
 }

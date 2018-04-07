@@ -6,6 +6,17 @@ public class CommOperationException extends Exception{
      * 
      */
     private static final long serialVersionUID = -7309100919410242075L;
+    
+    private CommOperationContext context;
+    
+    
+
+   
+
+    public CommOperationException(String message, Throwable cause, CommOperationContext context) {
+	super(message, cause);
+	this.context = context;
+    }
 
     public CommOperationException() {
 	super();

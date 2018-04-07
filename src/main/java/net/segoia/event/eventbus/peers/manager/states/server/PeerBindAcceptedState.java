@@ -89,7 +89,7 @@ public class PeerBindAcceptedState extends PeerState{
 			    "Don't agree on protocol. Found a better one.", commProtocol));
 		    // TODO: Propose the one we found
 
-		    acceptPeerAuth(peerManager);
+//		    acceptPeerAuth(peerManager);
 		}
 	    } else {
 		// TODO: propose the protocol we found

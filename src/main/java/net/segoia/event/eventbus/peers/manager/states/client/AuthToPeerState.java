@@ -58,9 +58,9 @@ public class AuthToPeerState extends PeerState{
 	    try {
 		ourProtocol = peerManager.getNodeContext().getSecurityManager().establishPeerCommunicationProtocol(peerContext);
 	    } catch (PeerCommunicationNegotiationFailedException ex) {
-		
+		ex.printStackTrace();
 	    } catch (PeerAuthRequestRejectedException arex) {
-
+		arex.printStackTrace();
 	    }
 
 	    /* set the protocol on peer context */
@@ -76,6 +76,13 @@ public class AuthToPeerState extends PeerState{
 	    
 	    peerManager.goToState(PeerManager.CONFIRM_PROTOCOL_TO_PEER);
 	    peerManager.forwardToPeer(new PeerProtocolConfirmedEvent(protocolConfirmation));
+	    
+	    /* after we send protocol confirmation event start using it */
+	    peerManager.onProtocolConfirmed();
+	}
+	else {
+	    /* protocols don't match */
+	    System.out.println("PROTOCOLS don't match");
 	}
     }
 

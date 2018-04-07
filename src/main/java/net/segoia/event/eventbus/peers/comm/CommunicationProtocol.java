@@ -20,6 +20,16 @@ public class CommunicationProtocol {
 	this.protocolDefinition = protocolDefinition;
 	this.config = config;
     }
+    
+    public static CommunicationProtocol buildPlainProtocol() {
+	CommunicationProtocolDefinition def = new CommunicationProtocolDefinition();
+	def.setClientCommStrategy(new NodeCommunicationStrategy());
+	def.setServerCommStrategy(new NodeCommunicationStrategy());
+
+	CommunicationProtocolConfig config = new CommunicationProtocolConfig();
+
+	return new CommunicationProtocol(def, config);
+    }
 
     public CommunicationProtocolDefinition getProtocolDefinition() {
 	return protocolDefinition;

@@ -1,27 +1,38 @@
 package net.segoia.event.eventbus.peers;
 
-import net.segoia.event.eventbus.Event;
-
 public abstract class AbstractEventTransceiver implements EventTransceiver {
 
-    private PeerEventListener remoteEventListener;
+    private PeerDataListener remoteDataListener;
+    
+    protected abstract void init();
 
-    public PeerEventListener getRemoteEventListener() {
-	return remoteEventListener;
+    public PeerDataListener getRemoteDataListener() {
+	return remoteDataListener;
     }
 
-    public void setRemoteEventListener(PeerEventListener remoteEventListener) {
-	this.remoteEventListener = remoteEventListener;
+    public void setRemoteDataListener(PeerDataListener remoteDataListener) {
+	this.remoteDataListener = remoteDataListener;
     }
 
     @Override
-    public void receiveEvent(Event event) {
-	remoteEventListener.onPeerEvent(event);
+    public void receiveData(byte[] data) {
+	remoteDataListener.onPeerData(data);
     }
 
     @Override
     public void onPeerLeaving() {
-	remoteEventListener.onPeerLeaving();
+	remoteDataListener.onPeerLeaving();
+
     }
+
+    // @Override
+    // public void receiveEvent(Event event) {
+    // remoteEventListener.onPeerEvent(event);
+    // }
+    //
+    // @Override
+    // public void onPeerLeaving() {
+    // remoteEventListener.onPeerLeaving();
+    // }
 
 }

@@ -102,7 +102,7 @@ public class EventNodeTest {
 	peerNode.registerToPeer(new ConnectToPeerRequest(clientTransceiver));
 	
 	/* wait for all events to pe handled */
-	EBus.waitToProcessAllOnMainLoop();
+	EBus.waitToProcessAllOnMainLoop(100);
 	
 	List<Event> receivedEvents = serverLocalAgent.getReceivedEvents();
 	
@@ -113,11 +113,11 @@ public class EventNodeTest {
 	Assert.assertTrue(lastReceivedEvent instanceof NewPeerEvent);
 	
 	NewPeerEvent newPeerEvent = (NewPeerEvent)lastReceivedEvent;
-	
+	System.out.println("hello");
 	/* simulate the peer node leaving */
 	clientTransceiver.terminate();
 	/* wait for all events to be handled */
-	EBus.waitToProcessAllOnMainLoop();
+	EBus.waitToProcessAllOnMainLoop(30);
 	
 	/* check if the peer left event is triggered on server side*/
 	lastReceivedEvent = receivedEvents.get(receivedEvents.size()-1);
@@ -165,7 +165,7 @@ public class EventNodeTest {
 	
 	
 	/* wait for all events to pe handled */
-	EBus.waitToProcessAllOnMainLoop(20);
+	EBus.waitToProcessAllOnMainLoop(70);
 	
 	System.out.println(serverLocalAgent.getReceivedEvents().size());
     }

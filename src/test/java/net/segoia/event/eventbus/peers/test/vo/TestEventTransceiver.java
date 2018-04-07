@@ -1,8 +1,6 @@
 package net.segoia.event.eventbus.peers.test.vo;
 
-import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.peers.AbstractEventTransceiver;
-import net.segoia.event.eventbus.util.EBus;
 
 public abstract class TestEventTransceiver extends AbstractEventTransceiver {
     /**
@@ -13,21 +11,47 @@ public abstract class TestEventTransceiver extends AbstractEventTransceiver {
     private boolean sendAsync;
 
     @Override
-    public void sendEvent(Event event) {
-	EBus.postEvent(event);
+    public void sendData(byte[] data) {
+	System.out.println("Sending "+new String(data));
 	if (!sendAsync) {
-	    pairTransceiver.receiveEvent(event);
+	    pairTransceiver.receiveData(data);
 	} else {
 	    new Thread() {
 
 		@Override
 		public void run() {
-		    pairTransceiver.receiveEvent(event);
+		    pairTransceiver.receiveData(data);
 		}
 
 	    }.start();
 	}
     }
+    
+    
+
+    @Override
+    public void start() {
+	// TODO Auto-generated method stub
+	
+    }
+
+
+
+    @Override
+    public void init() {
+	// TODO Auto-generated method stub
+	
+    }
+
+
+
+    @Override
+    public void receiveData(byte[] data) {
+	System.out.println("Receiving: "+new String(data));
+	super.receiveData(data);
+    }
+
+
 
     @Override
     public void terminate() {

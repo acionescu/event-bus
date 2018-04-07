@@ -10,7 +10,6 @@ import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolConfig;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolDefinition;
 import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
-import net.segoia.event.eventbus.peers.comm.PlainCommunicationProtocol;
 import net.segoia.event.eventbus.peers.events.auth.AuthRejectReason;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
@@ -55,15 +54,21 @@ public class EventNodeSecurityManager {
 
 	});
     }
-    
+
     private void initCommBuilders() {
-	if(commManagerBuilders == null) {
+	if (commManagerBuilders == null) {
 	    commManagerBuilders = new HashMap<>();
 	}
-	
-	
-	
+
 	commManagerBuilders.put(new CommManagerKey("SPKI", "SPKI"), new SpkiSpkiCommManagerBuilder());
+	
+	commManagerBuilders.put(new CommManagerKey(null, null), new CommManagerBuilder() {
+	    
+	    @Override
+	    public CommManager build(CommProtocolContext context) {
+		return new PlainCommManager();
+	    }
+	});
     }
 
     private void loadIdentities() {
@@ -94,6 +99,12 @@ public class EventNodeSecurityManager {
 	}
     }
 
+    /**
+     * Builds a {@link AbstractCommManager} for a peer
+     * 
+     * @param context
+     * @return
+     */
     public CommManager getCommManager(PeerCommContext context) {
 	/*
 	 * Create a public identity manager for peer and save it on peerContext
@@ -106,8 +117,17 @@ public class EventNodeSecurityManager {
 	CommProtocolContext commProtocolContext = new CommProtocolContext(ourIdentity, peerIdentity,
 		context.getTxStrategy(), context.getRxStrategy());
 
-	CommManagerKey commManagerKey = new CommManagerKey(ourIdentity.getPublicNodeIdentity().getType().getType(),
-		peerIdentity.getType());
+	String ourIdentityType = null;
+	if (ourIdentity != null) {
+	    ourIdentityType = ourIdentity.getPublicNodeIdentity().getType().getType();
+	}
+
+	String peerIdentityType = null;
+	if (peerIdentity != null) {
+	    peerIdentityType = peerIdentity.getType();
+	}
+
+	CommManagerKey commManagerKey = new CommManagerKey(ourIdentityType, peerIdentityType);
 
 	CommManagerBuilder commManagerBuilder = commManagerBuilders.get(commManagerKey);
 
@@ -123,7 +143,10 @@ public class EventNodeSecurityManager {
     }
 
     private PublicIdentityManager getPeerIdentity(PeerCommContext pcc) {
+	int peerIdentityIndex = pcc.getPeerIdentityIndex();
+
 	PeerContext peerContext = pcc.getPeerContext();
+
 	PublicIdentityManager peerIdentityManager = peerContext.getPeerIdentityManager();
 	if (peerIdentityManager != null) {
 	    return peerIdentityManager;
@@ -131,7 +154,11 @@ public class EventNodeSecurityManager {
 	List<? extends NodeIdentity<? extends NodeIdentityType>> peerIdentities = peerContext.getPeerInfo()
 		.getNodeAuth().getIdentities();
 
-	NodeIdentity<? extends NodeIdentityType> nodeIdentity = peerIdentities.get(pcc.getPeerIdentityIndex());
+	if (peerIdentityIndex < 0 || peerIdentityIndex >= peerIdentities.size()) {
+	    return null;
+	}
+
+	NodeIdentity<? extends NodeIdentityType> nodeIdentity = peerIdentities.get(peerIdentityIndex);
 
 	PublicIdentityManagerFactory ib = publicIdentityBuilders.get(nodeIdentity.getClass());
 
@@ -181,7 +208,7 @@ public class EventNodeSecurityManager {
 
 	/* if now communication policy is set, use plain protocol */
 	if (localCommPolicy == null && peerCommPolicy == null) {
-	    return new PlainCommunicationProtocol();
+	    return CommunicationProtocol.buildPlainProtocol();
 	}
 
 	List<? extends NodeIdentity<? extends NodeIdentityType>> localIdentities = securityConfig.getNodeAuth()

@@ -3,6 +3,7 @@ package net.segoia.event.eventbus.peers.security;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
 import net.segoia.util.crypto.CryptoUtil;
 
@@ -28,9 +29,9 @@ public class SpkiPrivateIdentityData extends PrivateIdentityData<SpkiNodeIdentit
     }
 
     @Override
-    public byte[] sign(SignCommOperationContext context) {
-	// TODO Auto-generated method stub
-	return null;
+    public byte[] sign(SignCommOperationContext context) throws Exception {
+	SignCommOperationDef opDef = context.getOpDef();
+	return CryptoUtil.sign(privateKey, context.getData(), opDef.getHashingAlgorithm());
     }
 
     @Override

@@ -1,6 +1,7 @@
 package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.Event;
+import net.segoia.event.eventbus.peers.comm.CommProtocolEventTransceiver;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.PeerAcceptedEvent;
 import net.segoia.event.eventbus.peers.events.PeerInfo;
@@ -16,6 +17,7 @@ import net.segoia.event.eventbus.peers.manager.states.server.PeerAcceptedState;
 import net.segoia.event.eventbus.peers.manager.states.server.PeerAuthAcceptedState;
 import net.segoia.event.eventbus.peers.manager.states.server.PeerBindAcceptedState;
 import net.segoia.event.eventbus.peers.manager.states.server.PeerBindRequestedState;
+import net.segoia.event.eventbus.util.EBus;
 
 /**
  * Implements a certain communication policy with a peer over an {@link EventRelay}
@@ -107,6 +109,14 @@ public class PeerManager implements PeerEventListener {
     protected void cleanUp() {
 
     }
+    
+    public void onProtocolConfirmed() {
+	
+	/* chain a protocol enforcing event transceiver */
+	EventRelay relay = peerContext.getRelay();
+	CommProtocolEventTransceiver commProtocolEventTransceiver = new CommProtocolEventTransceiver(relay.getTransceiver(), peerContext);
+	relay.bind(commProtocolEventTransceiver);
+    }
 
     public void onReady() {
 	goToState(acceptedState);
@@ -147,6 +157,7 @@ public class PeerManager implements PeerEventListener {
 
     @Override
     public void onPeerEvent(Event event) {
+	EBus.postEvent(event);
 	handleEventFromPeer(event);
     }
 
