@@ -1,6 +1,8 @@
 package net.segoia.event.eventbus.peers.comm;
 
-public class CommOperationDef {
+import net.segoia.event.eventbus.peers.security.OperationDef;
+
+public class CommOperationDef extends OperationDef{
     private String type;
 
     public CommOperationDef(String type) {

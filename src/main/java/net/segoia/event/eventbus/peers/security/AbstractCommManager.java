@@ -1,7 +1,5 @@
 package net.segoia.event.eventbus.peers.security;
 
-import net.segoia.event.eventbus.Event;
-import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
 
 public abstract class AbstractCommManager<O extends PrivateIdentityData<?>,P extends PublicIdentityManager> implements CommManager{

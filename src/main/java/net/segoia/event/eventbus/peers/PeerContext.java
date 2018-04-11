@@ -2,7 +2,7 @@ package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
-import net.segoia.event.eventbus.peers.events.SessionInfo;
+import net.segoia.event.eventbus.peers.events.session.SessionInfo;
 import net.segoia.event.eventbus.peers.security.PublicIdentityManager;
 
 public class PeerContext {

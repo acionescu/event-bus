@@ -1,9 +1,12 @@
 package net.segoia.event.eventbus.peers.security;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.crypto.SecretKey;
 
 import net.segoia.event.eventbus.peers.PeerContext;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
@@ -15,8 +18,12 @@ import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentityType;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
+import net.segoia.event.eventbus.peers.events.session.KeyDef;
+import net.segoia.event.eventbus.peers.events.session.SessionKey;
 import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
+import net.segoia.event.eventbus.peers.exceptions.PeerSessionException;
+import net.segoia.util.crypto.CryptoUtil;
 
 public class EventNodeSecurityManager {
     private EventNodeSecurityConfig securityConfig;
@@ -61,9 +68,9 @@ public class EventNodeSecurityManager {
 	}
 
 	commManagerBuilders.put(new CommManagerKey("SPKI", "SPKI"), new SpkiSpkiCommManagerBuilder());
-	
+
 	commManagerBuilders.put(new CommManagerKey(null, null), new CommManagerBuilder() {
-	    
+
 	    @Override
 	    public CommManager build(CommProtocolContext context) {
 		return new PlainCommManager();
@@ -313,6 +320,34 @@ public class EventNodeSecurityManager {
 	    index++;
 	}
 	return -1;
+    }
+
+    public SessionKey generateNewSessionKey(PeerContext peerContext) throws PeerSessionException {
+	String channel = peerContext.getCommunicationChannel();
+	PeerChannelSecurityPolicy localChannelPolicy = securityConfig.getSecurityPolicy().getChannelPolicy(channel);
+	ChannelSessionPolicy sessionPolicy = localChannelPolicy.getCommunicationPolicy().getSessionPolicy();
+
+	/*
+	 * Get session key definition
+	 */
+	KeyDef sessionKeyDef = sessionPolicy.getSessionKeyDef();
+
+	int maxSupportedKeySize = sessionKeyDef.getKeySize();
+
+	PublicIdentityManager peerIdentityManager = peerContext.getPeerIdentityManager();
+	if (peerIdentityManager != null) {
+	    maxSupportedKeySize = peerIdentityManager.getMaxSupportedEncryptedDataBlockSize();
+	}
+
+	try {
+	    SecretKey secretKey = CryptoUtil.generateSecretkey(sessionKeyDef.getAlgorithm(), maxSupportedKeySize);
+	    KeyDef newSessionKeyDef = new KeyDef(sessionKeyDef.getAlgorithm(), maxSupportedKeySize);
+	    return new SessionKey(CryptoUtil.base64Encode(secretKey.getEncoded()), newSessionKeyDef);
+	} catch (NoSuchAlgorithmException e) {
+	    throw new PeerSessionException("Failed to generate session key with algorithm "
+		    + sessionKeyDef.getAlgorithm() + " and size " + maxSupportedKeySize, e);
+	}
+
     }
 
     private class StrategyIdentitiesPair {

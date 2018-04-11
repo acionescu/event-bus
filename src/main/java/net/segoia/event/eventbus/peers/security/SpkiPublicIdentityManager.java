@@ -1,6 +1,6 @@
 package net.segoia.event.eventbus.peers.security;
 
 public interface SpkiPublicIdentityManager extends PublicIdentityManager{
-    public byte[] ecryptPublic(EncryptOperationContext context);
-    public boolean verifySignature(VerifySignatureOperationContext context);
+    public byte[] ecryptPublic(EncryptOperationContext context) throws Exception;
+    public boolean verifySignature(VerifySignatureOperationContext context) throws Exception;
 }

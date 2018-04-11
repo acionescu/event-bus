@@ -1,5 +1,5 @@
 package net.segoia.event.eventbus.peers.security;
 
-public interface CommOperation<C extends CommOperationContext<?, ?, ?>, O extends OperationOutput> {
-    O operate(C context) throws CommOperationException;
+public interface CommOperation<I extends OperationData, C extends OperationContext<?>, O extends OperationOutput>
+	extends GenericOperation<I, C, O> {
 }

@@ -1,10 +1,18 @@
 package net.segoia.event.eventbus.peers.security;
 
-public class SpkiSpkiCommOperationContext<C extends OperationContext> extends CommOperationContext<C, SpkiPrivateIdentityData, SpkiPublicIdentityManager>{
+import net.segoia.event.eventbus.peers.comm.CommOperationDef;
 
-    public SpkiSpkiCommOperationContext(C opContex, SpkiPrivateIdentityData ourIdentity,
+public class SpkiSpkiCommOperationContext<D extends CommOperationDef>
+	extends SpkiCommOperationContext<D, SpkiPrivateIdentityData, SpkiPublicIdentityManager> {
+    
+   
+    private SignOperationWorker signWorker;
+
+    public SpkiSpkiCommOperationContext(D opDef, SpkiPrivateIdentityData ourIdentity,
 	    SpkiPublicIdentityManager peerIdentity) {
-	super(opContex, ourIdentity, peerIdentity);
+	super(opDef, ourIdentity, peerIdentity);
     }
+
+    
 
 }

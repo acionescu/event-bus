@@ -22,6 +22,9 @@ public class NodeCommunicationStrategy {
      * Defines the strategy used to relay events between peers
      */
     private CommStrategy relayCommStrategy;
+    
+    
+    
 
     public CommStrategy getDirectTxStrategy() {
 	return directTxStrategy;

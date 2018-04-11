@@ -12,7 +12,7 @@ public class CommManagerConfig {
     private Map<String, CommOperation> rxOperations=new HashMap<>();
     private Map<String, OperationContextBuilder> rxOpContextBuilders = new HashMap<>();
     
-    public <O extends CommOperation<?,?>> O getTxOperation(CommOperationDef def) {
+    public <O extends CommOperation<?,?,?,?>> O getTxOperation(CommOperationDef def) {
 	return (O)txOperations.get(def.getType());
     }
     

@@ -2,16 +2,10 @@ package net.segoia.event.eventbus.peers.security;
 
 import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
 
-public class SignCommOperationContext extends RawDataOperationContext {
-    private SignCommOperationDef opDef;
+public class SignCommOperationContext extends OperationContext<SignCommOperationDef> {
 
-    public SignCommOperationContext(byte[] data, SignCommOperationDef opDef) {
-	super(data);
-	this.opDef = opDef;
-    }
-
-    public SignCommOperationDef getOpDef() {
-	return opDef;
+    public SignCommOperationContext(SignCommOperationDef opDef) {
+	super(opDef);
     }
 
 }

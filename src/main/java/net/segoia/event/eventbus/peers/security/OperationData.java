@@ -1,12 +1,10 @@
 package net.segoia.event.eventbus.peers.security;
 
-public class RawDataOperationContext<D extends OperationDef> extends OperationContext<D> {
+public class OperationData {
     private byte[] data;
 
-    
-
-    public RawDataOperationContext(D opDef, byte[] data) {
-	super(opDef);
+    public OperationData(byte[] data) {
+	super();
 	this.data = data;
     }
 
@@ -17,4 +15,5 @@ public class RawDataOperationContext<D extends OperationDef> extends OperationCo
     public void setData(byte[] data) {
 	this.data = data;
     }
+
 }

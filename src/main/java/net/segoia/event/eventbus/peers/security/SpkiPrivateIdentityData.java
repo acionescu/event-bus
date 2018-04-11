@@ -1,8 +1,14 @@
 package net.segoia.event.eventbus.peers.security;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Signature;
 
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+
+import net.segoia.event.eventbus.peers.comm.EncryptCommOperationDef;
 import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
 import net.segoia.util.crypto.CryptoUtil;
@@ -28,16 +34,30 @@ public class SpkiPrivateIdentityData extends PrivateIdentityData<SpkiNodeIdentit
 	return publicKey;
     }
 
+//    @Override
+//    public byte[] sign(SignCommOperationContext context) throws Exception {
+//	SignCommOperationDef opDef = context.getOpDef();
+//	return CryptoUtil.sign(privateKey, context.getData(), opDef.getHashingAlgorithm());
+//    }
+//
+//    @Override
+//    public byte[] decryptPrivate(DecryptOperationContext context) throws Exception {
+//	return CryptoUtil.decrypt(privateKey, context.getData(), context.getOpDef().getTransformation());
+//    }
+
     @Override
-    public byte[] sign(SignCommOperationContext context) throws Exception {
-	SignCommOperationDef opDef = context.getOpDef();
-	return CryptoUtil.sign(privateKey, context.getData(), opDef.getHashingAlgorithm());
+    public SignOperationWorker buildSignWorker(SignCommOperationDef opDef) throws Exception {
+	Signature sig = Signature.getInstance(opDef.getHashingAlgorithm());
+	sig.initSign(privateKey);
+	//TODO: reuse the signature for the same algorithm;
+	return new DefaultSignOperationWorker(sig);
     }
 
     @Override
-    public byte[] decryptPrivate(DecryptOperationContext context) {
-	// TODO Auto-generated method stub
-	return null;
+    public DecryptOperationWorker buildPrivateDecryptWorker(EncryptCommOperationDef opDef) throws Exception {
+	Cipher cipher = Cipher.getInstance(opDef.getTransformation());
+	cipher.init(Cipher.DECRYPT_MODE, privateKey);
+	return new CipherDecryptOperationWorker(cipher);
     }
 
 }

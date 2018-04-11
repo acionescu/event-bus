@@ -2,7 +2,7 @@ package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
-import net.segoia.event.eventbus.peers.events.SessionInfo;
+import net.segoia.event.eventbus.peers.events.session.SessionInfo;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
 import net.segoia.event.eventbus.peers.util.EventNodeHelper;
 

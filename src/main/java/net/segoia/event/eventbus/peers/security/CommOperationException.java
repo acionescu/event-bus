@@ -1,19 +1,19 @@
 package net.segoia.event.eventbus.peers.security;
 
-public class CommOperationException extends Exception{
+public class CommOperationException extends GenericOperationException{
 
     /**
      * 
      */
     private static final long serialVersionUID = -7309100919410242075L;
     
-    private CommOperationContext context;
+    private OperationContext context;
     
     
 
    
 
-    public CommOperationException(String message, Throwable cause, CommOperationContext context) {
+    public CommOperationException(String message, Throwable cause, OperationContext context) {
 	super(message, cause);
 	this.context = context;
     }

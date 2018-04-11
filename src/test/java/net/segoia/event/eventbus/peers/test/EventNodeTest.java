@@ -165,7 +165,7 @@ public class EventNodeTest {
 	
 	
 	/* wait for all events to pe handled */
-	EBus.waitToProcessAllOnMainLoop(70);
+	EBus.waitToProcessAllOnMainLoop(100);
 	
 	System.out.println(serverLocalAgent.getReceivedEvents().size());
     }

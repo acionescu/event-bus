@@ -1,7 +1,5 @@
 package net.segoia.event.eventbus.peers.events.session;
 
-import net.segoia.event.eventbus.peers.events.SessionInfo;
-
 public class SessionStartedData {
     private SessionInfo sessionInfo;
 
