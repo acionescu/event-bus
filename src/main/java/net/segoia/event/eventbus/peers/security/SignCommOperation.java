@@ -1,19 +1,18 @@
 package net.segoia.event.eventbus.peers.security;
 
-public class SignCommOperation implements CommOperation<SpkiSpkiCommOperationContext<SignCommOperationContext>, SignCommOperationOutput>{
+public class SignCommOperation
+	implements CommOperation<OperationData, SignCommOperationContext, SignCommOperationOutput> {
 
     @Override
-    public SignCommOperationOutput operate(SpkiSpkiCommOperationContext<SignCommOperationContext> context) throws CommOperationException {
-	SpkiPrivateIdentityData ourIdentity = context.getOurIdentity();
-	SignCommOperationContext opContex = context.getOpContex();
-	byte[] signature;
+    public SignCommOperationOutput operate(OperationDataContext<OperationData, SignCommOperationContext> dataContext)
+	    throws GenericOperationException {
+
+	SignCommOperationContext context = dataContext.getOpContext();
 	try {
-	    signature = ourIdentity.sign(opContex);
-	} catch (Exception e) {
-	    throw new CommOperationException("Signature failed",e,context);
+	    return context.sign(dataContext.getInputData().getFullData());
+	} catch (Throwable e) {
+	    throw new CommOperationException("Signature failed", e, context);
 	}
-	
-	return new SignCommOperationOutput(opContex.getData(), signature);
     }
 
 }

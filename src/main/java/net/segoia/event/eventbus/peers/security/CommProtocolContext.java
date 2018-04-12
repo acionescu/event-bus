@@ -1,6 +1,5 @@
 package net.segoia.event.eventbus.peers.security;
 
-import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
 
 public class CommProtocolContext {

@@ -2,6 +2,10 @@ package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.peers.comm.CommProtocolEventTransceiver;
+import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
+import net.segoia.event.eventbus.peers.comm.CommunicationProtocolConfig;
+import net.segoia.event.eventbus.peers.comm.CommunicationProtocolDefinition;
+import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.PeerAcceptedEvent;
 import net.segoia.event.eventbus.peers.events.PeerInfo;
@@ -17,6 +21,8 @@ import net.segoia.event.eventbus.peers.manager.states.server.PeerAcceptedState;
 import net.segoia.event.eventbus.peers.manager.states.server.PeerAuthAcceptedState;
 import net.segoia.event.eventbus.peers.manager.states.server.PeerBindAcceptedState;
 import net.segoia.event.eventbus.peers.manager.states.server.PeerBindRequestedState;
+import net.segoia.event.eventbus.peers.security.CommManager;
+import net.segoia.event.eventbus.peers.security.PeerCommContext;
 import net.segoia.event.eventbus.util.EBus;
 
 /**
@@ -116,6 +122,53 @@ public class PeerManager implements PeerEventListener {
 	EventRelay relay = peerContext.getRelay();
 	CommProtocolEventTransceiver commProtocolEventTransceiver = new CommProtocolEventTransceiver(relay.getTransceiver(), peerContext);
 	relay.bind(commProtocolEventTransceiver);
+	
+	
+	obtainCommManager();
+	startNewPeerSession();
+    }
+    
+    public void startNewPeerSession() {
+	
+    }
+    
+    protected void obtainCommManager() {
+	CommManager commManager = getNodeContext().getSecurityManager().getCommManager(buildPeerCommContext());
+	peerContext.setCommManager(commManager);
+	
+    }
+    
+    protected PeerCommContext buildPeerCommContext() {
+	CommunicationProtocol commProtocol = peerContext.getCommProtocol();
+	CommunicationProtocolDefinition protocolDefinition = commProtocol.getProtocolDefinition();
+	NodeCommunicationStrategy clientCommStrategy = protocolDefinition.getClientCommStrategy();
+	NodeCommunicationStrategy serverCommStrategy = protocolDefinition.getServerCommStrategy();
+
+	CommunicationProtocolConfig protocolConfig = commProtocol.getConfig();
+	
+	     NodeCommunicationStrategy txStrategy = null;
+	     NodeCommunicationStrategy rxStrategy = null;
+	     int ourIdentityIndex;
+	     int peerIdentityIndex;
+
+	if (peerContext.isInServerMode()) {
+	    /* we're acting as client */
+	    txStrategy = clientCommStrategy;
+	    rxStrategy = serverCommStrategy;
+
+	    ourIdentityIndex = protocolConfig.getClientNodeIdentity();
+	    peerIdentityIndex = protocolConfig.getServerNodeIdentity();
+	} else {
+	    /* we're acting as server */
+	    txStrategy = serverCommStrategy;
+	    rxStrategy = clientCommStrategy;
+
+	    peerIdentityIndex = protocolConfig.getClientNodeIdentity();
+	    ourIdentityIndex = protocolConfig.getServerNodeIdentity();
+	}
+
+	
+	return new PeerCommContext(ourIdentityIndex, peerIdentityIndex, txStrategy, rxStrategy, peerContext);
     }
 
     public void onReady() {

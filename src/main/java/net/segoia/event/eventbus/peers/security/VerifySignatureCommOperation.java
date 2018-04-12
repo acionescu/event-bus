@@ -1,24 +1,27 @@
 package net.segoia.event.eventbus.peers.security;
 
 public class VerifySignatureCommOperation
-	implements CommOperation<SpkiSpkiCommOperationContext<VerifySignatureOperationContext>, OperationOutput> {
+	implements CommOperation<SignCommOperationOutput, VerifySignatureOperationContext, OperationOutput> {
 
     @Override
-    public OperationOutput operate(SpkiSpkiCommOperationContext<VerifySignatureOperationContext> context)
-	    throws CommOperationException {
-	SpkiPublicIdentityManager peerIdentity = context.getPeerIdentity();
-	VerifySignatureOperationContext opContex = context.getOpContex();
+    public OperationOutput operate(
+	    OperationDataContext<SignCommOperationOutput, VerifySignatureOperationContext> dataContext)
+	    throws GenericOperationException {
+	VerifySignatureOperationContext context = dataContext.getOpContext();
+
 	boolean isValid;
+	SignCommOperationOutput sigData = null;
 	try {
-	    isValid = peerIdentity.verifySignature(opContex);
-	} catch (Exception e) {
+	    sigData = context.deserializeTo(SignCommOperationOutput.class, dataContext.getInputData());
+	    isValid = context.verify(sigData);
+
+	} catch (Throwable e) {
 	    throw new CommOperationException("Failed to verify signature", e, context);
 	}
 	if (!isValid) {
-	    throw new SignatureInvalidException(opContex, peerIdentity);
+	    throw new SignatureInvalidException(context, context.getPeerIdentity());
 	}
-	return new OperationOutput(opContex.getSignOutput().getData());
-
+	return new OperationOutput(sigData.getData());
     }
 
 }

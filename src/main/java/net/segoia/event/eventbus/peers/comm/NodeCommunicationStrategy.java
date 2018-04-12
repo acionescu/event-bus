@@ -23,7 +23,10 @@ public class NodeCommunicationStrategy {
      */
     private CommStrategy relayCommStrategy;
     
-    
+    /**
+     * The strategy used to transmit session key
+     */
+    private CommStrategy sessionTxStrategy;
     
 
     public CommStrategy getDirectTxStrategy() {
@@ -58,6 +61,14 @@ public class NodeCommunicationStrategy {
 	this.rxNodeIdentityType = rxNodeIdentityType;
     }
 
+    public CommStrategy getSessionTxStrategy() {
+        return sessionTxStrategy;
+    }
+
+    public void setSessionTxStrategy(CommStrategy sessionTxStrategy) {
+        this.sessionTxStrategy = sessionTxStrategy;
+    }
+
     @Override
     public int hashCode() {
 	final int prime = 31;
@@ -65,6 +76,7 @@ public class NodeCommunicationStrategy {
 	result = prime * result + ((directTxStrategy == null) ? 0 : directTxStrategy.hashCode());
 	result = prime * result + ((relayCommStrategy == null) ? 0 : relayCommStrategy.hashCode());
 	result = prime * result + ((rxNodeIdentityType == null) ? 0 : rxNodeIdentityType.hashCode());
+	result = prime * result + ((sessionTxStrategy == null) ? 0 : sessionTxStrategy.hashCode());
 	result = prime * result + ((txNodeIdentityType == null) ? 0 : txNodeIdentityType.hashCode());
 	return result;
     }
@@ -93,6 +105,11 @@ public class NodeCommunicationStrategy {
 		return false;
 	} else if (!rxNodeIdentityType.equals(other.rxNodeIdentityType))
 	    return false;
+	if (sessionTxStrategy == null) {
+	    if (other.sessionTxStrategy != null)
+		return false;
+	} else if (!sessionTxStrategy.equals(other.sessionTxStrategy))
+	    return false;
 	if (txNodeIdentityType == null) {
 	    if (other.txNodeIdentityType != null)
 		return false;
@@ -100,5 +117,7 @@ public class NodeCommunicationStrategy {
 	    return false;
 	return true;
     }
+
+ 
 
 }

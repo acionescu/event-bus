@@ -1,21 +1,18 @@
 package net.segoia.event.eventbus.peers.security;
 
 public class EncryptWithPublicCommOperation
-	implements CommOperation<SpkiSpkiCommOperationContext<EncryptOperationContext>, OperationOutput> {
+	implements CommOperation<OperationData, EncryptWithPrivateOperationContext, OperationOutput> {
 
     @Override
-    public OperationOutput operate(SpkiSpkiCommOperationContext<EncryptOperationContext> context)
-	    throws CommOperationException {
-
-	SpkiPublicIdentityManager peerIdentity = context.getPeerIdentity();
-	byte[] encryptedData;
+    public OperationOutput operate(OperationDataContext<OperationData, EncryptWithPrivateOperationContext> dataContext)
+	    throws GenericOperationException {
+	EncryptWithPrivateOperationContext context = dataContext.getOpContext();
 	try {
-	    encryptedData = peerIdentity.ecryptPublic(context.getOpContex());
+	    byte[] encryptedData = context.encrypt(dataContext.getInputData().getFullData());
 	    return new OperationOutput(encryptedData);
-	} catch (Exception e) {
+	} catch (Throwable e) {
 	    throw new CommOperationException("Faield to encrypt data", e, context);
 	}
-
     }
 
 }

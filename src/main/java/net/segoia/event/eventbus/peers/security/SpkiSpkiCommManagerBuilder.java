@@ -1,10 +1,7 @@
 package net.segoia.event.eventbus.peers.security;
 
-import java.io.UnsupportedEncodingException;
-
-import net.segoia.event.eventbus.peers.comm.EncryptCommOperationDef;
+import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
 import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
-import net.segoia.event.eventbus.util.JsonUtils;
 
 public class SpkiSpkiCommManagerBuilder implements CommManagerBuilder {
     private CommManagerConfig config;
@@ -15,55 +12,60 @@ public class SpkiSpkiCommManagerBuilder implements CommManagerBuilder {
 	config = new CommManagerConfig();
 
 	/* add tx operations */
-	config.addTxOperation("S", new SignCommOperation());
-	config.addTxOperation("E", new EncryptWithPublicCommOperation());
+	config.addTxOperation(SignCommOperationDef.TYPE, new SignCommOperation());
+	config.addTxOperation(EncryptWithPublicCommOperationDef.TYPE, new EncryptWithPublicCommOperation());
 
 	/* add rx operations */
-	config.addRxOperation("S", new VerifySignatureCommOperation());
-	config.addRxOperation("E", new DecryptWithPrivateCommOperation());
+	config.addRxOperation(SignCommOperationDef.TYPE, new VerifySignatureCommOperation());
+	config.addRxOperation(EncryptWithPublicCommOperationDef.TYPE, new DecryptWithPrivateCommOperation());
 
 	/* add tx operation context builders */
-	config.addTxOpContextBuilder("S", new OperationContextBuilder<SignCommOperationDef>() {
+	config.addTxOpContextBuilder(SignCommOperationDef.TYPE, new SpkiOperationContextBuilder<SignCommOperationDef>() {
 
 	    @Override
-	    public OperationContext buildContext(SignCommOperationDef def, OperationOutput opContext) {
-		return new SignCommOperationContext(opContext.getFullOutputData(), def);
+	    public OperationContext buildContext(SignCommOperationDef def, SpkiPrivateIdentityManager privateIdentity,
+		    SpkiPublicIdentityManager peerIdentity) {
+		return new SignCommOperationContext(def, privateIdentity, peerIdentity);
 	    }
 
 	});
 
-	config.addTxOpContextBuilder("E", new OperationContextBuilder<EncryptCommOperationDef>() {
+	config.addTxOpContextBuilder(EncryptWithPublicCommOperationDef.TYPE, new SpkiOperationContextBuilder<EncryptWithPublicCommOperationDef>() {
 
 	    @Override
-	    public OperationContext buildContext(EncryptCommOperationDef def, OperationOutput opContext) {
-		return new EncryptOperationContext(opContext.getFullOutputData(), def);
+	    public OperationContext buildContext(EncryptWithPublicCommOperationDef def,
+		    SpkiPrivateIdentityManager privateIdentity, SpkiPublicIdentityManager peerIdentity) {
+		return new EncryptWithPrivateOperationContext(def, privateIdentity, peerIdentity);
 	    }
 	});
 
 	/* add rx operation context builder */
 
-	config.addRxOpContextBuilder("S", new OperationContextBuilder<SignCommOperationDef>() {
+	config.addRxOpContextBuilder(SignCommOperationDef.TYPE, new SpkiOperationContextBuilder<SignCommOperationDef>() {
 
 	    @Override
-	    public OperationContext buildContext(SignCommOperationDef def, OperationOutput opContext) {
-		byte[] data = opContext.getFullOutputData();
-		String json;
-		try {
-		    json = new String(data, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-		    throw new RuntimeException("Failed to convert bytes to UTF-8 string");
-		}
-		SignCommOperationOutput signOperationOutput = JsonUtils.fromJson(json, SignCommOperationOutput.class);
+	    public OperationContext buildContext(SignCommOperationDef def, SpkiPrivateIdentityManager privateIdentity,
+		    SpkiPublicIdentityManager peerIdentity) {
+		// byte[] data = opContext.getFullData();
+		// String json;
+		// try {
+		// json = new String(data, "UTF-8");
+		// } catch (UnsupportedEncodingException e) {
+		// throw new RuntimeException("Failed to convert bytes to UTF-8 string");
+		// }
+		// SignCommOperationOutput signOperationOutput = JsonUtils.fromJson(json,
+		// SignCommOperationOutput.class);
 
-		return new VerifySignatureOperationContext(def, signOperationOutput);
+		return new VerifySignatureOperationContext(def, privateIdentity, peerIdentity);
 	    }
 	});
 
-	config.addRxOpContextBuilder("E", new OperationContextBuilder<EncryptCommOperationDef>() {
+	config.addRxOpContextBuilder(EncryptWithPublicCommOperationDef.TYPE, new SpkiOperationContextBuilder<EncryptWithPublicCommOperationDef>() {
 
 	    @Override
-	    public OperationContext buildContext(EncryptCommOperationDef def, OperationOutput opContext) {
-		return new DecryptOperationContext(opContext.getFullOutputData(), def);
+	    public OperationContext buildContext(EncryptWithPublicCommOperationDef def,
+		    SpkiPrivateIdentityManager privateIdentity, SpkiPublicIdentityManager peerIdentity) {
+		return new DecryptWithPrivateOperationContext(def, privateIdentity, peerIdentity);
 	    }
 	});
 
@@ -76,7 +78,7 @@ public class SpkiSpkiCommManagerBuilder implements CommManagerBuilder {
 	commManager.setPeerIdentity((SpkiPublicIdentityManager) context.getPeerIdentity());
 	commManager.setTxStrategy(context.getTxStrategy());
 	commManager.setRxStrategy(context.getRxStrategy());
-	
+
 	commManager.setConfig(config);
 
 	return commManager;

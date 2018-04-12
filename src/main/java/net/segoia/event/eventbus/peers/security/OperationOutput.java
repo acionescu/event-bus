@@ -1,21 +1,10 @@
 package net.segoia.event.eventbus.peers.security;
 
-public class OperationOutput {
-    private byte[] data;
-    
+public class OperationOutput extends OperationData {
 
     public OperationOutput(byte[] data) {
-	super();
-	this.data = data;
+	super(data);
     }
 
-
-    public byte[] getData() {
-        return data;
-    }
-
-
-    public byte[] getFullOutputData() {
-	return getData();
-    }
+    
 }

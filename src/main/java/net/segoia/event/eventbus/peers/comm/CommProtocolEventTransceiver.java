@@ -55,8 +55,9 @@ public class CommProtocolEventTransceiver extends ChainedEventTransceiver {
 	}
 
 	/* obtain a communication manager for this peer */
+	PeerCommContext peerCommContext = new PeerCommContext(ourIdentityIndex, peerIdentityIndex, txStrategy, rxStrategy, peerContext);
 	commManager = peerContext.getNodeContext().getSecurityManager().getCommManager(
-		new PeerCommContext(ourIdentityIndex, peerIdentityIndex, txStrategy, rxStrategy, peerContext));
+		peerCommContext);
 
     }
 

@@ -30,7 +30,7 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
 
 import net.segoia.event.eventbus.peers.comm.CommOperationDef;
-import net.segoia.event.eventbus.peers.comm.EncryptCommOperationDef;
+import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
 import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentityType;
@@ -141,8 +141,8 @@ public class JsonUtils {
 		switch (type) {
 		case SignCommOperationDef.TYPE:
 		    return context.deserialize(json, SignCommOperationDef.class);
-		case EncryptCommOperationDef.TYPE:
-		    return context.deserialize(json, EncryptCommOperationDef.class);
+		case EncryptWithPublicCommOperationDef.TYPE:
+		    return context.deserialize(json, EncryptWithPublicCommOperationDef.class);
 		default:
 		    throw new JsonParseException("Unknown type for object " + json.toString());
 		}
@@ -155,7 +155,7 @@ public class JsonUtils {
 	    public JsonElement serialize(CommOperationDef src, Type typeOfSrc, JsonSerializationContext context) {
 		switch(src.getType()) {
 		case SignCommOperationDef.TYPE : return context.serialize(src, SignCommOperationDef.class);
-		case EncryptCommOperationDef.TYPE : return context.serialize(src, EncryptCommOperationDef.class);
+		case EncryptWithPublicCommOperationDef.TYPE : return context.serialize(src, EncryptWithPublicCommOperationDef.class);
 		default:
 		    throw new JsonParseException("Type not supported for serialization "+src.getClass()+" "+src.getType());
 		}

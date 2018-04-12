@@ -7,6 +7,17 @@ public class OperationData {
 	super();
 	this.data = data;
     }
+    
+    /**
+     * Provides a way to convert complex data structures to a single byte array
+     * <br>
+     * Override to implement for a custom data object
+     * @return
+     */
+    public byte[] getFullData() {
+	return getData();
+    }
+    
 
     public byte[] getData() {
 	return data;

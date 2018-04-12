@@ -8,7 +8,7 @@ import java.security.Signature;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
-import net.segoia.event.eventbus.peers.comm.EncryptCommOperationDef;
+import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
 import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
 import net.segoia.util.crypto.CryptoUtil;
@@ -54,7 +54,7 @@ public class SpkiPrivateIdentityData extends PrivateIdentityData<SpkiNodeIdentit
     }
 
     @Override
-    public DecryptOperationWorker buildPrivateDecryptWorker(EncryptCommOperationDef opDef) throws Exception {
+    public DecryptOperationWorker buildPrivateDecryptWorker(EncryptWithPublicCommOperationDef opDef) throws Exception {
 	Cipher cipher = Cipher.getInstance(opDef.getTransformation());
 	cipher.init(Cipher.DECRYPT_MODE, privateKey);
 	return new CipherDecryptOperationWorker(cipher);

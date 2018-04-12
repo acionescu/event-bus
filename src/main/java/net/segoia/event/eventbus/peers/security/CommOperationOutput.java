@@ -12,7 +12,7 @@ public class CommOperationOutput extends OperationOutput {
     }
 
     @Override
-    public byte[] getFullOutputData() {
+    public byte[] getFullData() {
 
 	try {
 	    return JsonUtils.toJson(this).getBytes("UTF-8");

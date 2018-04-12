@@ -3,6 +3,7 @@ package net.segoia.event.eventbus.peers;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.session.SessionInfo;
+import net.segoia.event.eventbus.peers.security.CommManager;
 import net.segoia.event.eventbus.peers.security.PublicIdentityManager;
 
 public class PeerContext {
@@ -37,6 +38,8 @@ public class PeerContext {
      * A public identity manger for this peer
      */
     private PublicIdentityManager peerIdentityManager;
+    
+    private CommManager commManager;
 
     public PeerContext(String peerId, EventTransceiver transceiver) {
 	super();
@@ -114,6 +117,14 @@ public class PeerContext {
 
     public void setPeerIdentityManager(PublicIdentityManager peerIdentityManager) {
 	this.peerIdentityManager = peerIdentityManager;
+    }
+
+    public CommManager getCommManager() {
+        return commManager;
+    }
+
+    public void setCommManager(CommManager commManager) {
+        this.commManager = commManager;
     }
 
 }

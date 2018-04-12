@@ -1,11 +1,11 @@
 package net.segoia.event.eventbus.peers.comm;
 
-public class EncryptCommOperationDef extends CommOperationDef {
-    public static final String TYPE = "E";
+public class EncryptWithPublicCommOperationDef extends CommOperationDef {
+    public static final String TYPE = "EP";
 
     private String transformation;
 
-    public EncryptCommOperationDef() {
+    public EncryptWithPublicCommOperationDef() {
 	super(TYPE);
     }
 
@@ -33,7 +33,7 @@ public class EncryptCommOperationDef extends CommOperationDef {
 	    return false;
 	if (getClass() != obj.getClass())
 	    return false;
-	EncryptCommOperationDef other = (EncryptCommOperationDef) obj;
+	EncryptWithPublicCommOperationDef other = (EncryptWithPublicCommOperationDef) obj;
 	if (transformation == null) {
 	    if (other.transformation != null)
 		return false;
