@@ -1,40 +1,24 @@
 package net.segoia.event.eventbus.peers.security;
 
-import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
+import net.segoia.event.eventbus.peers.comm.CommStrategy;
 
 public class CommProtocolContext {
-    private PrivateIdentityData<?> ourIdentity;
-    private PublicIdentityManager peerIdentity;
-    private NodeCommunicationStrategy txStrategy;
-    private NodeCommunicationStrategy rxStrategy;
-   
 
-    public CommProtocolContext(PrivateIdentityData<?> ourIdentity, PublicIdentityManager peerIdentity,
-	    NodeCommunicationStrategy txStrategy, NodeCommunicationStrategy rxStrategy) {
+    private CommStrategy txStrategy;
+    private CommStrategy rxStrategy;
+
+    public CommProtocolContext(CommStrategy txStrategy, CommStrategy rxStrategy) {
 	super();
-	this.ourIdentity = ourIdentity;
-	this.peerIdentity = peerIdentity;
 	this.txStrategy = txStrategy;
 	this.rxStrategy = rxStrategy;
     }
 
-    public PrivateIdentityData<?> getOurIdentity() {
-	return ourIdentity;
+    public CommStrategy getTxStrategy() {
+	return txStrategy;
     }
 
-    public PublicIdentityManager getPeerIdentity() {
-	return peerIdentity;
+    public CommStrategy getRxStrategy() {
+	return rxStrategy;
     }
-
-    public NodeCommunicationStrategy getTxStrategy() {
-        return txStrategy;
-    }
-
-    public NodeCommunicationStrategy getRxStrategy() {
-        return rxStrategy;
-    }
-    
-    
-
 
 }

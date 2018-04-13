@@ -1,6 +1,6 @@
 package net.segoia.event.eventbus.peers.events.auth.id;
 
-public class SpkiNodeIdentityType extends NodeIdentityType {
+public class SpkiNodeIdentityType extends IdentityType {
     public static final String TYPE = "SPKI";
 
     private String algorithm;

@@ -15,7 +15,7 @@ import net.segoia.event.eventbus.peers.events.NewPeerEvent;
 import net.segoia.event.eventbus.peers.events.PeerLeftEvent;
 import net.segoia.event.eventbus.peers.events.auth.NodeAuth;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentityType;
+import net.segoia.event.eventbus.peers.events.auth.id.IdentityType;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.test.vo.ClientTestEventTransceiver;
@@ -136,7 +136,7 @@ public class EventNodeTest {
 	
 	NodeAuth nodeAuth = peerNode1.getNodeInfo().getNodeAuth();
 	
-	List<? extends NodeIdentity<? extends NodeIdentityType>> nodeIdentities = nodeAuth.getIdentities();
+	List<? extends NodeIdentity<? extends IdentityType>> nodeIdentities = nodeAuth.getIdentities();
 	/* we should have at least one identity */
 	Assert.assertTrue(nodeIdentities.size() > 0);
 	

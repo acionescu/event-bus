@@ -6,12 +6,19 @@ import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolConfig;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolDefinition;
 import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
+import net.segoia.event.eventbus.peers.comm.PeerCommManager;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.PeerAcceptedEvent;
 import net.segoia.event.eventbus.peers.events.PeerInfo;
 import net.segoia.event.eventbus.peers.events.PeerLeavingEvent;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequest;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindAccepted;
+import net.segoia.event.eventbus.peers.events.session.PeerSessionStartedEvent;
+import net.segoia.event.eventbus.peers.events.session.SessionInfo;
+import net.segoia.event.eventbus.peers.events.session.SessionKey;
+import net.segoia.event.eventbus.peers.events.session.SessionKeyData;
+import net.segoia.event.eventbus.peers.events.session.SessionStartedData;
+import net.segoia.event.eventbus.peers.exceptions.PeerSessionException;
 import net.segoia.event.eventbus.peers.manager.states.PeerState;
 import net.segoia.event.eventbus.peers.manager.states.client.AcceptedByPeerState;
 import net.segoia.event.eventbus.peers.manager.states.client.AuthToPeerState;
@@ -21,9 +28,13 @@ import net.segoia.event.eventbus.peers.manager.states.server.PeerAcceptedState;
 import net.segoia.event.eventbus.peers.manager.states.server.PeerAuthAcceptedState;
 import net.segoia.event.eventbus.peers.manager.states.server.PeerBindAcceptedState;
 import net.segoia.event.eventbus.peers.manager.states.server.PeerBindRequestedState;
+import net.segoia.event.eventbus.peers.security.CommDataContext;
 import net.segoia.event.eventbus.peers.security.CommManager;
+import net.segoia.event.eventbus.peers.security.CommOperationException;
+import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
 import net.segoia.event.eventbus.peers.security.PeerCommContext;
 import net.segoia.event.eventbus.util.EBus;
+import net.segoia.util.crypto.CryptoUtil;
 
 /**
  * Implements a certain communication policy with a peer over an {@link EventRelay}
@@ -35,7 +46,7 @@ public class PeerManager implements PeerEventListener {
     private PeerContext peerContext;
     private String peerId;
     private String peerType;
-    
+
     private PeerState state;
 
     /**
@@ -115,29 +126,97 @@ public class PeerManager implements PeerEventListener {
     protected void cleanUp() {
 
     }
-    
+
+    public void setUpSessionCommManager() {
+	PeerCommManager peerCommManager = new PeerCommManager();
+
+	peerContext.setPeerCommManager(peerCommManager);
+
+	/* get the session communication manager */
+	EventNodeSecurityManager securityManager = getNodeContext().getSecurityManager();
+
+	PeerCommContext peerCommContext = buildPeerCommContext();
+	peerContext.setPeerCommContext(peerCommContext);
+
+	/*
+	 * Get the session comm manager
+	 */
+	CommManager sessionCommManager = securityManager.getSessionCommManager(peerCommContext);
+
+	peerCommManager.setSessionCommManager(sessionCommManager);
+    }
+
+    public void generateNewSession() {
+	EventNodeSecurityManager securityManager = getNodeContext().getSecurityManager();
+
+	try {
+	    securityManager.generateNewSessionKey(peerContext);
+
+	} catch (PeerSessionException e) {
+	    handleError(e);
+
+	}
+    }
+
+    public void setUpDirectCommManager() {
+	EventNodeSecurityManager securityManager = getNodeContext().getSecurityManager();
+	PeerCommContext peerCommContext = peerContext.getPeerCommContext();
+	PeerCommManager peerCommManager = peerContext.getPeerCommManager();
+
+	/* now we can build a direct comm manager */
+	CommManager directCommManager = securityManager.getDirectCommManager(peerCommContext);
+
+	peerCommManager.setDirectCommManager(directCommManager);
+    }
+
     public void onProtocolConfirmed() {
+	setUpSessionCommManager();
+	generateNewSession();
+	setUpDirectCommManager();
 	
+	/* send the session */
+	startNewPeerSession();
+
+    }
+
+    public void startNewPeerSession() {
+	SessionKey sessionKey = peerContext.getSessionKey();
+
+	PeerCommManager peerCommManager = peerContext.getPeerCommManager();
+
+	SessionInfo sessionInfo = null;
+
+	try {
+	    /* prepare session token */
+	    CommDataContext processedSessionData = peerCommManager.getSessionCommManager()
+		    .processsOutgoingData(new CommDataContext(sessionKey.getKeyBytes()));
+	    /* encode base64 */
+	    String sessionToken = CryptoUtil.base64Encode(processedSessionData.getData());
+
+	    SessionKeyData sessionKeyData = new SessionKeyData(sessionToken, sessionKey.getKeyDef());
+
+	    sessionInfo = new SessionInfo(sessionKey.getSessionId(), sessionKeyData);
+
+	} catch (CommOperationException e) {
+	    handleError(e);
+	    return;
+	}
+
 	/* chain a protocol enforcing event transceiver */
 	EventRelay relay = peerContext.getRelay();
-	CommProtocolEventTransceiver commProtocolEventTransceiver = new CommProtocolEventTransceiver(relay.getTransceiver(), peerContext);
+	CommProtocolEventTransceiver commProtocolEventTransceiver = new CommProtocolEventTransceiver(
+		relay.getTransceiver(), peerContext);
 	relay.bind(commProtocolEventTransceiver);
-	
-	
-	obtainCommManager();
-	startNewPeerSession();
+
+	/* now we can send the session start event */
+
+	forwardToPeer(new PeerSessionStartedEvent(new SessionStartedData(sessionInfo)));
     }
-    
-    public void startNewPeerSession() {
-	
+
+    public void handleError(Exception e) {
+	e.printStackTrace();
     }
-    
-    protected void obtainCommManager() {
-	CommManager commManager = getNodeContext().getSecurityManager().getCommManager(buildPeerCommContext());
-	peerContext.setCommManager(commManager);
-	
-    }
-    
+
     protected PeerCommContext buildPeerCommContext() {
 	CommunicationProtocol commProtocol = peerContext.getCommProtocol();
 	CommunicationProtocolDefinition protocolDefinition = commProtocol.getProtocolDefinition();
@@ -145,11 +224,11 @@ public class PeerManager implements PeerEventListener {
 	NodeCommunicationStrategy serverCommStrategy = protocolDefinition.getServerCommStrategy();
 
 	CommunicationProtocolConfig protocolConfig = commProtocol.getConfig();
-	
-	     NodeCommunicationStrategy txStrategy = null;
-	     NodeCommunicationStrategy rxStrategy = null;
-	     int ourIdentityIndex;
-	     int peerIdentityIndex;
+
+	NodeCommunicationStrategy txStrategy = null;
+	NodeCommunicationStrategy rxStrategy = null;
+	int ourIdentityIndex;
+	int peerIdentityIndex;
 
 	if (peerContext.isInServerMode()) {
 	    /* we're acting as client */
@@ -167,7 +246,6 @@ public class PeerManager implements PeerEventListener {
 	    ourIdentityIndex = protocolConfig.getServerNodeIdentity();
 	}
 
-	
 	return new PeerCommContext(ourIdentityIndex, peerIdentityIndex, txStrategy, rxStrategy, peerContext);
     }
 

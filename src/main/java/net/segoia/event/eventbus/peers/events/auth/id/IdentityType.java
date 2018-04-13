@@ -1,10 +1,10 @@
 package net.segoia.event.eventbus.peers.events.auth.id;
 
-public abstract class NodeIdentityType {
+public abstract class IdentityType {
     /* type of identity */
     private String type;
 
-    public NodeIdentityType(String type) {
+    public IdentityType(String type) {
 	super();
 	this.type = type;
     }
@@ -29,7 +29,7 @@ public abstract class NodeIdentityType {
 	    return false;
 	if (getClass() != obj.getClass())
 	    return false;
-	NodeIdentityType other = (NodeIdentityType) obj;
+	IdentityType other = (IdentityType) obj;
 	if (type == null) {
 	    if (other.type != null)
 		return false;

@@ -2,10 +2,10 @@ package net.segoia.event.eventbus.peers.security;
 
 import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
 
-public class EncryptWithPrivateOperationContext extends SpkiSpkiCommOperationContext<EncryptWithPublicCommOperationDef> {
+public class EncryptWithPublicOperationContext extends SpkiSpkiCommOperationContext<EncryptWithPublicCommOperationDef> {
     private EncryptOperationWorker encryptWorker;
 
-    public EncryptWithPrivateOperationContext(EncryptWithPublicCommOperationDef opDef, SpkiPrivateIdentityManager ourIdentity,
+    public EncryptWithPublicOperationContext(EncryptWithPublicCommOperationDef opDef, SpkiPrivateIdentityManager ourIdentity,
 	    SpkiPublicIdentityManager peerIdentity) {
 	super(opDef, ourIdentity, peerIdentity);
     }
@@ -18,7 +18,7 @@ public class EncryptWithPrivateOperationContext extends SpkiSpkiCommOperationCon
     }
     
     public byte[] encrypt(byte[] data) throws Exception{
-	return encryptWorker.encrypt(data);
+	return getEncryptWorker().encrypt(data);
     }
 
 }

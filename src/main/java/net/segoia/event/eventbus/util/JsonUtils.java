@@ -33,7 +33,7 @@ import net.segoia.event.eventbus.peers.comm.CommOperationDef;
 import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
 import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentityType;
+import net.segoia.event.eventbus.peers.events.auth.id.IdentityType;
 import net.segoia.event.eventbus.peers.events.auth.id.PlainNodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.PlainNodeIdentityType;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
@@ -45,10 +45,10 @@ public class JsonUtils {
     static {
 	GsonBuilder gsonBuilder = new GsonBuilder();
 
-	gsonBuilder.registerTypeAdapter(NodeIdentityType.class, new JsonDeserializer<NodeIdentityType>() {
+	gsonBuilder.registerTypeAdapter(IdentityType.class, new JsonDeserializer<IdentityType>() {
 
 	    @Override
-	    public NodeIdentityType deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+	    public IdentityType deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
 		    throws JsonParseException {
 		JsonObject jo = json.getAsJsonObject();
 		JsonElement typeElem = jo.get("type");
@@ -69,10 +69,10 @@ public class JsonUtils {
 	    }
 	});
 	
-	gsonBuilder.registerTypeAdapter(NodeIdentityType.class, new JsonSerializer<NodeIdentityType>() {
+	gsonBuilder.registerTypeAdapter(IdentityType.class, new JsonSerializer<IdentityType>() {
 
 	    @Override
-	    public JsonElement serialize(NodeIdentityType src, Type typeOfSrc, JsonSerializationContext context) {
+	    public JsonElement serialize(IdentityType src, Type typeOfSrc, JsonSerializationContext context) {
 		switch(src.getType()) {
 		case PlainNodeIdentityType.TYPE : return context.serialize(src, PlainNodeIdentityType.class);
 		case SpkiNodeIdentityType.TYPE : return context.serialize(src, SpkiNodeIdentityType.class);

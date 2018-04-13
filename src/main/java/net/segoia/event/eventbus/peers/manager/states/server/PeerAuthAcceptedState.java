@@ -50,14 +50,15 @@ public class PeerAuthAcceptedState extends PeerState {
 	if (ourProtocol.equals(peerProtocol)) {
 	    /* if they match, initiate the session */
 
-	    SessionStartedData sessionStartedData = new SessionStartedData(
-		    peerManager.getNodeContext().generateNewSession());
-	    peerManager.onReady();
+	   
+	  
 	    
 	    /* start using the protocol before sending the session started event */
 	    peerManager.onProtocolConfirmed();
 	    
-	    peerManager.forwardToPeer(new PeerSessionStartedEvent(sessionStartedData));
+	    peerManager.onReady();
+	    
+	   
 	}
 
 	else {

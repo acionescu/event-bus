@@ -7,20 +7,26 @@ import java.util.List;
 import java.util.Map;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import net.segoia.event.eventbus.peers.PeerContext;
-import net.segoia.event.eventbus.peers.comm.CommOperationDef;
-import net.segoia.event.eventbus.peers.comm.CommStrategy;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolConfig;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolDefinition;
+import net.segoia.event.eventbus.peers.comm.EncryptSymmetricOperationDef;
+import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
 import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
+import net.segoia.event.eventbus.peers.comm.PeerCommManager;
+import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
 import net.segoia.event.eventbus.peers.events.auth.AuthRejectReason;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
+import net.segoia.event.eventbus.peers.events.auth.id.IdentityType;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentityType;
+import net.segoia.event.eventbus.peers.events.auth.id.SharedIdentityType;
+import net.segoia.event.eventbus.peers.events.auth.id.SharedNodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
 import net.segoia.event.eventbus.peers.events.session.KeyDef;
+import net.segoia.event.eventbus.peers.events.session.SessionInfo;
 import net.segoia.event.eventbus.peers.events.session.SessionKey;
 import net.segoia.event.eventbus.peers.events.session.SessionKeyData;
 import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
@@ -37,6 +43,10 @@ public class EventNodeSecurityManager {
 
     private Map<CommManagerKey, CommManagerBuilder> commManagerBuilders;
 
+    private Map<CommManagerKey, CommProtocolContextBuilder<?>> commProtocolContextBuilders;
+
+    private Map<SharedIdentityType, SessionManagerFactory<?>> sessionManagerBuilders;
+
     public EventNodeSecurityManager() {
 	super();
     }
@@ -46,8 +56,61 @@ public class EventNodeSecurityManager {
 
 	this.securityConfig = securityConfig;// JsonUtils.copyObject(securityConfig);
 	loadIdentities();
+	initCommProtocolContextBuilders();
 	initPublicIdentityBuilders();
 	initCommBuilders();
+	initSessionManagerBuilders();
+    }
+
+    private void initSessionManagerBuilders() {
+	sessionManagerBuilders = new HashMap<>();
+
+	sessionManagerBuilders.put(new SharedIdentityType(new KeyDef("AES", 128)),
+		new SessionManagerFactory<DefaultSessionManager>() {
+
+		    @Override
+		    public DefaultSessionManager build(SharedNodeIdentity identity) {
+			return new DefaultSessionManager(identity.getSecretKey());
+		    }
+		});
+    }
+
+    private void initCommProtocolContextBuilders() {
+	commProtocolContextBuilders = new HashMap<>();
+
+	commProtocolContextBuilders.put(new CommManagerKey("SPKI", "SPKI", null, PeerCommManager.SESSION_COMM),
+		new CommProtocolContextBuilder<SpkiCommProtocolContext>() {
+
+		    @Override
+		    public SpkiCommProtocolContext build(PeerCommContext context) {
+			PeerContext peerContext = context.getPeerContext();
+
+			SpkiCommProtocolContext commProtocolContext = new SpkiCommProtocolContext(
+				context.getTxStrategy().getSessionTxStrategy(),
+				context.getRxStrategy().getSessionTxStrategy(),
+				(SpkiPrivateIdentityManager) peerContext.getOurIdentityManager(),
+				(SpkiPublicIdentityManager) peerContext.getPeerIdentityManager());
+
+			return commProtocolContext;
+		    }
+		});
+
+	commProtocolContextBuilders.put(new CommManagerKey("SPKI", "SPKI", "AES", PeerCommManager.DIRECT_COMM),
+		new CommProtocolContextBuilder<CombinedCommProtocolContext>() {
+
+		    @Override
+		    public CombinedCommProtocolContext build(PeerCommContext context) {
+			PeerContext peerContext = context.getPeerContext();
+
+			CombinedCommProtocolContext commProtocolContext = new CombinedCommProtocolContext(
+				context.getTxStrategy().getDirectTxStrategy(),
+				context.getRxStrategy().getDirectTxStrategy(), peerContext.getSessionManager(),
+				(SpkiPrivateIdentityManager) peerContext.getOurIdentityManager(),
+				(SpkiPublicIdentityManager) peerContext.getPeerIdentityManager());
+
+			return commProtocolContext;
+		    }
+		});
     }
 
     private void initPublicIdentityBuilders() {
@@ -70,15 +133,111 @@ public class EventNodeSecurityManager {
 	    commManagerBuilders = new HashMap<>();
 	}
 
-	commManagerBuilders.put(new CommManagerKey("SPKI", "SPKI"), new SpkiSpkiCommManagerBuilder());
+	CommManagerConfig config = new CommManagerConfig();
 
-	commManagerBuilders.put(new CommManagerKey(null, null), new CommManagerBuilder() {
+	/* add tx operations */
+	config.addTxOperation(SignCommOperationDef.TYPE, new SignCommOperation());
+	config.addTxOperation(EncryptWithPublicCommOperationDef.TYPE, new EncryptWithPublicCommOperation());
 
-	    @Override
-	    public CommManager build(CommProtocolContext context) {
-		return new PlainCommManager();
-	    }
-	});
+	/* add rx operations */
+	config.addRxOperation(SignCommOperationDef.TYPE, new VerifySignatureCommOperation());
+	config.addRxOperation(EncryptWithPublicCommOperationDef.TYPE, new DecryptWithPrivateCommOperation());
+
+	/* add symmetric operations */
+	config.addTxOperation(EncryptSymmetricOperationDef.TYPE, new EncryptSymmetricCommOperation());
+	config.addRxOperation(EncryptSymmetricOperationDef.TYPE, new DecryptSymmetricCommOperation());
+
+	/* add tx operation context builders */
+	config.addTxOpContextBuilder(SignCommOperationDef.TYPE,
+		new SpkiCommOperationContextBuilder<SignCommOperationDef>() {
+
+		    @Override
+		    public OperationContext buildContext(SignCommOperationDef def, SpkiCommProtocolContext context) {
+			return new SignCommOperationContext(def, context.getOurIdentity(), context.getPeerIdentity());
+		    }
+
+		});
+
+	config.addTxOpContextBuilder(EncryptWithPublicCommOperationDef.TYPE,
+		new SpkiCommOperationContextBuilder<EncryptWithPublicCommOperationDef>() {
+
+		    @Override
+		    public OperationContext buildContext(EncryptWithPublicCommOperationDef def,
+			    SpkiCommProtocolContext context) {
+			return new EncryptWithPublicOperationContext(def, context.getOurIdentity(),
+				context.getPeerIdentity());
+		    }
+		});
+
+	/* add rx operation context builder */
+
+	config.addRxOpContextBuilder(SignCommOperationDef.TYPE,
+		new SpkiCommOperationContextBuilder<SignCommOperationDef>() {
+
+		    @Override
+		    public OperationContext buildContext(SignCommOperationDef def, SpkiCommProtocolContext context) {
+			// byte[] data = opContext.getFullData();
+			// String json;
+			// try {
+			// json = new String(data, "UTF-8");
+			// } catch (UnsupportedEncodingException e) {
+			// throw new RuntimeException("Failed to convert bytes to UTF-8 string");
+			// }
+			// SignCommOperationOutput signOperationOutput = JsonUtils.fromJson(json,
+			// SignCommOperationOutput.class);
+
+			return new VerifySignatureOperationContext(def, context.getOurIdentity(),
+				context.getPeerIdentity());
+		    }
+		});
+
+	config.addRxOpContextBuilder(EncryptWithPublicCommOperationDef.TYPE,
+		new SpkiCommOperationContextBuilder<EncryptWithPublicCommOperationDef>() {
+
+		    @Override
+		    public OperationContext buildContext(EncryptWithPublicCommOperationDef def,
+			    SpkiCommProtocolContext context) {
+			return new DecryptWithPrivateOperationContext(def, context.getOurIdentity(),
+				context.getPeerIdentity());
+		    }
+		});
+
+	/* add symmetric operation context builders */
+
+	config.addTxOpContextBuilder(EncryptSymmetricOperationDef.TYPE,
+		new CombinedCommOperationContextBuilder<EncryptSymmetricOperationDef>() {
+
+		    @Override
+		    public OperationContext<EncryptSymmetricOperationDef> buildContext(EncryptSymmetricOperationDef def,
+			    CombinedCommProtocolContext context) {
+			return new EncryptSymmetricCommOperationContext(def, context.getSharedIdentityManager());
+		    }
+		});
+
+	config.addRxOpContextBuilder(EncryptSymmetricOperationDef.TYPE,
+		new CombinedCommOperationContextBuilder<EncryptSymmetricOperationDef>() {
+
+		    @Override
+		    public OperationContext<EncryptSymmetricOperationDef> buildContext(EncryptSymmetricOperationDef def,
+			    CombinedCommProtocolContext context) {
+			return new DecryptSymmetricCommOperationContext(def, context.getSharedIdentityManager());
+		    }
+		});
+
+	commManagerBuilders.put(new CommManagerKey("SPKI", "SPKI", null, PeerCommManager.SESSION_COMM),
+		new SpkiSpkiCommManagerBuilder(config));
+
+	commManagerBuilders.put(new CommManagerKey(null, null, null, PeerCommManager.SESSION_COMM),
+		new CommManagerBuilder() {
+
+		    @Override
+		    public CommManager build(CommProtocolContext context) {
+			return new PlainCommManager();
+		    }
+		});
+
+	commManagerBuilders.put(new CommManagerKey("SPKI", "SPKI", "AES", PeerCommManager.DIRECT_COMM),
+		new CombinedCommManagerBuilder(config));
     }
 
     private void loadIdentities() {
@@ -115,21 +274,18 @@ public class EventNodeSecurityManager {
      * @param context
      * @return
      */
-    public CommManager getCommManager(PeerCommContext context) {
+    public CommManager getSessionCommManager(PeerCommContext context) {
 	/*
 	 * Create a public identity manager for peer and save it on peerContext
 	 * 
 	 */
 
 	PublicIdentityManager peerIdentity = getPeerIdentity(context);
-	PrivateIdentityData<NodeIdentity<? extends NodeIdentityType>> ourIdentity = getOurIdentity(context);
-
-	CommProtocolContext commProtocolContext = new CommProtocolContext(ourIdentity, peerIdentity,
-		context.getTxStrategy(), context.getRxStrategy());
+	PrivateIdentityManager ourIdentity = getOurIdentity(context);
 
 	String ourIdentityType = null;
 	if (ourIdentity != null) {
-	    ourIdentityType = ourIdentity.getPublicNodeIdentity().getType().getType();
+	    ourIdentityType = ourIdentity.getType();
 	}
 
 	String peerIdentityType = null;
@@ -137,7 +293,10 @@ public class EventNodeSecurityManager {
 	    peerIdentityType = peerIdentity.getType();
 	}
 
-	CommManagerKey commManagerKey = new CommManagerKey(ourIdentityType, peerIdentityType);
+	CommManagerKey commManagerKey = new CommManagerKey(ourIdentityType, peerIdentityType, null,
+		PeerCommManager.SESSION_COMM);
+
+	CommProtocolContext commProtocolContext = commProtocolContextBuilders.get(commManagerKey).build(context);
 
 	CommManagerBuilder commManagerBuilder = commManagerBuilders.get(commManagerKey);
 
@@ -147,8 +306,33 @@ public class EventNodeSecurityManager {
 
     }
 
-    private PrivateIdentityData<NodeIdentity<? extends NodeIdentityType>> getOurIdentity(PeerCommContext pcc) {
-	PrivateIdentityData privateIdentityData = privateIdentities.get(pcc.getOurIdentityIndex());
+    public CommManager getDirectCommManager(PeerCommContext context) {
+	PeerContext peerContext = context.getPeerContext();
+	CommManagerKey commManagerKey = new CommManagerKey(peerContext.getOurIdentityManager().getType(),
+		peerContext.getPeerIdentityManager().getType(), peerContext.getSessionManager().getIdentityType(),
+		PeerCommManager.DIRECT_COMM);
+
+	CommManagerBuilder commManagerBuilder = commManagerBuilders.get(commManagerKey);
+	SessionManager sessionManager = peerContext.getSessionManager();
+
+	CommProtocolContext commProtocolContext = commProtocolContextBuilders.get(commManagerKey).build(context);
+
+	CommManager commManager = commManagerBuilder.build(commProtocolContext);
+
+	return commManager;
+    }
+
+    private PrivateIdentityManager getOurIdentity(PeerCommContext pcc) {
+
+	PeerContext peerContext = pcc.getPeerContext();
+
+	PrivateIdentityManager privateIdentityData = peerContext.getOurIdentityManager();
+	if (privateIdentityData != null) {
+	    return privateIdentityData;
+	}
+
+	privateIdentityData = privateIdentities.get(pcc.getOurIdentityIndex());
+	peerContext.setOurIdentityManager(privateIdentityData);
 	return privateIdentityData;
     }
 
@@ -161,14 +345,14 @@ public class EventNodeSecurityManager {
 	if (peerIdentityManager != null) {
 	    return peerIdentityManager;
 	}
-	List<? extends NodeIdentity<? extends NodeIdentityType>> peerIdentities = peerContext.getPeerInfo()
-		.getNodeAuth().getIdentities();
+	List<? extends NodeIdentity<? extends IdentityType>> peerIdentities = peerContext.getPeerInfo().getNodeAuth()
+		.getIdentities();
 
 	if (peerIdentityIndex < 0 || peerIdentityIndex >= peerIdentities.size()) {
 	    return null;
 	}
 
-	NodeIdentity<? extends NodeIdentityType> nodeIdentity = peerIdentities.get(peerIdentityIndex);
+	NodeIdentity<? extends IdentityType> nodeIdentity = peerIdentities.get(peerIdentityIndex);
 
 	PublicIdentityManagerFactory ib = publicIdentityBuilders.get(nodeIdentity.getClass());
 
@@ -195,8 +379,7 @@ public class EventNodeSecurityManager {
     public CommunicationProtocol establishPeerCommunicationProtocol(PeerContext peerContext)
 	    throws PeerCommunicationNegotiationFailedException, PeerAuthRequestRejectedException {
 
-	List<? extends NodeIdentity<? extends NodeIdentityType>> validPeerIdentities = getValidPeerIdentities(
-		peerContext);
+	List<? extends NodeIdentity<? extends IdentityType>> validPeerIdentities = getValidPeerIdentities(peerContext);
 
 	if (validPeerIdentities.size() == 0) {
 	    /* if no valid peer identity found, throw an exception */
@@ -221,7 +404,7 @@ public class EventNodeSecurityManager {
 	    return CommunicationProtocol.buildPlainProtocol();
 	}
 
-	List<? extends NodeIdentity<? extends NodeIdentityType>> localIdentities = securityConfig.getNodeAuth()
+	List<? extends NodeIdentity<? extends IdentityType>> localIdentities = securityConfig.getNodeAuth()
 		.getIdentities();
 
 	/* see if we can match a local tx strategy with a peer rx strategy */
@@ -314,7 +497,7 @@ public class EventNodeSecurityManager {
 	return strategyIdentitiesPairs;
     }
 
-    private int getNodeIdentityForType(NodeIdentityType type, List<? extends NodeIdentity<?>> identitiesList) {
+    private int getNodeIdentityForType(IdentityType type, List<? extends NodeIdentity<?>> identitiesList) {
 	int index = 0;
 	for (NodeIdentity<?> identity : identitiesList) {
 	    if (identity.getType().equals(type)) {
@@ -325,7 +508,7 @@ public class EventNodeSecurityManager {
 	return -1;
     }
 
-    public SessionKeyData generateNewSessionKey(PeerContext peerContext) throws PeerSessionException {
+    public SessionKey generateNewSessionKey(PeerContext peerContext) throws PeerSessionException {
 	String channel = peerContext.getCommunicationChannel();
 	PeerChannelSecurityPolicy localChannelPolicy = securityConfig.getSecurityPolicy().getChannelPolicy(channel);
 	ChannelSessionPolicy sessionPolicy = localChannelPolicy.getCommunicationPolicy().getSessionPolicy();
@@ -346,27 +529,50 @@ public class EventNodeSecurityManager {
 	    SecretKey secretKey = CryptoUtil.generateSecretkey(sessionKeyDef.getAlgorithm(), maxSupportedKeySize);
 	    KeyDef newSessionKeyDef = new KeyDef(sessionKeyDef.getAlgorithm(), maxSupportedKeySize);
 	    byte[] secretKeyBytes = secretKey.getEncoded();
-	    SessionKey sessionKey = new SessionKey(CryptoUtil.base64Encode(secretKeyBytes), newSessionKeyDef);
-	   
-	    /*
-	     * Process the session key according to the comm strategy
-	     */
-	    CommStrategy sessionCommStrategy = sessionPolicy.getSessionCommStrategy();
-	    sessionCommStrategy.g
-	    
-	    
-	    
-	    
-	    
+	    SessionKey sessionKey = new SessionKey(peerContext.getNodeContext().generateSessionId(), secretKeyBytes,
+		    newSessionKeyDef);
+
+	    /* build a session manager and set it on context */
+	    SharedIdentityType sharedIdentityType = new SharedIdentityType(newSessionKeyDef);
+	    SessionManager sessionManager = sessionManagerBuilders.get(sharedIdentityType)
+		    .build(new SharedNodeIdentity(sharedIdentityType, secretKey));
+
+	    peerContext.setSessionManager(sessionManager);
+	    peerContext.setSessionKey(sessionKey);
+	    return sessionKey;
+
 	} catch (NoSuchAlgorithmException e) {
 	    throw new PeerSessionException("Failed to generate session key with algorithm "
 		    + sessionKeyDef.getAlgorithm() + " and size " + maxSupportedKeySize, e);
 	}
 
     }
-    
-    protected SequentialOperationsProcessor buildOperationsProcessor(CommStrategy commStrategy) {
-	List<CommOperationDef> operations = commStrategy.getOperations();
+
+    public void buildSessionFromSessionInfo(PeerContext peerContext, SessionInfo sessionInfo)
+	    throws CommOperationException {
+	SessionKeyData sessionKeyData = sessionInfo.getSessionData();
+	KeyDef keyDef = sessionKeyData.getKeyDef();
+	/* decode base 64 string */
+	byte[] sessionTokenBytes = CryptoUtil.base64Decode(sessionKeyData.getSessionToken());
+
+	/* now feed this to the session comm manager */
+
+	PeerCommManager peerCommManager = peerContext.getPeerCommManager();
+
+	CommDataContext processedSessionData = peerCommManager
+		.processIncomingSessionData(new CommDataContext(sessionTokenBytes));
+
+	SecretKeySpec secretKeySpec = new SecretKeySpec(sessionTokenBytes, keyDef.getAlgorithm());
+
+	/* build a session manager and set it on context */
+	SharedIdentityType sharedIdentityType = new SharedIdentityType(keyDef);
+	SessionManager sessionManager = sessionManagerBuilders.get(sharedIdentityType)
+		.build(new SharedNodeIdentity(sharedIdentityType, secretKeySpec));
+
+	peerContext.setSessionManager(sessionManager);
+	
+	SessionKey sessionKey = new SessionKey(sessionInfo.getSessionId(), sessionTokenBytes, keyDef);
+	peerContext.setSessionKey(sessionKey);
     }
 
     private class StrategyIdentitiesPair {

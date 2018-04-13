@@ -1,6 +1,6 @@
 package net.segoia.event.eventbus.peers.security;
 
-public interface CommManagerBuilder {
+public interface CommManagerBuilder<C extends CommProtocolContext> {
     
-    CommManager build(CommProtocolContext context);
+    CommManager build(C context);
 }

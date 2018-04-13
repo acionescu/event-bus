@@ -1,10 +1,14 @@
 package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
+import net.segoia.event.eventbus.peers.comm.PeerCommManager;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.session.SessionInfo;
-import net.segoia.event.eventbus.peers.security.CommManager;
+import net.segoia.event.eventbus.peers.events.session.SessionKey;
+import net.segoia.event.eventbus.peers.security.PeerCommContext;
+import net.segoia.event.eventbus.peers.security.PrivateIdentityManager;
 import net.segoia.event.eventbus.peers.security.PublicIdentityManager;
+import net.segoia.event.eventbus.peers.security.SessionManager;
 
 public class PeerContext {
     private String peerId;
@@ -28,7 +32,7 @@ public class PeerContext {
      */
     private CommunicationProtocol commProtocol;
 
-    private SessionInfo sessionInfo;
+    private SessionKey sessionKey;
 
     private boolean remoteAgent;
 
@@ -38,8 +42,14 @@ public class PeerContext {
      * A public identity manger for this peer
      */
     private PublicIdentityManager peerIdentityManager;
+
+    private PrivateIdentityManager ourIdentityManager;
+
+    private SessionManager sessionManager;
+
+    private PeerCommManager peerCommManager;
     
-    private CommManager commManager;
+    private PeerCommContext peerCommContext;
 
     public PeerContext(String peerId, EventTransceiver transceiver) {
 	super();
@@ -87,12 +97,12 @@ public class PeerContext {
 	this.commProtocol = commProtocol;
     }
 
-    public SessionInfo getSessionInfo() {
-	return sessionInfo;
+    public SessionKey getSessionKey() {
+	return sessionKey;
     }
 
-    public void setSessionInfo(SessionInfo sessionInfo) {
-	this.sessionInfo = sessionInfo;
+    public void setSessionKey(SessionKey sessionKey) {
+	this.sessionKey = sessionKey;
     }
 
     public boolean isRemoteAgent() {
@@ -119,12 +129,36 @@ public class PeerContext {
 	this.peerIdentityManager = peerIdentityManager;
     }
 
-    public CommManager getCommManager() {
-        return commManager;
+    public PeerCommManager getPeerCommManager() {
+	return peerCommManager;
     }
 
-    public void setCommManager(CommManager commManager) {
-        this.commManager = commManager;
+    public void setPeerCommManager(PeerCommManager peerCommManager) {
+	this.peerCommManager = peerCommManager;
+    }
+
+    public SessionManager getSessionManager() {
+	return sessionManager;
+    }
+
+    public void setSessionManager(SessionManager sessionManager) {
+	this.sessionManager = sessionManager;
+    }
+
+    public PrivateIdentityManager getOurIdentityManager() {
+	return ourIdentityManager;
+    }
+
+    public void setOurIdentityManager(PrivateIdentityManager ourIdentityManager) {
+	this.ourIdentityManager = ourIdentityManager;
+    }
+
+    public PeerCommContext getPeerCommContext() {
+        return peerCommContext;
+    }
+
+    public void setPeerCommContext(PeerCommContext peerCommContext) {
+        this.peerCommContext = peerCommContext;
     }
 
 }

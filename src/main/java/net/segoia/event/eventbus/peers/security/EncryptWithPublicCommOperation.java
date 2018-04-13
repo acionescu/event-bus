@@ -1,12 +1,12 @@
 package net.segoia.event.eventbus.peers.security;
 
 public class EncryptWithPublicCommOperation
-	implements CommOperation<OperationData, EncryptWithPrivateOperationContext, OperationOutput> {
+	implements CommOperation<OperationData, EncryptWithPublicOperationContext, OperationOutput> {
 
     @Override
-    public OperationOutput operate(OperationDataContext<OperationData, EncryptWithPrivateOperationContext> dataContext)
+    public OperationOutput operate(OperationDataContext<OperationData, EncryptWithPublicOperationContext> dataContext)
 	    throws GenericOperationException {
-	EncryptWithPrivateOperationContext context = dataContext.getOpContext();
+	EncryptWithPublicOperationContext context = dataContext.getOpContext();
 	try {
 	    byte[] encryptedData = context.encrypt(dataContext.getInputData().getFullData());
 	    return new OperationOutput(encryptedData);

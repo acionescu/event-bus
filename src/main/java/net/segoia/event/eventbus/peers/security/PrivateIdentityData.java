@@ -2,9 +2,9 @@ package net.segoia.event.eventbus.peers.security;
 
 import net.segoia.event.eventbus.peers.events.auth.NodeAuth;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentityType;
+import net.segoia.event.eventbus.peers.events.auth.id.IdentityType;
 
-public abstract class PrivateIdentityData<N extends NodeIdentity<? extends NodeIdentityType>> {
+public abstract class PrivateIdentityData<N extends NodeIdentity<? extends IdentityType>> implements PrivateIdentityManager{
     /**
      * position in the {@link NodeAuth} identities list
      */
@@ -26,6 +26,11 @@ public abstract class PrivateIdentityData<N extends NodeIdentity<? extends NodeI
 
     public void setPublicNodeIdentity(N publicNodeIdentity) {
 	this.publicNodeIdentity = publicNodeIdentity;
+    }
+
+    @Override
+    public String getType() {
+	return getPublicNodeIdentity().getType().getType();
     }
 
 }

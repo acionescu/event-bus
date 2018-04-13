@@ -1,22 +1,23 @@
 package net.segoia.event.eventbus.peers.events.session;
 
 public class SessionKey {
-    private String key;
+    private String sessionId;
+    private byte[] keyBytes;
     private KeyDef keyDef;
 
-    public SessionKey(String key, KeyDef keyDef) {
+    public SessionKey(String sessionId, byte[] keyBytes, KeyDef keyDef) {
 	super();
-	this.key = key;
+	this.sessionId = sessionId;
+	this.keyBytes = keyBytes;
 	this.keyDef = keyDef;
-
     }
 
-    public String getKey() {
-	return key;
+    public byte[] getKeyBytes() {
+	return keyBytes;
     }
 
-    public void setKey(String key) {
-	this.key = key;
+    public void setKeyBytes(byte[] keyBytes) {
+	this.keyBytes = keyBytes;
     }
 
     public KeyDef getKeyDef() {
@@ -25,6 +26,14 @@ public class SessionKey {
 
     public void setKeyDef(KeyDef keyDef) {
 	this.keyDef = keyDef;
+    }
+
+    public String getSessionId() {
+	return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+	this.sessionId = sessionId;
     }
 
 }

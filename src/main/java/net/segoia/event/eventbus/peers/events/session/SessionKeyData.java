@@ -1,6 +1,5 @@
 package net.segoia.event.eventbus.peers.events.session;
 
-import net.segoia.event.eventbus.peers.comm.CommStrategy;
 import net.segoia.event.eventbus.peers.security.ChannelSessionPolicy;
 
 public class SessionKeyData {
@@ -16,18 +15,10 @@ public class SessionKeyData {
      */
     private KeyDef keyDef;
 
-    /**
-     * The strategy used to process the session key before sending it to the peer <br>
-     * Here are defined the operations used to process the session key, so the receiver will have to apply the inverse
-     * of these operations in order to obtain it
-     */
-    private CommStrategy sessionCommStrategy;
-
-    public SessionKeyData(String sessionToken, KeyDef keyDef, CommStrategy sessionCommStrategy) {
+    public SessionKeyData(String sessionToken, KeyDef keyDef) {
 	super();
 	this.sessionToken = sessionToken;
 	this.keyDef = keyDef;
-	this.sessionCommStrategy = sessionCommStrategy;
     }
 
     public String getSessionToken() {
@@ -44,14 +35,6 @@ public class SessionKeyData {
 
     public void setKeyDef(KeyDef keyDef) {
 	this.keyDef = keyDef;
-    }
-
-    public CommStrategy getSessionCommStrategy() {
-	return sessionCommStrategy;
-    }
-
-    public void setSessionCommStrategy(CommStrategy sessionCommStrategy) {
-	this.sessionCommStrategy = sessionCommStrategy;
     }
 
 }

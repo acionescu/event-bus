@@ -7,16 +7,16 @@ import net.segoia.event.eventbus.peers.comm.CommOperationDef;
 
 public class CommManagerConfig {
     private Map<String, CommOperation> txOperations=new HashMap<>();
-    private Map<String, SpkiOperationContextBuilder> txOpContextBuilders= new HashMap<>();
+    private Map<String, CommOperationContextBuilder> txOpContextBuilders= new HashMap<>();
     
     private Map<String, CommOperation> rxOperations=new HashMap<>();
-    private Map<String, SpkiOperationContextBuilder> rxOpContextBuilders = new HashMap<>();
+    private Map<String, CommOperationContextBuilder> rxOpContextBuilders = new HashMap<>();
     
     public <O extends CommOperation<?,?,?>> O getTxOperation(CommOperationDef def) {
 	return (O)txOperations.get(def.getType());
     }
     
-    public SpkiOperationContextBuilder getTxOpContextBuilder(CommOperationDef def) {
+    public CommOperationContextBuilder getTxOpContextBuilder(CommOperationDef def) {
 	return txOpContextBuilders.get(def.getType());
     }
     
@@ -24,7 +24,7 @@ public class CommManagerConfig {
 	return (O)rxOperations.get(def.getType());
     }
     
-    public SpkiOperationContextBuilder getRxOpContextBuilder(CommOperationDef def) {
+    public CommOperationContextBuilder getRxOpContextBuilder(CommOperationDef def) {
 	return rxOpContextBuilders.get(def.getType());
     }
     
@@ -32,7 +32,7 @@ public class CommManagerConfig {
 	txOperations.put(type, op);
     }
     
-    public void addTxOpContextBuilder(String type, SpkiOperationContextBuilder builder) {
+    public void addTxOpContextBuilder(String type, CommOperationContextBuilder builder) {
 	txOpContextBuilders.put(type, builder);
     }
     
@@ -40,7 +40,7 @@ public class CommManagerConfig {
 	rxOperations.put(type, op);
     }
     
-    public void addRxOpContextBuilder(String type, SpkiOperationContextBuilder builder) {
+    public void addRxOpContextBuilder(String type, CommOperationContextBuilder builder) {
 	rxOpContextBuilders.put(type, builder);
     }
 }
