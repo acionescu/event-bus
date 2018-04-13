@@ -20,15 +20,34 @@
 									"algorithm":"RSA",
 									"keySize":1024
 								},
-								"directTxStrategy":{
+								"sharedIdentityType":{
+									"className":"net.segoia.event.eventbus.peers.events.auth.id.SharedIdentityType",
+									"keyDef":{
+										"algorithm":"AES",
+										"keySize":128
+									}
+								},
+								"sessionTxStrategy":{
 									"operations":[
 									{
 										"className":"net.segoia.event.eventbus.peers.comm.SignCommOperationDef",
 										"hashingAlgorithm":"SHA256withRSA"
 									},
 									{
-										"className":"net.segoia.event.eventbus.peers.comm.EncryptCommOperationDef",
+										"className":"net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef",
 										"transformation":"RSA/ECB/PKCS1Padding"
+									}
+									]
+								},
+								"directTxStrategy":{
+									"operations":[
+										{
+										"className":"net.segoia.event.eventbus.peers.comm.SignCommOperationDef",
+										"hashingAlgorithm":"SHA256withRSA"
+									},
+									{
+										"className":"net.segoia.event.eventbus.peers.comm.EncryptSymmetricOperationDef",
+										"transformation":"AES/CBC/PKCS5Padding"
 									}
 									]
 								}
@@ -45,15 +64,34 @@
 									"algorithm":"RSA",
 									"keySize":1024
 								},
-								"directTxStrategy":{
+								"sharedIdentityType":{
+									"className":"net.segoia.event.eventbus.peers.events.auth.id.SharedIdentityType",
+									"keyDef":{
+										"algorithm":"AES",
+										"keySize":128
+									}
+								},
+								"sessionTxStrategy":{
 									"operations":[
 									{
 										"className":"net.segoia.event.eventbus.peers.comm.SignCommOperationDef",
 										"hashingAlgorithm":"SHA256withRSA"
 									},
 									{
-										"className":"net.segoia.event.eventbus.peers.comm.EncryptCommOperationDef",
+										"className":"net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef",
 										"transformation":"RSA/ECB/PKCS1Padding"
+									}
+									]
+								},
+								"directTxStrategy":{
+									"operations":[
+										{
+										"className":"net.segoia.event.eventbus.peers.comm.SignCommOperationDef",
+										"hashingAlgorithm":"SHA256withRSA"
+									},
+									{
+										"className":"net.segoia.event.eventbus.peers.comm.EncryptSymmetricOperationDef",
+										"transformation":"AES/CBC/PKCS5Padding"
 									}
 									]
 								}

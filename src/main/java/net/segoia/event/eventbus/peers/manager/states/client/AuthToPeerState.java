@@ -78,7 +78,8 @@ public class AuthToPeerState extends PeerState{
 	    peerManager.forwardToPeer(new PeerProtocolConfirmedEvent(protocolConfirmation));
 	    
 	    /* after we send protocol confirmation event start using it */
-	    peerManager.onProtocolConfirmed();
+//	    peerManager.onProtocolConfirmed();
+	    peerManager.setUpSessionCommManager();
 	}
 	else {
 	    /* protocols don't match */

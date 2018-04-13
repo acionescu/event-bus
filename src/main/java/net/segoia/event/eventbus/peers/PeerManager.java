@@ -32,7 +32,9 @@ import net.segoia.event.eventbus.peers.security.CommDataContext;
 import net.segoia.event.eventbus.peers.security.CommManager;
 import net.segoia.event.eventbus.peers.security.CommOperationException;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
+import net.segoia.event.eventbus.peers.security.OperationData;
 import net.segoia.event.eventbus.peers.security.PeerCommContext;
+import net.segoia.event.eventbus.peers.security.SessionKeyOutgoingAccumulator;
 import net.segoia.event.eventbus.util.EBus;
 import net.segoia.util.crypto.CryptoUtil;
 
@@ -187,9 +189,11 @@ public class PeerManager implements PeerEventListener {
 	SessionInfo sessionInfo = null;
 
 	try {
+	    SessionKeyOutgoingAccumulator opAcc = new SessionKeyOutgoingAccumulator(new OperationData(sessionKey.getKeyBytes()));
+	    
 	    /* prepare session token */
 	    CommDataContext processedSessionData = peerCommManager.getSessionCommManager()
-		    .processsOutgoingData(new CommDataContext(sessionKey.getKeyBytes()));
+		    .processsOutgoingData(new CommDataContext(opAcc));
 	    /* encode base64 */
 	    String sessionToken = CryptoUtil.base64Encode(processedSessionData.getData());
 

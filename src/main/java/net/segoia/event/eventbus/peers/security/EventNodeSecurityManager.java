@@ -509,14 +509,18 @@ public class EventNodeSecurityManager {
     }
 
     public SessionKey generateNewSessionKey(PeerContext peerContext) throws PeerSessionException {
-	String channel = peerContext.getCommunicationChannel();
-	PeerChannelSecurityPolicy localChannelPolicy = securityConfig.getSecurityPolicy().getChannelPolicy(channel);
-	ChannelSessionPolicy sessionPolicy = localChannelPolicy.getCommunicationPolicy().getSessionPolicy();
+	// String channel = peerContext.getCommunicationChannel();
+	// PeerChannelSecurityPolicy localChannelPolicy = securityConfig.getSecurityPolicy().getChannelPolicy(channel);
+	// ChannelSessionPolicy sessionPolicy = localChannelPolicy.getCommunicationPolicy().getSessionPolicy();
+
+	SharedIdentityType settledSharedIdentityType = (SharedIdentityType) peerContext.getPeerCommContext()
+		.getTxStrategy().getSharedIdentityType();
 
 	/*
 	 * Get session key definition
 	 */
-	KeyDef sessionKeyDef = sessionPolicy.getSessionKeyDef();
+	// KeyDef sessionKeyDef = sessionPolicy.getSessionKeyDef();
+	KeyDef sessionKeyDef = settledSharedIdentityType.getKeyDef();
 
 	int maxSupportedKeySize = sessionKeyDef.getKeySize();
 
@@ -570,7 +574,7 @@ public class EventNodeSecurityManager {
 		.build(new SharedNodeIdentity(sharedIdentityType, secretKeySpec));
 
 	peerContext.setSessionManager(sessionManager);
-	
+
 	SessionKey sessionKey = new SessionKey(sessionInfo.getSessionId(), sessionTokenBytes, keyDef);
 	peerContext.setSessionKey(sessionKey);
     }

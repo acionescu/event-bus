@@ -11,15 +11,18 @@ public class SequentialOperationsProcessor {
     }
 
     public CommDataContext processs(CommDataContext context) throws GenericOperationException {
-	byte[] data = context.getData();
-	OperationData operationData = new OperationData(data);
-	OperationOutput output=null;
+//	byte[] data = context.getData();
+//	OperationData operationData = new OperationData(data);
+//	OperationOutput output=null;
 	for (OperationExecutionContext oc : opContexts) {
 	    
-	    output = oc.executeOperation(operationData);
-	    operationData = output;
+//	    output = oc.executeOperation(operationData);
+//	    operationData = output;
+	    
+	    context.processOperation(oc);
 	}
-	return new CommDataContext(output.getFullData());
+//	return new CommDataContext(output.getFullData());
+	return new CommDataContext(context.getResult());
     }
 
 }

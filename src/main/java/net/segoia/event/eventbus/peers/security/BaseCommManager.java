@@ -17,6 +17,8 @@ public class BaseCommManager<C extends CommProtocolContext> implements CommManag
 	super();
 	this.commProtocolContext = commProtocolContext;
 	this.config = config;
+	
+	init();
     }
 
     public void init() {

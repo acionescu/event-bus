@@ -47,7 +47,7 @@ public class ConfirmProtocolToPeerState extends PeerState {
 
 	SessionInfo sessionInfo = data.getSessionInfo();
 
-	peerManager.setUpSessionCommManager();
+//	peerManager.setUpSessionCommManager();
 
 	PeerContext peerContext = peerManager.getPeerContext();
 	EventNodeSecurityManager securityManager = peerContext.getNodeContext().getSecurityManager();
