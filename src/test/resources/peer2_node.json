@@ -30,12 +30,12 @@
 								"sessionTxStrategy":{
 									"operations":[
 									{
-										"className":"net.segoia.event.eventbus.peers.comm.SignCommOperationDef",
-										"hashingAlgorithm":"SHA256withRSA"
-									},
-									{
 										"className":"net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef",
 										"transformation":"RSA/ECB/PKCS1Padding"
+									},
+									{
+										"className":"net.segoia.event.eventbus.peers.comm.SignCommOperationDef",
+										"hashingAlgorithm":"SHA256withRSA"
 									}
 									]
 								},
@@ -74,12 +74,12 @@
 								"sessionTxStrategy":{
 									"operations":[
 									{
-										"className":"net.segoia.event.eventbus.peers.comm.SignCommOperationDef",
-										"hashingAlgorithm":"SHA256withRSA"
-									},
-									{
 										"className":"net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef",
 										"transformation":"RSA/ECB/PKCS1Padding"
+									},
+									{
+										"className":"net.segoia.event.eventbus.peers.comm.SignCommOperationDef",
+										"hashingAlgorithm":"SHA256withRSA"
 									}
 									]
 								},

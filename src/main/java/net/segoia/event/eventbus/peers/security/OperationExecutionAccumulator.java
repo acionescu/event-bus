@@ -32,4 +32,9 @@ public class OperationExecutionAccumulator {
     public OperationOutput getResult() {
 	return lastOutput;
     }
+
+    public OperationData getCurrentData() {
+        return currentData;
+    }
+    
 }

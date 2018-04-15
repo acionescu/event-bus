@@ -3,7 +3,7 @@ package net.segoia.event.eventbus.peers.events.bind;
 import net.segoia.event.eventbus.peers.EventTransceiver;
 
 public class ConnectToPeerRequest {
-    private EventTransceiver transceiver;
+    private transient EventTransceiver transceiver;
 
     public ConnectToPeerRequest(EventTransceiver transceiver) {
 	super();

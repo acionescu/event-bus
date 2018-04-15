@@ -22,7 +22,7 @@ public class SequentialOperationsProcessor {
 	    context.processOperation(oc);
 	}
 //	return new CommDataContext(output.getFullData());
-	return new CommDataContext(context.getResult());
+	return context;
     }
 
 }

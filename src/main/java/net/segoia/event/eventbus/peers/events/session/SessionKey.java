@@ -4,6 +4,7 @@ public class SessionKey {
     private String sessionId;
     private byte[] keyBytes;
     private KeyDef keyDef;
+    private byte[] iv;
 
     public SessionKey(String sessionId, byte[] keyBytes, KeyDef keyDef) {
 	super();
@@ -36,4 +37,12 @@ public class SessionKey {
 	this.sessionId = sessionId;
     }
 
+    public byte[] getIv() {
+        return iv;
+    }
+
+    public void setIv(byte[] iv) {
+        this.iv = iv;
+    }
+    
 }

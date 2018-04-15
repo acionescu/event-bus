@@ -9,6 +9,7 @@ import org.junit.Test;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.peers.DefaultEventNode;
 import net.segoia.event.eventbus.peers.EventNode;
+import net.segoia.event.eventbus.peers.GlobalEventNodeAgent;
 import net.segoia.event.eventbus.peers.LocalAgentEventNodeContext;
 import net.segoia.event.eventbus.peers.LocalEventNodeAgent;
 import net.segoia.event.eventbus.peers.events.NewPeerEvent;
@@ -20,6 +21,7 @@ import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.test.vo.ClientTestEventTransceiver;
 import net.segoia.event.eventbus.peers.test.vo.ServerTestEventTransceiver;
+import net.segoia.event.eventbus.peers.test.vo.TestGlobalEventNodeAgent;
 import net.segoia.event.eventbus.peers.test.vo.TestLocalEventNodeAgent;
 import net.segoia.event.eventbus.util.EBus;
 
@@ -159,13 +161,15 @@ public class EventNodeTest {
 	peerNode1.registerLocalAgent(serverLocalAgent);
 	serverLocalAgent.setLoggingOn(true);
 	
+	peerNode2.registerGlobalAgent(new TestGlobalEventNodeAgent());
+	
 	
 	/* initiate peering */
 	peerNode2.registerToPeer(new ConnectToPeerRequest(clientTransceiver));
 	
 	
 	/* wait for all events to pe handled */
-	EBus.waitToProcessAllOnMainLoop(100);
+	EBus.waitToProcessAllOnMainLoop(3000);
 	
 	System.out.println(serverLocalAgent.getReceivedEvents().size());
     }

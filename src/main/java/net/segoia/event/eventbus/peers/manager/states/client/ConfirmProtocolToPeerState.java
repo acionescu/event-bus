@@ -59,7 +59,7 @@ public class ConfirmProtocolToPeerState extends PeerState {
 	    return;
 	}
 	peerManager.setUpDirectCommManager();
-
+	peerManager.setUpCommProtocolTransceiver();
 	peerManager.onReady();
     }
 

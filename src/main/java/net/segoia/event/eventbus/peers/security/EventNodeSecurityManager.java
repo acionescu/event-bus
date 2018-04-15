@@ -1,6 +1,7 @@
 package net.segoia.event.eventbus.peers.security;
 
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -535,6 +536,12 @@ public class EventNodeSecurityManager {
 	    byte[] secretKeyBytes = secretKey.getEncoded();
 	    SessionKey sessionKey = new SessionKey(peerContext.getNodeContext().generateSessionId(), secretKeyBytes,
 		    newSessionKeyDef);
+	    
+	    /* generate an initialization vector */
+	    SecureRandom sr = new SecureRandom();
+	    byte[] iv = new byte[maxSupportedKeySize/8];
+	    sr.nextBytes(iv);
+	    sessionKey.setIv(iv);
 
 	    /* build a session manager and set it on context */
 	    SharedIdentityType sharedIdentityType = new SharedIdentityType(newSessionKeyDef);
@@ -558,15 +565,19 @@ public class EventNodeSecurityManager {
 	KeyDef keyDef = sessionKeyData.getKeyDef();
 	/* decode base 64 string */
 	byte[] sessionTokenBytes = CryptoUtil.base64Decode(sessionKeyData.getSessionToken());
+	byte[] sessionSignatureBytes = CryptoUtil.base64Decode(sessionKeyData.getSessionTokenSignature());
+	
+	/* build a signatureObject */
+	SignCommOperationOutput signCommOperationOutput = new SignCommOperationOutput(sessionTokenBytes, sessionSignatureBytes);
 
 	/* now feed this to the session comm manager */
 
 	PeerCommManager peerCommManager = peerContext.getPeerCommManager();
 
 	CommDataContext processedSessionData = peerCommManager
-		.processIncomingSessionData(new CommDataContext(sessionTokenBytes));
+		.processIncomingSessionData(new CommDataContext(signCommOperationOutput));
 
-	SecretKeySpec secretKeySpec = new SecretKeySpec(sessionTokenBytes, keyDef.getAlgorithm());
+	SecretKeySpec secretKeySpec = new SecretKeySpec(processedSessionData.getData(), keyDef.getAlgorithm());
 
 	/* build a session manager and set it on context */
 	SharedIdentityType sharedIdentityType = new SharedIdentityType(keyDef);

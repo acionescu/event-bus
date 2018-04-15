@@ -35,6 +35,7 @@ import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
 import net.segoia.event.eventbus.peers.security.OperationData;
 import net.segoia.event.eventbus.peers.security.PeerCommContext;
 import net.segoia.event.eventbus.peers.security.SessionKeyOutgoingAccumulator;
+import net.segoia.event.eventbus.peers.security.SignCommOperationOutput;
 import net.segoia.event.eventbus.util.EBus;
 import net.segoia.util.crypto.CryptoUtil;
 
@@ -178,6 +179,9 @@ public class PeerManager implements PeerEventListener {
 	
 	/* send the session */
 	startNewPeerSession();
+	
+	/* activate the transceiver implementing the protocol */
+	setUpCommProtocolTransceiver();
 
     }
 
@@ -193,12 +197,18 @@ public class PeerManager implements PeerEventListener {
 	    
 	    /* prepare session token */
 	    CommDataContext processedSessionData = peerCommManager.getSessionCommManager()
-		    .processsOutgoingData(new CommDataContext(opAcc));
+		    .processsOutgoingData(new CommDataContext(sessionKey.getKeyBytes()));
+	    
+	    SignCommOperationOutput out = (SignCommOperationOutput)processedSessionData.getResult();
+	    
 	    /* encode base64 */
-	    String sessionToken = CryptoUtil.base64Encode(processedSessionData.getData());
+	    String sessionToken = CryptoUtil.base64Encode(out.getData());
+	    String sessionTokenSignature = CryptoUtil.base64Encode(out.getSignature());
+	    
+	    //TODO: send the iv as well
 
-	    SessionKeyData sessionKeyData = new SessionKeyData(sessionToken, sessionKey.getKeyDef());
-
+	    SessionKeyData sessionKeyData = new SessionKeyData(sessionToken, sessionTokenSignature, sessionKey.getKeyDef());
+	    
 	    sessionInfo = new SessionInfo(sessionKey.getSessionId(), sessionKeyData);
 
 	} catch (CommOperationException e) {
@@ -206,15 +216,17 @@ public class PeerManager implements PeerEventListener {
 	    return;
 	}
 
+	/* now we can send the session start event */
+
+	forwardToPeer(new PeerSessionStartedEvent(new SessionStartedData(sessionInfo)));
+    }
+    
+    public void setUpCommProtocolTransceiver() {
 	/* chain a protocol enforcing event transceiver */
 	EventRelay relay = peerContext.getRelay();
 	CommProtocolEventTransceiver commProtocolEventTransceiver = new CommProtocolEventTransceiver(
 		relay.getTransceiver(), peerContext);
 	relay.bind(commProtocolEventTransceiver);
-
-	/* now we can send the session start event */
-
-	forwardToPeer(new PeerSessionStartedEvent(new SessionStartedData(sessionInfo)));
     }
 
     public void handleError(Exception e) {

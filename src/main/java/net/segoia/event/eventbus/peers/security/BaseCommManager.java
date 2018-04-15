@@ -42,7 +42,8 @@ public class BaseCommManager<C extends CommProtocolContext> implements CommManag
 	List<CommOperationDef> rxOpDef = getRxStrategy().getOperations();
 	List<OperationExecutionContext> rxOpExecContexts = new ArrayList<>();
 
-	for (int i = 0; i < rxOpDef.size(); i++) {
+	/* the rx operations should be processed in reverse order */
+	for (int i = rxOpDef.size()-1; i >=0; i--) {
 	    CommOperationDef cDef = rxOpDef.get(i);
 	    OperationExecutionContext oec = new OperationExecutionContext(config.getRxOperation(cDef),
 		    config.getRxOpContextBuilder(cDef).buildContext(cDef, commProtocolContext));

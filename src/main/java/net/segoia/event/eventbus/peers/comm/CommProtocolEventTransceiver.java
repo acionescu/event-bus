@@ -5,6 +5,7 @@ import net.segoia.event.eventbus.peers.EventTransceiver;
 import net.segoia.event.eventbus.peers.PeerContext;
 import net.segoia.event.eventbus.peers.security.CommDataContext;
 import net.segoia.event.eventbus.peers.security.CommOperationException;
+import net.segoia.util.crypto.CryptoUtil;
 
 public class CommProtocolEventTransceiver extends ChainedEventTransceiver {
     private PeerContext peerContext;
@@ -29,7 +30,8 @@ public class CommProtocolEventTransceiver extends ChainedEventTransceiver {
     public void onPeerData(byte[] data) {
 	CommDataContext processedData;
 	try {
-	    processedData = peerCommManager.processIncomingData(new CommDataContext(data));
+	    byte[] decodedData = CryptoUtil.base64DecodeToBytes(data);
+	    processedData = peerCommManager.processIncomingData(new CommDataContext(decodedData));
 	    receiveData(processedData.getData());
 	} catch (CommOperationException e) {
 	    // TODO Auto-generated catch block
@@ -42,7 +44,9 @@ public class CommProtocolEventTransceiver extends ChainedEventTransceiver {
     public void sendData(byte[] data) {
 	try {
 	    CommDataContext processedData = peerCommManager.processsOutgoingData(new CommDataContext(data));
-	    super.sendData(processedData.getData());
+	    byte[] processedDataBytes = processedData.getData();
+	    byte[] encodedData = CryptoUtil.base64EncodeToBytes(processedDataBytes);
+	    super.sendData(encodedData);
 	} catch (CommOperationException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();

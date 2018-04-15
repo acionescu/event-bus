@@ -21,6 +21,7 @@ public class VerifySignatureCommOperation
 	if (!isValid) {
 	    throw new SignatureInvalidException(context, context.getPeerIdentity());
 	}
+	
 	return new OperationOutput(sigData.getData());
     }
 
