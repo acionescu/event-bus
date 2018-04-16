@@ -26,7 +26,7 @@ public class PeerBindAcceptedState extends PeerState{
 
 	PeerBindAcceptedEvent respEvent = new PeerBindAcceptedEvent(resp);
 
-	respEvent.to(peerManager.getPeerId());
+//	respEvent.to(peerManager.getPeerId());
 
 	peerManager.forwardToPeer(respEvent);
     }

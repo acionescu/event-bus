@@ -1,5 +1,6 @@
 package net.segoia.event.eventbus.peers.security;
 
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import net.segoia.event.eventbus.peers.events.session.SessionKeyData;
 import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerSessionException;
+import net.segoia.event.eventbus.util.JsonUtils;
 import net.segoia.util.crypto.CryptoUtil;
 
 public class EventNodeSecurityManager {
@@ -71,7 +73,7 @@ public class EventNodeSecurityManager {
 
 		    @Override
 		    public DefaultSessionManager build(SharedNodeIdentity identity) {
-			return new DefaultSessionManager(identity.getSecretKey());
+			return new DefaultSessionManager(identity.getSecretKey(), identity.getIv());
 		    }
 		});
     }
@@ -177,18 +179,23 @@ public class EventNodeSecurityManager {
 
 		    @Override
 		    public OperationContext buildContext(SignCommOperationDef def, SpkiCommProtocolContext context) {
-			// byte[] data = opContext.getFullData();
-			// String json;
-			// try {
-			// json = new String(data, "UTF-8");
-			// } catch (UnsupportedEncodingException e) {
-			// throw new RuntimeException("Failed to convert bytes to UTF-8 string");
-			// }
-			// SignCommOperationOutput signOperationOutput = JsonUtils.fromJson(json,
-			// SignCommOperationOutput.class);
 
-			return new VerifySignatureOperationContext(def, context.getOurIdentity(),
-				context.getPeerIdentity());
+			VerifySignatureOperationContext rc = new VerifySignatureOperationContext(def,
+				context.getOurIdentity(), context.getPeerIdentity());
+
+			rc.addDeserializer(SignCommOperationOutput.class, (data) -> {
+
+			    String json;
+			    try {
+				json = new String(data, "UTF-8");
+			    } catch (UnsupportedEncodingException e) {
+				throw new RuntimeException("Failed to convert bytes to UTF-8 string");
+			    }
+			    SignCommOperationOutput signOperationOutput = JsonUtils.fromJson(json,
+				    SignCommOperationOutput.class);
+			    return signOperationOutput;
+			});
+			return rc;
 		    }
 		});
 
@@ -536,17 +543,17 @@ public class EventNodeSecurityManager {
 	    byte[] secretKeyBytes = secretKey.getEncoded();
 	    SessionKey sessionKey = new SessionKey(peerContext.getNodeContext().generateSessionId(), secretKeyBytes,
 		    newSessionKeyDef);
-	    
+
 	    /* generate an initialization vector */
 	    SecureRandom sr = new SecureRandom();
-	    byte[] iv = new byte[maxSupportedKeySize/8];
+	    byte[] iv = new byte[maxSupportedKeySize / 8];
 	    sr.nextBytes(iv);
 	    sessionKey.setIv(iv);
 
 	    /* build a session manager and set it on context */
 	    SharedIdentityType sharedIdentityType = new SharedIdentityType(newSessionKeyDef);
 	    SessionManager sessionManager = sessionManagerBuilders.get(sharedIdentityType)
-		    .build(new SharedNodeIdentity(sharedIdentityType, secretKey));
+		    .build(new SharedNodeIdentity(sharedIdentityType, secretKey, iv));
 
 	    peerContext.setSessionManager(sessionManager);
 	    peerContext.setSessionKey(sessionKey);
@@ -566,9 +573,11 @@ public class EventNodeSecurityManager {
 	/* decode base 64 string */
 	byte[] sessionTokenBytes = CryptoUtil.base64Decode(sessionKeyData.getSessionToken());
 	byte[] sessionSignatureBytes = CryptoUtil.base64Decode(sessionKeyData.getSessionTokenSignature());
-	
+	byte[] ivBytes = CryptoUtil.base64Decode(sessionKeyData.getKeyIv());
+
 	/* build a signatureObject */
-	SignCommOperationOutput signCommOperationOutput = new SignCommOperationOutput(sessionTokenBytes, sessionSignatureBytes);
+	SignCommOperationOutput signCommOperationOutput = new SignCommOperationOutput(sessionTokenBytes,
+		sessionSignatureBytes);
 
 	/* now feed this to the session comm manager */
 
@@ -582,7 +591,7 @@ public class EventNodeSecurityManager {
 	/* build a session manager and set it on context */
 	SharedIdentityType sharedIdentityType = new SharedIdentityType(keyDef);
 	SessionManager sessionManager = sessionManagerBuilders.get(sharedIdentityType)
-		.build(new SharedNodeIdentity(sharedIdentityType, secretKeySpec));
+		.build(new SharedNodeIdentity(sharedIdentityType, secretKeySpec, ivBytes));
 
 	peerContext.setSessionManager(sessionManager);
 

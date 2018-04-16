@@ -121,7 +121,7 @@ public abstract class EventRelay implements PeerDataListener {
     }
 
     public void sendEvent(Event event) {
-	event.addRelay(getId());
+//	event.addRelay(getId());
 	sendData(eventToData(event));
     }
 

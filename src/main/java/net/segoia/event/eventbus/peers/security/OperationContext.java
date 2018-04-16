@@ -3,8 +3,6 @@ package net.segoia.event.eventbus.peers.security;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.segoia.event.eventbus.peers.comm.CommOperationDef;
-
 public class OperationContext<D extends OperationDef> {
     private D opDef;
     
@@ -23,7 +21,7 @@ public class OperationContext<D extends OperationDef> {
 	this.opDef = opDef;
     }
     
-    public void addDeserializer(Class clazz, OperationDataDeserializer<?> deserializer) {
+    public <T> void addDeserializer(Class<T> clazz, OperationDataDeserializer<T> deserializer) {
 	if(inputDeserializers == null) {
 	    inputDeserializers = new HashMap<>();
 	}
@@ -31,7 +29,7 @@ public class OperationContext<D extends OperationDef> {
     }
     
     public <T> T deserializeTo(Class<T> clazz, OperationData opData){
-	if(opData.getClass().isInstance(opData)) {
+	if(clazz.isInstance(opData)) {
 	    return (T)opData;
 	}
 	OperationDataDeserializer<?> d = inputDeserializers.get(clazz);

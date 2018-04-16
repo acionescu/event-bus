@@ -14,11 +14,18 @@ public class SessionKeyData {
      * The signature of the sessionToken
      */
     private String sessionTokenSignature;
+    
+    /**
+     * Encoded key iv
+     */
+    private String keyIv;
 
     /**
      * Defines the session key type
      */
     private KeyDef keyDef;
+    
+    
 
     public SessionKeyData(String sessionToken, KeyDef keyDef) {
 	super();
@@ -55,6 +62,14 @@ public class SessionKeyData {
 
     public void setSessionTokenSignature(String sessionTokenSignature) {
 	this.sessionTokenSignature = sessionTokenSignature;
+    }
+
+    public String getKeyIv() {
+        return keyIv;
+    }
+
+    public void setKeyIv(String keyIv) {
+        this.keyIv = keyIv;
     }
 
 }

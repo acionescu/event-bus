@@ -32,7 +32,9 @@ public class TestGlobalEventNodeAgent extends GlobalEventNodeAgent{
 	
 	context.addEventHandler(PeerAcceptedEvent.class, (c)->{
 	    System.out.println("helooooo");
-	    context.forwardTo(new Event("hello:hello:encrypted"), c.getEvent().getData().getPeerId());
+	    Event event = new Event("hello:hello:encrypted");
+	    context.forwardTo(event, c.getEvent().getData().getPeerId());
+	    context.forwardTo(event, c.getEvent().getData().getPeerId());
 	});
     }
 

@@ -205,9 +205,11 @@ public class PeerManager implements PeerEventListener {
 	    String sessionToken = CryptoUtil.base64Encode(out.getData());
 	    String sessionTokenSignature = CryptoUtil.base64Encode(out.getSignature());
 	    
-	    //TODO: send the iv as well
+	    //send the iv as well
+	    String keyIv = CryptoUtil.base64Encode(sessionKey.getIv());
 
 	    SessionKeyData sessionKeyData = new SessionKeyData(sessionToken, sessionTokenSignature, sessionKey.getKeyDef());
+	    sessionKeyData.setKeyIv(keyIv);
 	    
 	    sessionInfo = new SessionInfo(sessionKey.getSessionId(), sessionKeyData);
 
