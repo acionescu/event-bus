@@ -233,12 +233,12 @@ public abstract class EventNode {
     protected abstract void onTerminate();
 
     public synchronized void registerLocalAgent(LocalEventNodeAgent agent) {
-	agents.add(agent);
+	addAgent(agent);
 	agent.initLocalContext(new LocalAgentEventNodeContext(context));
     }
 
     public synchronized void registerGlobalAgent(GlobalEventNodeAgent agent) {
-	agents.add(agent);
+	addAgent(agent);
 	agent.initGlobalContext(new GlobalAgentEventNodeContext(context, peersManager));
     }
 
@@ -333,6 +333,10 @@ public abstract class EventNode {
 
     protected <E extends Event> void addEventHandler(String eventType, EventHandler<E> handler) {
 	addEventHandler(eventType, new CustomEventListener<>(handler));
+    }
+    
+    protected void addEventHandler(Condition cond, EventHandler<?> handler) {
+	addBusHandler(cond, new CustomEventListener<>(handler));
     }
 
     private void addBusHandler(Condition cond, CustomEventListener<?> handler) {

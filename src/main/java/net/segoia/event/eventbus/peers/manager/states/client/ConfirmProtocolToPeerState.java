@@ -8,12 +8,12 @@ import net.segoia.event.eventbus.peers.events.session.PeerSessionStartedEvent;
 import net.segoia.event.eventbus.peers.events.session.SessionInfo;
 import net.segoia.event.eventbus.peers.events.session.SessionKeyData;
 import net.segoia.event.eventbus.peers.events.session.SessionStartedData;
-import net.segoia.event.eventbus.peers.manager.states.PeerState;
+import net.segoia.event.eventbus.peers.manager.states.PeerManagerState;
 import net.segoia.event.eventbus.peers.security.CommOperationException;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
 import net.segoia.util.crypto.CryptoUtil;
 
-public class ConfirmProtocolToPeerState extends PeerState {
+public class ConfirmProtocolToPeerState extends PeerManagerState {
 
     @Override
     public void onEnterState(PeerManager peerManager) {

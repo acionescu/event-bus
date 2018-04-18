@@ -1,9 +1,9 @@
 package net.segoia.event.eventbus.peers.manager.states.server;
 
 import net.segoia.event.eventbus.peers.PeerManager;
-import net.segoia.event.eventbus.peers.manager.states.PeerState;
+import net.segoia.event.eventbus.peers.manager.states.PeerManagerState;
 
-public class PeerBindRequestedState extends PeerState{
+public class PeerBindRequestedState extends PeerManagerState{
 
     @Override
     public void onEnterState(PeerManager peerManager) {

@@ -23,7 +23,7 @@ public interface EventTransceiver {
     /**
      * Called when the communication with the peer is interrupted without us initiating it
      */
-    void onPeerLeaving();
+    void onPeerLeaving(PeerLeavingReason reason);
     
     /**
      * 

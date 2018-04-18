@@ -12,9 +12,9 @@ import net.segoia.event.eventbus.peers.events.session.PeerSessionStartedEvent;
 import net.segoia.event.eventbus.peers.events.session.SessionStartedData;
 import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
-import net.segoia.event.eventbus.peers.manager.states.PeerState;
+import net.segoia.event.eventbus.peers.manager.states.PeerManagerState;
 
-public class AuthToPeerState extends PeerState{
+public class AuthToPeerState extends PeerManagerState{
 
     @Override
     public void onEnterState(PeerManager peerManager) {

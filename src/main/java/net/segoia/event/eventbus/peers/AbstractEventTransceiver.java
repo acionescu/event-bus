@@ -20,8 +20,8 @@ public abstract class AbstractEventTransceiver implements EventTransceiver {
     }
 
     @Override
-    public void onPeerLeaving() {
-	remoteDataListener.onPeerLeaving();
+    public void onPeerLeaving(PeerLeavingReason reason) {
+	remoteDataListener.onPeerLeaving(reason);
 
     }
 

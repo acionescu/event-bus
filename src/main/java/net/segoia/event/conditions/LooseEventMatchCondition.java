@@ -62,6 +62,9 @@ public class LooseEventMatchCondition extends Condition{
 	return build(null,category);
     }
     
+    public static LooseEventMatchCondition build(String scope) {
+	return build(scope, null, null);
+    }
 
     @Override
     public boolean test(EventContext input) {

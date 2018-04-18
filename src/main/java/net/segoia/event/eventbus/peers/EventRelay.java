@@ -180,8 +180,8 @@ public abstract class EventRelay implements PeerDataListener {
     protected abstract void cleanUp();
 
     @Override
-    public void onPeerLeaving() {
-	getRemoteEventListener().onPeerLeaving();
+    public void onPeerLeaving(PeerLeavingReason reason) {
+	getRemoteEventListener().onPeerLeaving(reason);
     }
 
     public EventTransceiver getTransceiver() {

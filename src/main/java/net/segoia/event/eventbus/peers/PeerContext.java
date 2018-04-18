@@ -161,4 +161,12 @@ public class PeerContext {
         this.peerCommContext = peerCommContext;
     }
 
+    public EventTransceiver getTransceiver() {
+        return transceiver;
+    }
+
+    public void setTransceiver(EventTransceiver transceiver) {
+        this.transceiver = transceiver;
+    }
+
 }

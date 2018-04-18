@@ -27,104 +27,114 @@ public class EventBusNodeConfig {
      * If this is enabled, this node will relay events from other peers as well
      */
     private boolean autoRelayEnabled;
-    
+
     /**
-     * What internal events this node is allowed to share ( forward to peers )
-     * </br>
+     * What internal events this node is allowed to share ( forward to peers ) </br>
      * If left null, it will share all events
      */
     private Condition allowedSharedEvents;
-    
+
     /**
      * The default condition that will use for a peering request
      */
-    private Condition defaultRequestedEvents = LooseEventMatchCondition.build(Events.SCOPE.EBUS,Events.CATEGORY.PEER);
-    
-    
+    private Condition defaultRequestedEvents = LooseEventMatchCondition.build(Events.SCOPE.EBUS, Events.CATEGORY.PEER);
+
     /**
      * If true, this node will handle all incoming events regardless of the destination
      */
     private boolean god;
-    
-    private EventNodeSecurityConfig securityConfig=new EventNodeSecurityConfig();
-    
+
+    private EventNodeSecurityConfig securityConfig = new EventNodeSecurityConfig();
+
     /**
      * A helper class
      */
-    private EventNodeHelper helper=new EventNodeHelper();
-    
+    private EventNodeHelper helper = new EventNodeHelper();
+
+    private PeersManagerConfig peersManagerConfig;
 
     /**
      * @return the autoRelayEanbled
      */
     public boolean isAutoRelayEnabled() {
-        return autoRelayEnabled;
+	return autoRelayEnabled;
     }
 
     /**
-     * @param autoRelayEnabled the autoRelayEanbled to set
+     * @param autoRelayEnabled
+     *            the autoRelayEanbled to set
      */
     public void setAutoRelayEnabled(boolean autoRelayEnabled) {
-        this.autoRelayEnabled = autoRelayEnabled;
+	this.autoRelayEnabled = autoRelayEnabled;
     }
 
     /**
      * @return the allowedSharedEvents
      */
     public Condition getAllowedSharedEvents() {
-        return allowedSharedEvents;
+	return allowedSharedEvents;
     }
 
     /**
-     * @param allowedSharedEvents the allowedSharedEvents to set
+     * @param allowedSharedEvents
+     *            the allowedSharedEvents to set
      */
     public void setAllowedSharedEvents(Condition allowedSharedEvents) {
-        this.allowedSharedEvents = allowedSharedEvents;
+	this.allowedSharedEvents = allowedSharedEvents;
     }
 
     /**
      * @return the defaultRequestedEvents
      */
     public Condition getDefaultRequestedEvents() {
-        return defaultRequestedEvents;
+	return defaultRequestedEvents;
     }
 
     /**
-     * @param defaultRequestedEvents the defaultRequestedEvents to set
+     * @param defaultRequestedEvents
+     *            the defaultRequestedEvents to set
      */
     public void setDefaultRequestedEvents(Condition defaultRequestedEvents) {
-        this.defaultRequestedEvents = defaultRequestedEvents;
+	this.defaultRequestedEvents = defaultRequestedEvents;
     }
 
     /**
      * @return the god
      */
     public boolean isGod() {
-        return god;
+	return god;
     }
 
     /**
-     * @param god the god to set
+     * @param god
+     *            the god to set
      */
     public void setGod(boolean god) {
-        this.god = god;
+	this.god = god;
     }
 
     public EventNodeSecurityConfig getSecurityConfig() {
-        return securityConfig;
+	return securityConfig;
     }
 
     public void setSecurityConfig(EventNodeSecurityConfig securityConfig) {
-        this.securityConfig = securityConfig;
+	this.securityConfig = securityConfig;
     }
 
     public EventNodeHelper getHelper() {
-        return helper;
+	return helper;
     }
 
     public void setHelper(EventNodeHelper helper) {
-        this.helper = helper;
+	this.helper = helper;
     }
-    
-    
+
+    public PeersManagerConfig getPeersManagerConfig() {
+	return peersManagerConfig;
+    }
+
+    public void setPeersManagerConfig(PeersManagerConfig peersManagerConfig) {
+	this.peersManagerConfig = peersManagerConfig;
+    }
+
 }

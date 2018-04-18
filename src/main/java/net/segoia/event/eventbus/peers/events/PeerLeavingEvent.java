@@ -20,9 +20,9 @@ import net.segoia.event.eventbus.CustomEvent;
 import net.segoia.event.eventbus.EventType;
 
 @EventType("EBUS:PEER:LEAVING")
-public class PeerLeavingEvent extends CustomEvent<PeerInfo> {
+public class PeerLeavingEvent extends CustomEvent<PeerLeavingData> {
 
-    public PeerLeavingEvent(PeerInfo data) {
+    public PeerLeavingEvent(PeerLeavingData data) {
 	super(PeerLeavingEvent.class, data);
     }
 

@@ -7,11 +7,11 @@ import net.segoia.event.eventbus.peers.PeerContextHandler;
 import net.segoia.event.eventbus.peers.PeerEventContext;
 import net.segoia.event.eventbus.peers.PeerManager;
 
-public abstract class PeerState {
+public abstract class PeerManagerState {
     private FilteringEventProcessor localEventsProcessor = new FilteringEventProcessor(new PassthroughCustomEventContextListenerFactory());
     private FilteringEventProcessor peerEventsProcessor = new FilteringEventProcessor(new PassthroughCustomEventContextListenerFactory());
 
-    public PeerState() {
+    public PeerManagerState() {
 	init();
     }
 
@@ -41,6 +41,12 @@ public abstract class PeerState {
     protected <E extends Event> void registerPeerEventProcessor(Class<E> clazz, PeerContextHandler<E> handler) {
 	peerEventsProcessor.addEventHandler(clazz, (c) -> {
 	    handler.handleEvent((PeerEventContext<E>) c);
+	});
+    }
+    
+    protected void registerPeerEventProcessor(String eventType, PeerContextHandler<Event> handler) {
+	peerEventsProcessor.addEventHandler(eventType, (c)->{
+	    handler.handleEvent((PeerEventContext<Event>)c);
 	});
     }
 

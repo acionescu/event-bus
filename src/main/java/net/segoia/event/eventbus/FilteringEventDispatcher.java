@@ -22,6 +22,10 @@ public class FilteringEventDispatcher implements EventDispatcher, EventContextLi
     private Condition condition;
     private EventDispatcher dispatcher;
 
+    public FilteringEventDispatcher(Condition condition) {
+	this(condition, new SimpleEventDispatcher());
+    }
+
     public FilteringEventDispatcher(Condition condition, EventDispatcher dispatcher) {
 	super();
 	this.condition = condition;

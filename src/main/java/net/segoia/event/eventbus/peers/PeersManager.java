@@ -31,9 +31,18 @@ public class PeersManager extends GlobalEventNodeAgent {
     private EventNodeContext nodeContext;
     private EventNodePeersRegistry peersRegistry = new EventNodePeersRegistry();
     private RoutingTable routingTable = new RoutingTable();
+    
+    private PeerManagerFactory peerManagerFactory;
 
     public void init(EventNodeContext hostNodeContext) {
 	this.nodeContext = hostNodeContext;
+	PeersManagerConfig config = hostNodeContext.getConfig().getPeersManagerConfig();
+	if(config == null) {
+	    config = new PeersManagerConfig();
+	}
+	
+	peerManagerFactory = new PeerManagerAbstractFactory(config);
+	
 	initGlobalContext(new GlobalAgentEventNodeContext(hostNodeContext, this));
     }
 
@@ -93,7 +102,7 @@ public class PeersManager extends GlobalEventNodeAgent {
 	});
 
 	context.addEventHandler(PeerLeavingEvent.class, (c) -> {
-	    PeerInfo data = c.getEvent().getData();
+	    PeerInfo data = c.getEvent().getData().getPeerInfo();
 	    String peerId = data.getPeerId();
 	    removePeer(peerId);
 	    onPeerRemoved(data);
@@ -123,7 +132,7 @@ public class PeersManager extends GlobalEventNodeAgent {
 	String peerId = nodeContext.generatePeerId();
 
 	/* create a manager for this peer */
-	PeerManager peerManager = new PeerManager(peerId, transceiver);
+	PeerManager peerManager = peerManagerFactory.buidPeerManager(new PeerContext(peerId, transceiver));
 	peerManager.getPeerContext().setNodeContext(nodeContext);
 
 	peerManager.setInServerMode(true);
@@ -143,7 +152,7 @@ public class PeersManager extends GlobalEventNodeAgent {
 	String peerId = nodeContext.generatePeerId();
 
 	/* create a manager for this peer */
-	PeerManager peerManager = new PeerManager(peerId, transceiver);
+	PeerManager peerManager = peerManagerFactory.buidPeerManager(new PeerContext(peerId, transceiver));
 	peerManager.getPeerContext().setNodeContext(nodeContext);
 
 	peersRegistry.setPendingPeerManager(peerManager);

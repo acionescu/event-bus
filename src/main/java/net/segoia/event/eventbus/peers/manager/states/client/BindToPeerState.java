@@ -6,9 +6,9 @@ import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequest;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequestEvent;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindAccepted;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindAcceptedEvent;
-import net.segoia.event.eventbus.peers.manager.states.PeerState;
+import net.segoia.event.eventbus.peers.manager.states.PeerManagerState;
 
-public class BindToPeerState extends PeerState {
+public class BindToPeerState extends PeerManagerState {
 
     @Override
     public void onEnterState(PeerManager peerManager) {
