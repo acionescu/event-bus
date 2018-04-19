@@ -293,6 +293,7 @@ public class PeerManager implements PeerEventListener {
     }
 
     public void postEvent(Event event) {
+	
 	peerContext.getNodeContext().postEvent(event);
     }
 
@@ -326,6 +327,9 @@ public class PeerManager implements PeerEventListener {
 
     @Override
     public void onPeerEvent(Event event) {
+	/* make sure we don't allow peers to inject relays */
+	event.clearRelays();
+	event.addRelay(getPeerId());
 	EBus.postEvent(event);
 	handleEventFromPeer(event);
     }

@@ -1,6 +1,7 @@
 package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.Event;
+import net.segoia.event.eventbus.peers.events.PeerDataEvent;
 
 /**
  * Handles the transmission of events over a particular communication channel
@@ -18,6 +19,7 @@ public interface EventTransceiver {
     
     void sendData(byte[] data);
     void receiveData(byte[] data);
+    void receiveData(PeerDataEvent dataEvent);
     void setRemoteDataListener(PeerDataListener dataListener);
     
     /**

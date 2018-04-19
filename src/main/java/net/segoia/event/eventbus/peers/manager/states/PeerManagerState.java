@@ -49,5 +49,11 @@ public abstract class PeerManagerState {
 	    handler.handleEvent((PeerEventContext<Event>)c);
 	});
     }
+    
+    protected void registerPeerEventProcessor(PeerContextHandler<Event> handler) {
+	peerEventsProcessor.addEventHandler((c)->{
+	    handler.handleEvent((PeerEventContext<Event>)c);
+	});
+    }
 
 }

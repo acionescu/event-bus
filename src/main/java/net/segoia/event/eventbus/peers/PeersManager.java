@@ -366,11 +366,11 @@ public class PeersManager extends GlobalEventNodeAgent {
     }
 
     /**
-     * Called when a direct peer has called {@link #terminate()}
+     * Called when a direct peer has called {@link #terminate()} or simply dropped the connection
      * 
      * @param peerId
      */
-    public void onPeerLeaving(String peerId) {
+    public void onPeerLeaving(PeerLeavingEvent peerLeavingEvent) {
 
     }
 

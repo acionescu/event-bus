@@ -195,9 +195,13 @@ public class Event implements Cloneable {
 
     public static Event fromJson(String json, Event cause) {
 	Event e = fromJson(json);
-	cause.setAsCauseFor(e);
+	if(cause != null) {
+	    cause.setAsCauseFor(e);
+	}
 	return e;
     }
+    
+   
 
     public Object getParam(String key) {
 	return params.get(key);
@@ -288,7 +292,7 @@ public class Event implements Cloneable {
      * @param et
      * @return
      */
-    protected Event setAsCauseFor(Event newEvent) {
+    public Event setAsCauseFor(Event newEvent) {
 	newEvent.header.setCauseEvent(this);
 	if (EBus.debugEnabled) {
 	    this.header.addSpawnedEventId(newEvent.getId());

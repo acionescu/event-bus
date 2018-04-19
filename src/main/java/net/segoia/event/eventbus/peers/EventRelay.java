@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
+import net.segoia.event.eventbus.peers.events.PeerDataEvent;
 
 /**
  * Implements a certain communication protocol over an {@link EventTransceiver}
@@ -80,11 +81,12 @@ public abstract class EventRelay implements PeerDataListener {
 	this.remoteEventListener = remoteEventListener;
     }
 
-    public void onPeerData(byte[] data) {
+    public void onPeerData(PeerDataEvent dataEvent) {
+	byte[] data = dataEvent.getData().getData();
 	try {
 	    String json = new String(data, "UTF-8");
 
-	    Event event = Event.fromJson(json);
+	    Event event = Event.fromJson(json, dataEvent.getCauseEvent());
 	    receiveEvent(event);
 	} catch (UnsupportedEncodingException e) {
 	    // TODO Auto-generated catch block
@@ -126,7 +128,6 @@ public abstract class EventRelay implements PeerDataListener {
     }
 
     public void receiveEvent(Event event) {
-	event.addRelay(getId());
 	getRemoteEventListener().onPeerEvent(event);
     }
 

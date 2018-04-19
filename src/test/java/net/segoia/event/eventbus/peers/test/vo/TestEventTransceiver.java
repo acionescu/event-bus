@@ -1,6 +1,7 @@
 package net.segoia.event.eventbus.peers.test.vo;
 
 import net.segoia.event.eventbus.peers.AbstractEventTransceiver;
+import net.segoia.event.eventbus.peers.PeerLeavingReason;
 
 public abstract class TestEventTransceiver extends AbstractEventTransceiver {
     /**
@@ -55,7 +56,7 @@ public abstract class TestEventTransceiver extends AbstractEventTransceiver {
 
     @Override
     public void terminate() {
-	pairTransceiver.onPeerLeaving();
+	pairTransceiver.onPeerLeaving(new PeerLeavingReason(0, "Terminated"));
     }
 
     @Override
