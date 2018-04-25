@@ -189,7 +189,9 @@ public class PeerManager implements PeerEventListener {
 
 	peerCommManager.setDirectCommManager(directCommManager);
     }
-
+    /**
+     * This is called only when the node is operating in server mode
+     */
     public void onProtocolConfirmed() {
 	setUpSessionCommManager();
 	generateNewSession();
@@ -211,8 +213,8 @@ public class PeerManager implements PeerEventListener {
 	SessionInfo sessionInfo = null;
 
 	try {
-	    SessionKeyOutgoingAccumulator opAcc = new SessionKeyOutgoingAccumulator(
-		    new OperationData(sessionKey.getKeyBytes()));
+//	    SessionKeyOutgoingAccumulator opAcc = new SessionKeyOutgoingAccumulator(
+//		    new OperationData(sessionKey.getKeyBytes()));
 
 	    /* prepare session token */
 	    CommDataContext processedSessionData = peerCommManager.getSessionCommManager()

@@ -11,7 +11,9 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import net.segoia.event.eventbus.peers.EventNodeContext;
 import net.segoia.event.eventbus.peers.PeerContext;
+import net.segoia.event.eventbus.peers.PeerEventContext;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolConfig;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocolDefinition;
@@ -22,10 +24,13 @@ import net.segoia.event.eventbus.peers.comm.PeerCommManager;
 import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
 import net.segoia.event.eventbus.peers.events.auth.AuthRejectReason;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
+import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequest;
+import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequestEvent;
 import net.segoia.event.eventbus.peers.events.auth.id.IdentityType;
 import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.SharedIdentityType;
 import net.segoia.event.eventbus.peers.events.auth.id.SharedNodeIdentity;
+import net.segoia.event.eventbus.peers.events.auth.id.SpkiFullIdentityType;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
 import net.segoia.event.eventbus.peers.events.session.KeyDef;
 import net.segoia.event.eventbus.peers.events.session.SessionInfo;
@@ -34,6 +39,10 @@ import net.segoia.event.eventbus.peers.events.session.SessionKeyData;
 import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerSessionException;
+import net.segoia.event.eventbus.services.EventNodeServiceDefinition;
+import net.segoia.event.eventbus.services.EventNodeServiceRef;
+import net.segoia.event.eventbus.services.NodeIdentityProfile;
+import net.segoia.event.eventbus.services.ServiceContract;
 import net.segoia.event.eventbus.util.JsonUtils;
 import net.segoia.util.crypto.CryptoUtil;
 
@@ -622,4 +631,63 @@ public class EventNodeSecurityManager {
 	}
     }
 
+    public boolean isPeerIdentityIssuedByUs(PeerContext peerContext) {
+	PublicIdentityManager pim = peerContext.getPeerIdentityManager();
+	NodeIdentity peerIdentity = pim.getIdentity();
+	
+	return securityConfig.getIssuedIdentitiesManager().verify(peerIdentity);
+    }
+    
+    public void saveIssuedIdentity(NodeIdentity identity) {
+	securityConfig.getIssuedIdentitiesManager().storeIdentity(identity);
+    }
+    
+    public void issueServiceAccessIdentity(PeerEventContext<ServiceAccessIdRequestEvent> c) {
+	ServiceAccessIdRequestEvent event = c.getEvent();
+	ServiceAccessIdRequest request = event.getData();
+	
+	//TODO: verify that this peer is allowed to request this
+	
+	//TODO: verify that we actually provide the requested services
+	
+	EventNodeContext nodeContext = c.getPeerManager().getNodeContext();
+	
+	List<EventNodeServiceRef> targetServices = request.getTargetServices();
+	if(targetServices == null) {
+	    //throw error
+	}
+	
+	/* build a map with required service contracts */
+	Map<String,ServiceContract> serviceContracts=new HashMap<>();
+	
+	for(EventNodeServiceRef sref : targetServices) {
+	    EventNodeServiceDefinition serviceDef = nodeContext.getService(sref);
+	    if(serviceDef == null) {
+		//throw error
+	    }
+	    //TODO: do extra checks if the peer is allowed to use this service
+	    ServiceContract serviceContract = new ServiceContract();
+	    serviceContract.setServiceRef(sref);
+	    serviceContracts.put(sref.toString(), serviceContract);
+	}
+	
+	IdentitiesManager identitiesManager = securityConfig.getIdentitiesManager();
+	//TODO: use configuration to set the default identity type
+	NodeIdentity<?> issuedIdentity = identitiesManager.issueIdentity(new IssueIdentityRequest(new SpkiFullIdentityType(new KeyDef("RSA", 1024))));
+	
+	/* build a profile for this identity */
+	
+	NodeIdentityProfile issuedIdentityProfile = new NodeIdentityProfile(issuedIdentity);
+	/* set parent identity key */
+	PeerContext peerContext = c.getPeerManager().getPeerContext();
+	String parentIdentityKey = peerContext.getPeerIdentityManager().getIdentityKey();
+	issuedIdentityProfile.setParentIdentityKey(parentIdentityKey);
+	
+	for(EventNodeServiceRef sr : request.getTargetServices()) {
+	    
+	}
+	
+	
+    }
+    
 }

@@ -30,6 +30,9 @@ import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.EventDispatcher;
 import net.segoia.event.eventbus.FilteringEventBus;
+import net.segoia.event.eventbus.agents.AgentRegisterRequest;
+import net.segoia.event.eventbus.agents.GlobalAgentRegisterRequest;
+import net.segoia.event.eventbus.agents.LocalAgentRegisterRequest;
 import net.segoia.event.eventbus.peers.events.EventNodeInfo;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.NodeTerminateEvent;
@@ -39,6 +42,10 @@ import net.segoia.event.eventbus.peers.events.bind.PeerBindRequest;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequestEvent;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityConfig;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
+import net.segoia.event.eventbus.services.EventNodeServiceContext;
+import net.segoia.event.eventbus.services.EventNodeServiceDefinition;
+import net.segoia.event.eventbus.services.EventNodeServiceRef;
+import net.segoia.event.eventbus.services.EventNodeServicesManager;
 import net.segoia.event.eventbus.util.EBus;
 
 /**
@@ -56,6 +63,8 @@ public abstract class EventNode {
     private EventNodeSecurityManager securityManager;
 
     private PeersManager peersManager;
+
+    private EventNodeServicesManager servicesManager;
 
     /**
      * if true, it will call {@link #init()} from the constructor, otherwise somebody else will have to call
@@ -133,6 +142,8 @@ public abstract class EventNode {
 	peersManager = new PeersManager();
 	addAgent(peersManager);
 	peersManager.init(context);
+
+	servicesManager = new EventNodeServicesManager();
     }
 
     protected synchronized void addAgent(EventNodeAgent agent) {
@@ -232,14 +243,36 @@ public abstract class EventNode {
 
     protected abstract void onTerminate();
 
-    public synchronized void registerLocalAgent(LocalEventNodeAgent agent) {
+    public synchronized void registerLocalAgent(LocalAgentRegisterRequest registerRequest) {
+	LocalEventNodeAgent agent = registerRequest.getAgent();
 	addAgent(agent);
 	agent.initLocalContext(new LocalAgentEventNodeContext(context));
     }
 
-    public synchronized void registerGlobalAgent(GlobalEventNodeAgent agent) {
+    public synchronized void registerGlobalAgent(GlobalAgentRegisterRequest registerRequest) {
+	GlobalEventNodeAgent agent = registerRequest.getAgent();
 	addAgent(agent);
 	agent.initGlobalContext(new GlobalAgentEventNodeContext(context, peersManager));
+    }
+
+    protected void addServices(AgentRegisterRequest<?> request) {
+	List<EventNodeServiceDefinition> providedServices = request.getProvidedServices();
+	if (providedServices == null) {
+	    return;
+	}
+	EventNodeAgent agent = request.getAgent();
+	for (EventNodeServiceDefinition sd : providedServices) {
+	    EventNodeServiceContext sc = new EventNodeServiceContext(agent, sd);
+	    servicesManager.addService(sc);
+	}
+    }
+
+    public EventNodeServiceDefinition getService(EventNodeServiceRef serviceRef) {
+	EventNodeServiceContext sc = servicesManager.getService(serviceRef);
+	if (sc == null) {
+	    return null;
+	}
+	return sc.getServiceDef();
     }
 
     public void registerToPeer(ConnectToPeerRequest request) {
@@ -334,7 +367,7 @@ public abstract class EventNode {
     protected <E extends Event> void addEventHandler(String eventType, EventHandler<E> handler) {
 	addEventHandler(eventType, new CustomEventListener<>(handler));
     }
-    
+
     protected void addEventHandler(Condition cond, EventHandler<?> handler) {
 	addBusHandler(cond, new CustomEventListener<>(handler));
     }

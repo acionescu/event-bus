@@ -13,6 +13,8 @@ public class EventNodeSecurityConfig {
      */
     private List<PrivateIdentityDataLoader<?>> identityLoaders;
 
+    private IdentitiesManager identitiesManager= new DefaultIdentitiesManager();
+
     public NodeAuth getNodeAuth() {
 	return nodeAuth;
     }
@@ -35,6 +37,14 @@ public class EventNodeSecurityConfig {
 
     public void setIdentityLoaders(List<PrivateIdentityDataLoader<?>> identityLoaders) {
 	this.identityLoaders = identityLoaders;
+    }
+
+    public IdentitiesManager getIdentitiesManager() {
+	return identitiesManager;
+    }
+
+    public void setIdentitiesManager(IdentitiesManager identitiesManager) {
+	this.identitiesManager = identitiesManager;
     }
 
 }

@@ -3,7 +3,6 @@ package net.segoia.event.eventbus.peers.security;
 import java.util.Map;
 
 import net.segoia.event.eventbus.peers.EventNode;
-import net.segoia.event.eventbus.peers.PeerContext;
 
 /**
  * Defines the generic security policy that governs the functioning of an {@link EventNode}

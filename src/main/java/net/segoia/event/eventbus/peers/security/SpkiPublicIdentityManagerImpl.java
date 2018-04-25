@@ -1,5 +1,6 @@
 package net.segoia.event.eventbus.peers.security;
 
+import java.security.MessageDigest;
 import java.security.PublicKey;
 import java.security.Signature;
 
@@ -13,12 +14,16 @@ import net.segoia.util.crypto.CryptoUtil;
 public class SpkiPublicIdentityManagerImpl implements SpkiPublicIdentityManager {
     private PublicKey publicKey;
     private SpkiNodeIdentity identity;
+    private String identityKey;
 
     public SpkiPublicIdentityManagerImpl(SpkiNodeIdentity identity) {
 	this.identity = identity;
 	try {
-	    publicKey = CryptoUtil.getPublicKeyFromBase64EncodedString(identity.getPublicKey(),
+	    String pubKeyString = identity.getPublicKey();
+	    publicKey = CryptoUtil.getPublicKeyFromBase64EncodedString(pubKeyString,
 		    identity.getType().getAlgorithm());
+	    
+	    identityKey = CryptoUtil.computeHash(pubKeyString, "SHA-256");
 	} catch (Exception e) {
 	    throw new IdentityException("Failed to obtain public key from spki node identity", e, identity);
 	}
@@ -48,6 +53,8 @@ public class SpkiPublicIdentityManagerImpl implements SpkiPublicIdentityManager 
     public int getMaxSupportedEncryptedDataBlockSize() {
 	return identity.getType().getKeySize()/8;
     }
+    
+    
 
     @Override
     public EncryptOperationWorker buildEncryptPublicWorker(EncryptWithPublicCommOperationDef opDef) throws Exception {
@@ -62,5 +69,16 @@ public class SpkiPublicIdentityManagerImpl implements SpkiPublicIdentityManager 
 	sig.initVerify(publicKey);
 	return new DefaultVerifySignatureOperationWorker(sig);
     }
+
+    public SpkiNodeIdentity getIdentity() {
+        return identity;
+    }
+
+    @Override
+    public String getIdentityKey() {
+	return identityKey;
+    }
+
+  
 
 }

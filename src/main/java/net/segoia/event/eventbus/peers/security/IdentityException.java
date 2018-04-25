@@ -11,9 +11,18 @@ public class IdentityException extends RuntimeException {
 
     private NodeIdentity<?> nodeIdentity;
 
+    public IdentityException(String message, Throwable cause) {
+	super(message, cause);
+	// TODO Auto-generated constructor stub
+    }
+
     public IdentityException(String message, Throwable cause, NodeIdentity<?> nodeIdentity) {
 	super(message, cause);
 	this.nodeIdentity = nodeIdentity;
+    }
+
+    public NodeIdentity<?> getNodeIdentity() {
+	return nodeIdentity;
     }
 
 }

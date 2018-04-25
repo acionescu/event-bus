@@ -33,12 +33,13 @@ import net.segoia.event.eventbus.peers.comm.CommOperationDef;
 import net.segoia.event.eventbus.peers.comm.EncryptSymmetricOperationDef;
 import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
 import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.IdentityType;
+import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.PlainNodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.PlainNodeIdentityType;
 import net.segoia.event.eventbus.peers.events.auth.id.SharedIdentityType;
-import net.segoia.event.eventbus.peers.events.auth.id.SharedNodeIdentity;
+import net.segoia.event.eventbus.peers.events.auth.id.SpkiFullIdentityType;
+import net.segoia.event.eventbus.peers.events.auth.id.SpkiFullNodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentityType;
 
@@ -68,6 +69,8 @@ public class JsonUtils {
 		    return context.deserialize(json, SpkiNodeIdentityType.class);
 		case SharedIdentityType.TYPE:
 		    return context.deserialize(json, SharedIdentityType.class);
+		case SpkiFullIdentityType.TYPE:
+		    return context.deserialize(json, SpkiFullIdentityType.class);
 		default:
 		    throw new JsonParseException("Unknown type for object " + json.toString());
 		}
@@ -82,6 +85,7 @@ public class JsonUtils {
 		case PlainNodeIdentityType.TYPE : return context.serialize(src, PlainNodeIdentityType.class);
 		case SpkiNodeIdentityType.TYPE : return context.serialize(src, SpkiNodeIdentityType.class);
 		case SharedIdentityType.TYPE: return context.serialize(src, SharedIdentityType.class);
+		case SpkiFullIdentityType.TYPE: return context.serialize(SpkiFullIdentityType.class);
 		default:
 		    throw new JsonParseException("Type not supported for serialization "+src.getClass()+" "+src.getType());
 		}
@@ -112,7 +116,8 @@ public class JsonUtils {
 		    return context.deserialize(json, PlainNodeIdentity.class);
 		case SpkiNodeIdentityType.TYPE:
 		    return context.deserialize(json, SpkiNodeIdentity.class);
-		
+		case SpkiFullIdentityType.TYPE:
+		    return context.deserialize(json, SpkiFullNodeIdentity.class);
 		default:
 		    throw new JsonParseException("Unknown type for object " + json.toString());
 		}
@@ -126,6 +131,7 @@ public class JsonUtils {
 		switch(src.getType().getType()) {
 		case PlainNodeIdentityType.TYPE : return context.serialize(src, PlainNodeIdentity.class);
 		case SpkiNodeIdentityType.TYPE : return context.serialize(src, SpkiNodeIdentity.class);
+		case SpkiFullIdentityType.TYPE: return context.serialize(src, SpkiFullNodeIdentity.class);
 		default:
 		    throw new JsonParseException("Type not supported for serialization "+src.getClass()+" "+src.getType());
 		}

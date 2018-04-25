@@ -3,7 +3,6 @@ package net.segoia.event.eventbus.peers;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.comm.PeerCommManager;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
-import net.segoia.event.eventbus.peers.events.session.SessionInfo;
 import net.segoia.event.eventbus.peers.events.session.SessionKey;
 import net.segoia.event.eventbus.peers.security.PeerCommContext;
 import net.segoia.event.eventbus.peers.security.PrivateIdentityManager;
