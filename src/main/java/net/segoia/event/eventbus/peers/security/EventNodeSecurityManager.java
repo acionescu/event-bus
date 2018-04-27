@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceConfigurationError;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -22,7 +23,7 @@ import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
 import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
 import net.segoia.event.eventbus.peers.comm.PeerCommManager;
 import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
-import net.segoia.event.eventbus.peers.events.auth.AuthRejectReason;
+import net.segoia.event.eventbus.peers.events.RequestRejectReason;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
 import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequest;
 import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequestEvent;
@@ -38,7 +39,13 @@ import net.segoia.event.eventbus.peers.events.session.SessionKey;
 import net.segoia.event.eventbus.peers.events.session.SessionKeyData;
 import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
+import net.segoia.event.eventbus.peers.exceptions.PeerRequestHandlingException;
+import net.segoia.event.eventbus.peers.exceptions.PeerRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerSessionException;
+import net.segoia.event.eventbus.peers.manager.states.PeerStateContext;
+import net.segoia.event.eventbus.peers.manager.states.server.PeerAcceptedState;
+import net.segoia.event.eventbus.peers.security.rules.PeerEventBlackList;
+import net.segoia.event.eventbus.peers.security.rules.PeerEventRule;
 import net.segoia.event.eventbus.services.EventNodeServiceDefinition;
 import net.segoia.event.eventbus.services.EventNodeServiceRef;
 import net.segoia.event.eventbus.services.NodeIdentityProfile;
@@ -59,6 +66,8 @@ public class EventNodeSecurityManager {
 
     private Map<SharedIdentityType, SessionManagerFactory<?>> sessionManagerBuilders;
 
+    private Map<String, IdentityRole> identityRoles = new HashMap<>();
+
     public EventNodeSecurityManager() {
 	super();
     }
@@ -72,6 +81,8 @@ public class EventNodeSecurityManager {
 	initPublicIdentityBuilders();
 	initCommBuilders();
 	initSessionManagerBuilders();
+	
+	initIdentityRoles();
     }
 
     private void initSessionManagerBuilders() {
@@ -285,6 +296,19 @@ public class EventNodeSecurityManager {
 	}
     }
 
+    private void initIdentityRoles() {
+	List<PeerEventRule> serviceAccessRules = new ArrayList<>();
+	serviceAccessRules.add(PeerEventRule.buildRegexRule(PeerAcceptedState.ID + "/SERVICE:ACCESS_ID:REQUEST"));
+
+	PeerEventBlackList deniedServiceAccessIdEvents = new PeerEventBlackList(serviceAccessRules);
+
+	IdentityRole serviceAccessIdRole = new IdentityRole(IdentityRole.SERVICE_ACCESS, deniedServiceAccessIdEvents);
+
+	identityRoles.put(serviceAccessIdRole.getType(), serviceAccessIdRole);
+
+	identityRoles.put(IdentityRole.PEER_AUTH, new IdentityRole(IdentityRole.PEER_AUTH, null));
+    }
+
     /**
      * Builds a {@link AbstractCommManager} for a peer
      * 
@@ -401,7 +425,7 @@ public class EventNodeSecurityManager {
 	if (validPeerIdentities.size() == 0) {
 	    /* if no valid peer identity found, throw an exception */
 	    throw new PeerAuthRequestRejectedException(
-		    new PeerAuthRejected(new AuthRejectReason("No valid peer identity provided")));
+		    new PeerAuthRejected(new RequestRejectReason("No valid peer identity provided")));
 
 	}
 
@@ -631,63 +655,170 @@ public class EventNodeSecurityManager {
 	}
     }
 
-    public boolean isPeerIdentityIssuedByUs(PeerContext peerContext) {
-	PublicIdentityManager pim = peerContext.getPeerIdentityManager();
-	NodeIdentity peerIdentity = pim.getIdentity();
-	
-	return securityConfig.getIssuedIdentitiesManager().verify(peerIdentity);
+    public NodeIdentityProfile getIdentityProfile(String identityKey) {
+	return securityConfig.getIdentitiesManager().getIdentityProfile(identityKey);
     }
-    
-    public void saveIssuedIdentity(NodeIdentity identity) {
-	securityConfig.getIssuedIdentitiesManager().storeIdentity(identity);
+
+    public NodeIdentityProfile getCurrentPeerIdentityProfile(PeerContext peerContext) {
+	return getIdentityProfile(peerContext.getPeerIdentityManager().getIdentityKey());
     }
-    
-    public void issueServiceAccessIdentity(PeerEventContext<ServiceAccessIdRequestEvent> c) {
+
+    public boolean isEventAccepted(PeerStateContext context) {
+	PeerContext peerContext = context.getPeerContext();
+	NodeIdentityProfile currentPeerIdentityProfile = getCurrentPeerIdentityProfile(peerContext);
+	for (String roleId : currentPeerIdentityProfile.getRoles()) {
+	    IdentityRole identityRole = identityRoles.get(roleId);
+	    if (identityRole != null) {
+		boolean accepted = identityRole.isEventAccepted(context);
+		if (accepted) {
+		    return true;
+		}
+	    }
+	}
+	return false;
+    }
+
+    /**
+     * Returns an existing identity for the specified services access or creates one if instructed so
+     * 
+     * @param c
+     * @param create
+     * @return
+     * @throws PeerRequestRejectedException
+     * @throws PeerRequestHandlingException
+     */
+    public NodeIdentityProfile getValidIdentityForServiceAccess(PeerEventContext<ServiceAccessIdRequestEvent> c,
+	    boolean create) throws PeerRequestRejectedException, PeerRequestHandlingException {
 	ServiceAccessIdRequestEvent event = c.getEvent();
 	ServiceAccessIdRequest request = event.getData();
-	
-	//TODO: verify that this peer is allowed to request this
-	
-	//TODO: verify that we actually provide the requested services
-	
-	EventNodeContext nodeContext = c.getPeerManager().getNodeContext();
-	
-	List<EventNodeServiceRef> targetServices = request.getTargetServices();
-	if(targetServices == null) {
-	    //throw error
+
+	PeerContext peerContext = c.getPeerManager().getPeerContext();
+	/* get the current identity */
+	PublicIdentityManager peerIdentityManager = peerContext.getPeerIdentityManager();
+	if (peerIdentityManager == null) {
+	    /* we need to see if we can issue a new identity without any authentication. For now just throw exception */
+	    throw new PeerRequestRejectedException("Authentication is required to issue new identity", peerContext);
 	}
-	
-	/* build a map with required service contracts */
-	Map<String,ServiceContract> serviceContracts=new HashMap<>();
-	
-	for(EventNodeServiceRef sref : targetServices) {
-	    EventNodeServiceDefinition serviceDef = nodeContext.getService(sref);
-	    if(serviceDef == null) {
-		//throw error
+
+	String currentIdentityKey = peerIdentityManager.getIdentityKey();
+	/* get profile for current identity */
+	IdentitiesManager identitiesManager = securityConfig.getIdentitiesManager();
+	NodeIdentityProfile currentIdentityProfile = identitiesManager.getIdentityProfile(currentIdentityKey);
+
+	if (currentIdentityProfile == null) {
+	    /* a profile should already be present for this identity. throw Error */
+	    throw new PeerRequestHandlingException("No profile found for identity " + currentIdentityKey, peerContext);
+	}
+
+	List<EventNodeServiceRef> targetServices = request.getTargetServices();
+
+	if (targetServices == null || targetServices.size() == 0) {
+	    throw new PeerRequestRejectedException("A service access request must specify at least a service",
+		    peerContext);
+	}
+
+	/* check if child identities allow access to requested services */
+
+	List<String> childIdentities = currentIdentityProfile.getChildIdentityKeysList();
+
+	if (childIdentities != null) {
+	    /* check if the child identities support the requested services */
+	    for (String childIdKey : childIdentities) {
+		NodeIdentityProfile childIdProfile = identitiesManager.getIdentityProfile(childIdKey);
+		if (childIdProfile == null) {
+		    throw new PeerRequestHandlingException(
+			    "No profile found for child id " + childIdKey + " parent id key " + currentIdentityKey,
+			    peerContext);
+		}
+		if (childIdProfile.areServicesAccessible(targetServices)) {
+		    return childIdProfile;
+		}
 	    }
-	    //TODO: do extra checks if the peer is allowed to use this service
+	}
+
+	if (create) {
+	    /* issue a new identity */
+	    NodeIdentityProfile newAccessIdentityProfile = issueServiceAccessIdentity(c);
+	    currentIdentityProfile.addChildIdentityKey(newAccessIdentityProfile.getIdentityKey());
+	    newAccessIdentityProfile.setParentIdentityKey(currentIdentityKey);
+
+	    /* save the profile for later use */
+	    identitiesManager.storeIdentityProfile(newAccessIdentityProfile);
+	    
+	    /* update the current identity profile */
+	    identitiesManager.storeIdentityProfile(currentIdentityProfile);
+
+	    return newAccessIdentityProfile;
+	}
+
+	return null;
+    }
+
+    public NodeIdentityProfile issueServiceAccessIdentity(PeerEventContext<ServiceAccessIdRequestEvent> c) {
+	ServiceAccessIdRequestEvent event = c.getEvent();
+	ServiceAccessIdRequest request = event.getData();
+
+	// TODO: verify that this peer is allowed to request this
+
+	// TODO: verify that we actually provide the requested services
+
+	EventNodeContext nodeContext = c.getPeerManager().getNodeContext();
+
+	List<EventNodeServiceRef> targetServices = request.getTargetServices();
+	if (targetServices == null) {
+	    // throw error
+	}
+
+	/* build a map with required service contracts */
+	Map<String, ServiceContract> serviceContracts = new HashMap<>();
+
+	for (EventNodeServiceRef sref : targetServices) {
+	    EventNodeServiceDefinition serviceDef = nodeContext.getService(sref);
+	    if (serviceDef == null) {
+		// throw error
+	    }
+	    // TODO: do extra checks if the peer is allowed to use this service
 	    ServiceContract serviceContract = new ServiceContract();
 	    serviceContract.setServiceRef(sref);
 	    serviceContracts.put(sref.toString(), serviceContract);
 	}
-	
+
 	IdentitiesManager identitiesManager = securityConfig.getIdentitiesManager();
-	//TODO: use configuration to set the default identity type
-	NodeIdentity<?> issuedIdentity = identitiesManager.issueIdentity(new IssueIdentityRequest(new SpkiFullIdentityType(new KeyDef("RSA", 1024))));
-	
+	// TODO: use configuration to set the default identity type
+	NodeIdentity<?> issuedIdentity = identitiesManager
+		.issueIdentity(new IssueIdentityRequest(new SpkiFullIdentityType(new KeyDef("RSA", 1024))));
+
 	/* build a profile for this identity */
-	
+
 	NodeIdentityProfile issuedIdentityProfile = new NodeIdentityProfile(issuedIdentity);
 	/* set parent identity key */
 	PeerContext peerContext = c.getPeerManager().getPeerContext();
 	String parentIdentityKey = peerContext.getPeerIdentityManager().getIdentityKey();
 	issuedIdentityProfile.setParentIdentityKey(parentIdentityKey);
+
+	/* add service contracts to the profile */
+	issuedIdentityProfile.setServiceContracts(serviceContracts);
+	/* set role */
+	issuedIdentityProfile.addRole(IdentityRole.SERVICE_ACCESS);
+
+	return issuedIdentityProfile;
+    }
+
+    public void onPeerNodeAuth(PeerContext peerContext) {
+	PublicIdentityManager peerIdentityManager = getPeerIdentity(peerContext.getPeerCommContext());
+	String identityKey = peerIdentityManager.getIdentityKey();
+	IdentitiesManager identitiesManager = securityConfig.getIdentitiesManager();
+	NodeIdentityProfile identityProfile = identitiesManager.getIdentityProfile(identityKey);
 	
-	for(EventNodeServiceRef sr : request.getTargetServices()) {
-	    
+	if(identityProfile == null) {
+	    /* this identity is new to us, create a profile  */
+	    identityProfile = new NodeIdentityProfile(peerIdentityManager.getIdentityKey(), peerIdentityManager.getIdentity());
+	    /* if this identity is unknown, then it must be a personal peer id */
+	    identityProfile.addRole(IdentityRole.PEER_AUTH);
 	}
 	
-	
+	identityProfile.setLastAuthTs(System.currentTimeMillis());
+	/* store peer identity profile */
+	identitiesManager.storeIdentityProfile(identityProfile);
     }
-    
 }

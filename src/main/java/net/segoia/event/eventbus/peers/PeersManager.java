@@ -1,5 +1,7 @@
 package net.segoia.event.eventbus.peers;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,39 +12,44 @@ import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.constants.Events;
 import net.segoia.event.eventbus.peers.events.NewPeerEvent;
+import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.PeerAcceptedEvent;
 import net.segoia.event.eventbus.peers.events.PeerInfo;
 import net.segoia.event.eventbus.peers.events.PeerLeavingEvent;
 import net.segoia.event.eventbus.peers.events.PeerLeftEvent;
+import net.segoia.event.eventbus.peers.events.auth.NodeAuth;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthAcceptedEvent;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejectedEvent;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequestEvent;
 import net.segoia.event.eventbus.peers.events.auth.PeerProtocolConfirmedEvent;
+import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequestEvent;
+import net.segoia.event.eventbus.peers.events.bind.DisconnectFromPeerRequestEvent;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindAcceptedEvent;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequest;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequestEvent;
 import net.segoia.event.eventbus.peers.events.session.PeerSessionStartedEvent;
 import net.segoia.event.eventbus.peers.routing.RoutingTable;
+import net.segoia.event.eventbus.peers.security.PrivateIdentityData;
 import net.segoia.util.data.SetMap;
 
 public class PeersManager extends GlobalEventNodeAgent {
     private EventNodeContext nodeContext;
     private EventNodePeersRegistry peersRegistry = new EventNodePeersRegistry();
     private RoutingTable routingTable = new RoutingTable();
-    
+
     private PeerManagerFactory peerManagerFactory;
 
     public void init(EventNodeContext hostNodeContext) {
 	this.nodeContext = hostNodeContext;
 	PeersManagerConfig config = hostNodeContext.getConfig().getPeersManagerConfig();
-	if(config == null) {
+	if (config == null) {
 	    config = new PeersManagerConfig();
 	}
-	
+
 	peerManagerFactory = new PeerManagerAbstractFactory(config);
-	
+
 	initGlobalContext(new GlobalAgentEventNodeContext(hostNodeContext, this));
     }
 
@@ -108,6 +115,17 @@ public class PeersManager extends GlobalEventNodeAgent {
 	    onPeerRemoved(data);
 	});
 
+	context.addEventHandler(DisconnectFromPeerRequestEvent.class, (c) -> {
+	    String peerId = c.getEvent().getData().getPeerId();
+	    PeerManager pm = peersRegistry.getDirectPeerManager(peerId);
+	    if (pm != null) {
+		pm.terminate();
+		removePeer(peerId);
+	    } else {
+		throw new RuntimeException("No peer manager found for peer id " + peerId);
+	    }
+	});
+
 	context.addEventHandler(PeerAcceptedEvent.class, (c) -> {
 	    handlePeerAccepted(c);
 	});
@@ -132,8 +150,33 @@ public class PeersManager extends GlobalEventNodeAgent {
 	String peerId = nodeContext.generatePeerId();
 
 	/* create a manager for this peer */
-	PeerManager peerManager = peerManagerFactory.buidPeerManager(new PeerContext(peerId, transceiver));
-	peerManager.getPeerContext().setNodeContext(nodeContext);
+	PeerContext peerContext = new PeerContext(peerId, transceiver);
+
+	List<PrivateIdentityData<?>> ourIdentities = data.getOurIdentities();
+	if (ourIdentities != null) {
+
+	    peerContext.setOurAvailableIdentities(ourIdentities);
+	    
+	    NodeInfo defaultNodeInfo = nodeContext.getNodeInfo();
+	    
+	    /* let's create a custom node info with specified identities */
+	    NodeInfo customNodeInfo = new NodeInfo(defaultNodeInfo.getNodeId());
+	    customNodeInfo.setSecurityPolicy(defaultNodeInfo.getSecurityPolicy());
+	    NodeAuth customNodeAuth = new NodeAuth();
+	    List<NodeIdentity<?>> customIdentities = new ArrayList<>();
+	    for(PrivateIdentityData<?> pid : ourIdentities) {
+		customIdentities.add(pid.getPublicNodeIdentity());
+	    }
+	    
+	    customNodeAuth.setIdentities(customIdentities);
+	    customNodeInfo.setNodeAuth(customNodeAuth);
+	    
+	    peerContext.setOurNodeInfo(customNodeInfo);
+
+	}
+
+	PeerManager peerManager = peerManagerFactory.buildPeerManager(peerContext);
+	peerContext.setNodeContext(nodeContext);
 
 	peerManager.setInServerMode(true);
 
@@ -152,7 +195,7 @@ public class PeersManager extends GlobalEventNodeAgent {
 	String peerId = nodeContext.generatePeerId();
 
 	/* create a manager for this peer */
-	PeerManager peerManager = peerManagerFactory.buidPeerManager(new PeerContext(peerId, transceiver));
+	PeerManager peerManager = peerManagerFactory.buildPeerManager(new PeerContext(peerId, transceiver));
 	peerManager.getPeerContext().setNodeContext(nodeContext);
 
 	peersRegistry.setPendingPeerManager(peerManager);

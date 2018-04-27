@@ -1,13 +1,18 @@
 package net.segoia.event.eventbus.peers;
 
+import java.util.List;
+
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.comm.PeerCommManager;
 import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.session.SessionKey;
+import net.segoia.event.eventbus.peers.manager.states.PeerStateContext;
 import net.segoia.event.eventbus.peers.security.PeerCommContext;
+import net.segoia.event.eventbus.peers.security.PrivateIdentityData;
 import net.segoia.event.eventbus.peers.security.PrivateIdentityManager;
 import net.segoia.event.eventbus.peers.security.PublicIdentityManager;
 import net.segoia.event.eventbus.peers.security.SessionManager;
+import net.segoia.event.eventbus.services.NodeIdentityProfile;
 
 public class PeerContext {
     private String peerId;
@@ -49,6 +54,14 @@ public class PeerContext {
     private PeerCommManager peerCommManager;
     
     private PeerCommContext peerCommContext;
+    
+    /**
+     * In case we want to specify custom identities to use with this particular peer
+     */
+    private List<PrivateIdentityData<?>> ourAvailableIdentities;
+    
+    private NodeInfo ourNodeInfo;
+    
 
     public PeerContext(String peerId, EventTransceiver transceiver) {
 	super();
@@ -167,5 +180,30 @@ public class PeerContext {
     public void setTransceiver(EventTransceiver transceiver) {
         this.transceiver = transceiver;
     }
+    
+    public NodeIdentityProfile getCurrentPeerIdentityProfile() {
+	return nodeContext.getSecurityManager().getCurrentPeerIdentityProfile(this);
+    }
 
+    public boolean isEventAccepted(PeerStateContext context) {
+	return nodeContext.getSecurityManager().isEventAccepted(context);
+    }
+
+    public List<PrivateIdentityData<?>> getOurAvailableIdentities() {
+        return ourAvailableIdentities;
+    }
+
+    public void setOurAvailableIdentities(List<PrivateIdentityData<?>> ourAvailableIdentities) {
+        this.ourAvailableIdentities = ourAvailableIdentities;
+    }
+
+    public NodeInfo getOurNodeInfo() {
+        return ourNodeInfo;
+    }
+
+    public void setOurNodeInfo(NodeInfo ourNodeInfo) {
+        this.ourNodeInfo = ourNodeInfo;
+    }
+    
+    
 }

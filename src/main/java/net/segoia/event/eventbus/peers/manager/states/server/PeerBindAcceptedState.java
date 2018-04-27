@@ -3,7 +3,7 @@ package net.segoia.event.eventbus.peers.manager.states.server;
 import net.segoia.event.eventbus.peers.PeerEventContext;
 import net.segoia.event.eventbus.peers.PeerManager;
 import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
-import net.segoia.event.eventbus.peers.events.auth.AuthRejectReason;
+import net.segoia.event.eventbus.peers.events.RequestRejectReason;
 import net.segoia.event.eventbus.peers.events.auth.MessageAuthRejectedReason;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthAccepted;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthAcceptedEvent;
@@ -85,7 +85,7 @@ public class PeerBindAcceptedState extends PeerManagerState{
 
 		    /* Fail, for now */
 
-		    rejectPeerAuth(peerManager, new AuthRejectReason<CommunicationProtocol>(
+		    rejectPeerAuth(peerManager, new RequestRejectReason<CommunicationProtocol>(
 			    "Don't agree on protocol. Found a better one.", commProtocol));
 		    // TODO: Propose the one we found
 
@@ -111,7 +111,7 @@ public class PeerBindAcceptedState extends PeerManagerState{
 	peerManager.forwardToPeer(new PeerAuthAcceptedEvent(peerAuthAccepted));
     }
 
-    protected void rejectPeerAuth(PeerManager peerManager, AuthRejectReason reason) {
+    protected void rejectPeerAuth(PeerManager peerManager, RequestRejectReason reason) {
 	PeerAuthRejected peerAuthRejected = new PeerAuthRejected(reason);
 	peerManager.forwardToPeer(new PeerAuthRejectedEvent(peerAuthRejected));
     }

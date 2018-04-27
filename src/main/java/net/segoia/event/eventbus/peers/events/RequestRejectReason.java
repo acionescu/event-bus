@@ -1,21 +1,21 @@
-package net.segoia.event.eventbus.peers.events.auth;
+package net.segoia.event.eventbus.peers.events;
 
-public class AuthRejectReason<D> {
+public class RequestRejectReason<D> {
     private String message;
 
     private D data;
 
-    public AuthRejectReason() {
+    public RequestRejectReason() {
 	super();
 	// TODO Auto-generated constructor stub
     }
 
-    public AuthRejectReason(String message) {
+    public RequestRejectReason(String message) {
 	super();
 	this.message = message;
     }
 
-    public AuthRejectReason(String message, D data) {
+    public RequestRejectReason(String message, D data) {
 	super();
 	this.message = message;
 	this.data = data;

@@ -7,21 +7,22 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import net.segoia.event.eventbus.Event;
+import net.segoia.event.eventbus.agents.GlobalAgentRegisterRequest;
+import net.segoia.event.eventbus.agents.LocalAgentRegisterRequest;
 import net.segoia.event.eventbus.peers.DefaultEventNode;
 import net.segoia.event.eventbus.peers.EventNode;
-import net.segoia.event.eventbus.peers.GlobalEventNodeAgent;
 import net.segoia.event.eventbus.peers.LocalAgentEventNodeContext;
 import net.segoia.event.eventbus.peers.LocalEventNodeAgent;
 import net.segoia.event.eventbus.peers.events.NewPeerEvent;
 import net.segoia.event.eventbus.peers.events.PeerLeftEvent;
 import net.segoia.event.eventbus.peers.events.auth.NodeAuth;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.IdentityType;
+import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.test.vo.ClientTestEventTransceiver;
 import net.segoia.event.eventbus.peers.test.vo.ServerTestEventTransceiver;
-import net.segoia.event.eventbus.peers.test.vo.TestGlobalEventNodeAgent;
+import net.segoia.event.eventbus.peers.test.vo.ClientServiceTestAgent;
 import net.segoia.event.eventbus.peers.test.vo.TestLocalEventNodeAgent;
 import net.segoia.event.eventbus.util.EBus;
 
@@ -75,7 +76,7 @@ public class EventNodeTest {
 	    }
 	};
 
-	mainNode.registerLocalAgent(localAgent);
+	mainNode.registerLocalAgent(new LocalAgentRegisterRequest(localAgent));
 
 	EBus.waitToProcessAllOnMainLoop();
 
@@ -98,7 +99,7 @@ public class EventNodeTest {
 	serverTransceiver.setSendAsync(true);
 	
 	TestLocalEventNodeAgent serverLocalAgent = new TestLocalEventNodeAgent();
-	mainNode.registerLocalAgent(serverLocalAgent);
+	mainNode.registerLocalAgent(new LocalAgentRegisterRequest(serverLocalAgent));
 	
 	/* initiate peering */
 	peerNode.registerToPeer(new ConnectToPeerRequest(clientTransceiver));
@@ -149,27 +150,19 @@ public class EventNodeTest {
 	final EventNode peerNode2 = EBus.loadNode("peer2_node.json").getNode();
 	
 	
-	ServerTestEventTransceiver serverTransceiver = new ServerTestEventTransceiver(peerNode1);
 	
-	ClientTestEventTransceiver clientTransceiver = new ClientTestEventTransceiver(serverTransceiver);
-	
-	clientTransceiver.setSendAsync(true);
-	serverTransceiver.setSendAsync(true);
 	
 	TestLocalEventNodeAgent serverLocalAgent = new TestLocalEventNodeAgent();
 	
-	peerNode1.registerLocalAgent(serverLocalAgent);
+	peerNode1.registerLocalAgent(new LocalAgentRegisterRequest(serverLocalAgent));
 	serverLocalAgent.setLoggingOn(true);
 	
-	peerNode2.registerGlobalAgent(new TestGlobalEventNodeAgent());
-	
-	
-	/* initiate peering */
-	peerNode2.registerToPeer(new ConnectToPeerRequest(clientTransceiver));
+	ClientServiceTestAgent clientTestAgent = new ClientServiceTestAgent(peerNode1);
+	peerNode2.registerGlobalAgent(new GlobalAgentRegisterRequest(clientTestAgent));
 	
 	
 	/* wait for all events to pe handled */
-	EBus.waitToProcessAllOnMainLoop(200);
+	EBus.waitToProcessAllOnMainLoop(500);
 	
 	System.out.println(serverLocalAgent.getReceivedEvents().size());
     }

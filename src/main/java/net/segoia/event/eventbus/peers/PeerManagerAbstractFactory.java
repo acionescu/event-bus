@@ -13,7 +13,7 @@ public class PeerManagerAbstractFactory implements PeerManagerFactory{
     }
 
     @Override
-    public PeerManager buidPeerManager(PeerContext peerContext) {
+    public PeerManager buildPeerManager(PeerContext peerContext) {
 	String channel = peerContext.getTransceiver().getChannel();
 	Map<String, PeerManagerFactory> peerManagerFactories = config.getPeerManagerFactories();
 	PeerManagerFactory peerManagerFactory = null;
@@ -24,7 +24,7 @@ public class PeerManagerAbstractFactory implements PeerManagerFactory{
 	if(peerManagerFactory == null) {
 	    peerManagerFactory = config.getDefaultPeerManagerFactory();
 	}
-	return peerManagerFactory.buidPeerManager(peerContext);
+	return peerManagerFactory.buildPeerManager(peerContext);
     }
 
     public PeersManagerConfig getConfig() {

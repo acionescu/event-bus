@@ -1,6 +1,8 @@
 package net.segoia.event.eventbus.peers.events.auth;
 
-public class MessageAuthRejectedReason extends AuthRejectReason<Object>{
+import net.segoia.event.eventbus.peers.events.RequestRejectReason;
+
+public class MessageAuthRejectedReason extends RequestRejectReason<Object>{
 
     public MessageAuthRejectedReason() {
 	super();

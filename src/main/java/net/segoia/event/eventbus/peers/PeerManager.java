@@ -148,7 +148,15 @@ public class PeerManager implements PeerEventListener {
 
     }
 
+    public void setUpPeerCommContext() {
+	PeerCommContext peerCommContext = buildPeerCommContext();
+	peerContext.setPeerCommContext(peerCommContext);
+	getNodeContext().getSecurityManager().onPeerNodeAuth(peerContext);
+    }
+
     public void setUpSessionCommManager() {
+	setUpPeerCommContext();
+
 	PeerCommManager peerCommManager = new PeerCommManager();
 
 	peerContext.setPeerCommManager(peerCommManager);
@@ -156,13 +164,10 @@ public class PeerManager implements PeerEventListener {
 	/* get the session communication manager */
 	EventNodeSecurityManager securityManager = getNodeContext().getSecurityManager();
 
-	PeerCommContext peerCommContext = buildPeerCommContext();
-	peerContext.setPeerCommContext(peerCommContext);
-
 	/*
 	 * Get the session comm manager
 	 */
-	CommManager sessionCommManager = securityManager.getSessionCommManager(peerCommContext);
+	CommManager sessionCommManager = securityManager.getSessionCommManager(peerContext.getPeerCommContext());
 
 	peerCommManager.setSessionCommManager(sessionCommManager);
     }
@@ -189,6 +194,7 @@ public class PeerManager implements PeerEventListener {
 
 	peerCommManager.setDirectCommManager(directCommManager);
     }
+
     /**
      * This is called only when the node is operating in server mode
      */
@@ -213,8 +219,8 @@ public class PeerManager implements PeerEventListener {
 	SessionInfo sessionInfo = null;
 
 	try {
-//	    SessionKeyOutgoingAccumulator opAcc = new SessionKeyOutgoingAccumulator(
-//		    new OperationData(sessionKey.getKeyBytes()));
+	    // SessionKeyOutgoingAccumulator opAcc = new SessionKeyOutgoingAccumulator(
+	    // new OperationData(sessionKey.getKeyBytes()));
 
 	    /* prepare session token */
 	    CommDataContext processedSessionData = peerCommManager.getSessionCommManager()
@@ -255,6 +261,7 @@ public class PeerManager implements PeerEventListener {
 
     public void handleError(Exception e) {
 	e.printStackTrace();
+	// TODO: we should log this
     }
 
     protected PeerCommContext buildPeerCommContext() {
@@ -295,7 +302,7 @@ public class PeerManager implements PeerEventListener {
     }
 
     public void postEvent(Event event) {
-	
+
 	peerContext.getNodeContext().postEvent(event);
     }
 

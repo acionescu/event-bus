@@ -55,5 +55,9 @@ public abstract class PeerManagerState {
 	    handler.handleEvent((PeerEventContext<Event>)c);
 	});
     }
+    
+    public String getId() {
+	return getClass().getSimpleName();
+    }
 
 }

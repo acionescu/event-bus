@@ -10,11 +10,12 @@ import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiFullIdentityType;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiFullNodeIdentity;
 import net.segoia.event.eventbus.peers.events.session.KeyDef;
+import net.segoia.event.eventbus.services.NodeIdentityProfile;
 import net.segoia.util.crypto.CryptoUtil;
 
 public class DefaultIdentitiesManager implements IdentitiesManager {
     private Map<Class<?>, IdentityBuilder<?>> identityBuilders;
-    private IssuedIdentitiesManager issuedIdentitiesManager= new InMemoryIssuedIdentitiesManager();
+    private IdentitiesRepository identitiesRepository = new InMemoryIdentitiesRepository();
 
     public DefaultIdentitiesManager() {
 	identityBuilders = new HashMap<>();
@@ -52,14 +53,22 @@ public class DefaultIdentitiesManager implements IdentitiesManager {
 	return builder.buildIdentity(request);
     }
 
-    public IssuedIdentitiesManager getIssuedIdentitiesManager() {
-        return issuedIdentitiesManager;
+    public IdentitiesRepository getIdentitiesRepository() {
+	return identitiesRepository;
     }
 
-    public void setIssuedIdentitiesManager(IssuedIdentitiesManager issuedIdentitiesManager) {
-        this.issuedIdentitiesManager = issuedIdentitiesManager;
+    public void setIdentitiesRepository(IdentitiesRepository identitiesRepository) {
+	this.identitiesRepository = identitiesRepository;
     }
-    
-    
+
+    @Override
+    public void storeIdentityProfile(NodeIdentityProfile identityProfile) {
+	identitiesRepository.storeIdentityProfile(identityProfile);
+    }
+
+    @Override
+    public NodeIdentityProfile getIdentityProfile(String identityKey) {
+	return identitiesRepository.getIdentityProfile(identityKey);
+    }
 
 }

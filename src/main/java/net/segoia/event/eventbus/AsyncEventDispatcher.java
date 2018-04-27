@@ -199,13 +199,22 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
     }
 
     public void waitToProcessAll(int sleep) {
-	try {
-	    Thread.sleep(sleep);
-	} catch (InterruptedException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
-	waitToProcessAll();
+	long processed = totalEventsProcessed;
+	do {
+
+	    try {
+		Thread.sleep(sleep);
+	    } catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
+	    processed = totalEventsProcessed;
+	} while (totalEventsQueued > totalEventsProcessed || processed < totalEventsProcessed);
+
+	// if(totalEventsQueued < totalEventsProcessed) {
+	// waitToProcessAll();
+	// }
+
     }
 
     public void processAllAndStop() {

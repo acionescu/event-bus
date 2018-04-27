@@ -9,13 +9,13 @@ import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
  *
  */
 import net.segoia.event.eventbus.services.EventNodeServiceAccessPolicy;
+import net.segoia.event.eventbus.services.ServiceContract;
 
 public class ServiceAccessIdIssuedData {
     private NodeIdentity<?> accessIdentity;
-    private List<EventNodeServiceAccessPolicy> servicePolicies;
+    private List<ServiceContract> servicePolicies;
 
-    public ServiceAccessIdIssuedData(NodeIdentity<?> accessIdentity,
-	    List<EventNodeServiceAccessPolicy> servicePolicies) {
+    public ServiceAccessIdIssuedData(NodeIdentity<?> accessIdentity, List<ServiceContract> servicePolicies) {
 	super();
 	this.accessIdentity = accessIdentity;
 	this.servicePolicies = servicePolicies;
@@ -34,11 +34,11 @@ public class ServiceAccessIdIssuedData {
 	this.accessIdentity = accessIdentity;
     }
 
-    public List<EventNodeServiceAccessPolicy> getServicePolicies() {
+    public List<ServiceContract> getServicePolicies() {
 	return servicePolicies;
     }
 
-    public void setServicePolicies(List<EventNodeServiceAccessPolicy> servicePolicies) {
+    public void setServicePolicies(List<ServiceContract> servicePolicies) {
 	this.servicePolicies = servicePolicies;
     }
 

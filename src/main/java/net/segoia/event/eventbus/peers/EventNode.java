@@ -38,6 +38,8 @@ import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.NodeTerminateEvent;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequestEvent;
+import net.segoia.event.eventbus.peers.events.bind.DisconnectFromPeerRequest;
+import net.segoia.event.eventbus.peers.events.bind.DisconnectFromPeerRequestEvent;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequest;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequestEvent;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityConfig;
@@ -278,6 +280,10 @@ public abstract class EventNode {
     public void registerToPeer(ConnectToPeerRequest request) {
 	postInternally(new ConnectToPeerRequestEvent(request));
     }
+    
+    public void disconnectFromPeer(DisconnectFromPeerRequest request) {
+	postInternally(new DisconnectFromPeerRequestEvent(request));
+    }
 
     public void registerPeer(PeerBindRequest request) {
 	postInternally(new PeerBindRequestEvent(request));
@@ -503,6 +509,7 @@ public abstract class EventNode {
 		if (event.from() == null) {
 		    event.addRelay(getId());
 		}
+		System.out.println("handling event locally "+ec.getEvent().getEt());
 		/* dispatch this further only if this event is meant for us */
 		return super.dispatchEvent(ec);
 	    }

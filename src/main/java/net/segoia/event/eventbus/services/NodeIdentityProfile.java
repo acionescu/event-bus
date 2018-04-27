@@ -1,5 +1,6 @@
 package net.segoia.event.eventbus.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,14 +21,23 @@ public class NodeIdentityProfile {
 
     private List<String> childIdentityKeysList;
 
+    private List<String> roles;
+    
+    private long lastAuthTs;
+
     public NodeIdentityProfile(NodeIdentity<?> identity) {
 	super();
 	this.identity = identity;
     }
 
+    public NodeIdentityProfile(String identityKey, NodeIdentity<?> identity) {
+	super();
+	this.identityKey = identityKey;
+	this.identity = identity;
+    }
+
     public NodeIdentityProfile() {
 	super();
-	// TODO Auto-generated constructor stub
     }
 
     public NodeIdentity<?> getIdentity() {
@@ -68,6 +78,48 @@ public class NodeIdentityProfile {
 
     public void setChildIdentityKeysList(List<String> childIdentityKeysList) {
 	this.childIdentityKeysList = childIdentityKeysList;
+    }
+
+    public void addChildIdentityKey(String childIdKey) {
+	if (childIdentityKeysList == null) {
+	    childIdentityKeysList = new ArrayList<>();
+	}
+	childIdentityKeysList.add(childIdKey);
+    }
+
+    public boolean areServicesAccessible(List<EventNodeServiceRef> servicesRefs) {
+	for (EventNodeServiceRef sr : servicesRefs) {
+	    if (!serviceContracts.containsKey(sr.toString())) {
+		return false;
+	    }
+	}
+	return true;
+    }
+
+    public List<String> getRoles() {
+	return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+	this.roles = roles;
+    }
+
+    public void addRole(String roleId) {
+	if (roles == null) {
+	    roles = new ArrayList<>();
+	}
+
+	if (!roles.contains(roleId)) {
+	    roles.add(roleId);
+	}
+    }
+
+    public long getLastAuthTs() {
+        return lastAuthTs;
+    }
+
+    public void setLastAuthTs(long lastAuthTs) {
+        this.lastAuthTs = lastAuthTs;
     }
 
 }

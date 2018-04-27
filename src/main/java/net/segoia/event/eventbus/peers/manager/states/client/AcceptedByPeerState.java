@@ -25,8 +25,9 @@ public class AcceptedByPeerState extends PeerManagerState{
 
     @Override
     protected void registerPeerEventHandlers() {
-	// TODO Auto-generated method stub
-	
+	registerPeerEventProcessor((c)->{
+	    c.getPeerManager().postEvent(c.getEvent());
+	});
     }
 
 }

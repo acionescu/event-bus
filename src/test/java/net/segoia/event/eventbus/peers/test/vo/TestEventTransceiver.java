@@ -56,6 +56,7 @@ public abstract class TestEventTransceiver extends AbstractEventTransceiver {
 
     @Override
     public void terminate() {
+	System.out.println("Terminating transceiver");
 	pairTransceiver.onPeerLeaving(new PeerLeavingReason(0, "Terminated"));
     }
 

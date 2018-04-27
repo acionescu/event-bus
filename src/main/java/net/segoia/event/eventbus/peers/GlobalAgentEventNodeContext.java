@@ -3,6 +3,7 @@ package net.segoia.event.eventbus.peers;
 import java.util.Set;
 
 import net.segoia.event.eventbus.Event;
+import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 
 /**
  * A context that is aware of peer events as well as local events
@@ -32,4 +33,6 @@ public class GlobalAgentEventNodeContext extends LocalAgentEventNodeContext{
     public void forwardToAllKnown(Event event) {
 	peersManager.forwardToAllKnown(event);
     }
+    
+   
 }

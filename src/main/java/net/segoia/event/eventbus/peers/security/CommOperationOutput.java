@@ -1,8 +1,8 @@
 package net.segoia.event.eventbus.peers.security;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
-import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.util.JsonUtils;
 
 public class CommOperationOutput extends OperationOutput {
@@ -23,4 +23,10 @@ public class CommOperationOutput extends OperationOutput {
 	return null;
     }
 
+    
+    public static void main(String[] args) {
+	Charset c = Charset.forName("UTF-8");
+	
+	System.out.println(c);
+    }
 }
