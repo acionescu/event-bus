@@ -1,5 +1,6 @@
 package net.segoia.event.eventbus.peers.manager.states.client;
 
+import net.segoia.event.eventbus.peers.PeerContext;
 import net.segoia.event.eventbus.peers.PeerEventContext;
 import net.segoia.event.eventbus.peers.PeerManager;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequest;
@@ -48,8 +49,10 @@ public class BindToPeerState extends PeerManagerState {
 	}
 
 	peerManager.handlePeerBindAccepted(resp);
+	
+	PeerContext peerContext = peerManager.getPeerContext();
 
-	PeerAuthRequest peerAuthRequest = new PeerAuthRequest(c.getNodeContext().getNodeInfo());
+	PeerAuthRequest peerAuthRequest = new PeerAuthRequest(peerContext.getOurNodeInfo());
 
 	peerManager.goToState(PeerManager.AUTH_TO_PEER);
 	peerManager.forwardToPeer(new PeerAuthRequestEvent(peerAuthRequest));

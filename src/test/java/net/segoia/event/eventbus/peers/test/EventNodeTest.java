@@ -149,9 +149,6 @@ public class EventNodeTest {
 	
 	final EventNode peerNode2 = EBus.loadNode("peer2_node.json").getNode();
 	
-	
-	
-	
 	TestLocalEventNodeAgent serverLocalAgent = new TestLocalEventNodeAgent();
 	
 	peerNode1.registerLocalAgent(new LocalAgentRegisterRequest(serverLocalAgent));

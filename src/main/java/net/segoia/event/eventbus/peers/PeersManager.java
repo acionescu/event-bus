@@ -156,23 +156,26 @@ public class PeersManager extends GlobalEventNodeAgent {
 	if (ourIdentities != null) {
 
 	    peerContext.setOurAvailableIdentities(ourIdentities);
-	    
+
 	    NodeInfo defaultNodeInfo = nodeContext.getNodeInfo();
-	    
+
 	    /* let's create a custom node info with specified identities */
 	    NodeInfo customNodeInfo = new NodeInfo(defaultNodeInfo.getNodeId());
 	    customNodeInfo.setSecurityPolicy(defaultNodeInfo.getSecurityPolicy());
 	    NodeAuth customNodeAuth = new NodeAuth();
 	    List<NodeIdentity<?>> customIdentities = new ArrayList<>();
-	    for(PrivateIdentityData<?> pid : ourIdentities) {
+	    for (PrivateIdentityData<?> pid : ourIdentities) {
 		customIdentities.add(pid.getPublicNodeIdentity());
 	    }
-	    
+
 	    customNodeAuth.setIdentities(customIdentities);
 	    customNodeInfo.setNodeAuth(customNodeAuth);
-	    
+
 	    peerContext.setOurNodeInfo(customNodeInfo);
 
+	}
+	else {
+	    peerContext.setOurNodeInfo(nodeContext.getNodeInfo());
 	}
 
 	PeerManager peerManager = peerManagerFactory.buildPeerManager(peerContext);

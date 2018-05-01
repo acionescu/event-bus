@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceConfigurationError;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -23,6 +22,7 @@ import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
 import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
 import net.segoia.event.eventbus.peers.comm.PeerCommManager;
 import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
+import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.RequestRejectReason;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
 import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequest;
@@ -81,7 +81,7 @@ public class EventNodeSecurityManager {
 	initPublicIdentityBuilders();
 	initCommBuilders();
 	initSessionManagerBuilders();
-	
+
 	initIdentityRoles();
     }
 
@@ -371,8 +371,15 @@ public class EventNodeSecurityManager {
 	if (privateIdentityData != null) {
 	    return privateIdentityData;
 	}
-
-	privateIdentityData = privateIdentities.get(pcc.getOurIdentityIndex());
+	
+	List<PrivateIdentityData<?>> ourAvailableIdentities = peerContext.getOurAvailableIdentities();
+	
+	if(ourAvailableIdentities != null) {
+	    privateIdentityData = ourAvailableIdentities.get(pcc.getOurIdentityIndex());
+	}
+	else {
+	    privateIdentityData = privateIdentities.get(pcc.getOurIdentityIndex());
+	}
 	peerContext.setOurIdentityManager(privateIdentityData);
 	return privateIdentityData;
     }
@@ -445,9 +452,15 @@ public class EventNodeSecurityManager {
 	    return CommunicationProtocol.buildPlainProtocol();
 	}
 
-	List<? extends NodeIdentity<? extends IdentityType>> localIdentities = securityConfig.getNodeAuth()
-		.getIdentities();
+	
+	List<? extends NodeIdentity<? extends IdentityType>> localIdentities = securityConfig.getNodeAuth().getIdentities();
 
+	NodeInfo ourNodeInfo = peerContext.getOurNodeInfo();
+	/* if we a different node info is specified, then use that */
+	if (ourNodeInfo != null) {
+	    localIdentities = ourNodeInfo.getNodeAuth().getIdentities();
+	}
+	
 	/* see if we can match a local tx strategy with a peer rx strategy */
 
 	List<StrategyIdentitiesPair> localAsTxStrategyIdentitiesPairs = getMatchingCommStrategy(
@@ -744,7 +757,7 @@ public class EventNodeSecurityManager {
 
 	    /* save the profile for later use */
 	    identitiesManager.storeIdentityProfile(newAccessIdentityProfile);
-	    
+
 	    /* update the current identity profile */
 	    identitiesManager.storeIdentityProfile(currentIdentityProfile);
 
@@ -809,14 +822,15 @@ public class EventNodeSecurityManager {
 	String identityKey = peerIdentityManager.getIdentityKey();
 	IdentitiesManager identitiesManager = securityConfig.getIdentitiesManager();
 	NodeIdentityProfile identityProfile = identitiesManager.getIdentityProfile(identityKey);
-	
-	if(identityProfile == null) {
-	    /* this identity is new to us, create a profile  */
-	    identityProfile = new NodeIdentityProfile(peerIdentityManager.getIdentityKey(), peerIdentityManager.getIdentity());
+
+	if (identityProfile == null) {
+	    /* this identity is new to us, create a profile */
+	    identityProfile = new NodeIdentityProfile(peerIdentityManager.getIdentityKey(),
+		    peerIdentityManager.getIdentity());
 	    /* if this identity is unknown, then it must be a personal peer id */
 	    identityProfile.addRole(IdentityRole.PEER_AUTH);
 	}
-	
+
 	identityProfile.setLastAuthTs(System.currentTimeMillis());
 	/* store peer identity profile */
 	identitiesManager.storeIdentityProfile(identityProfile);

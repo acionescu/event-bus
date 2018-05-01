@@ -27,8 +27,8 @@ public class DefaultIdentitiesManager implements IdentitiesManager {
 		KeyDef keyDef = identityType.getKeyDef();
 		try {
 		    KeyPair keyPair = CryptoUtil.generateKeyPair(keyDef.getAlgorithm(), keyDef.getKeySize());
-		    String encodedPubKey = CryptoUtil.base64Encode(keyPair.getPublic().getEncoded());
-		    String encodedPrivateKey = CryptoUtil.base64Encode(keyPair.getPrivate().getEncoded());
+		    String encodedPubKey = CryptoUtil.encodePublicKeyToBase64String(keyPair.getPublic());
+		    String encodedPrivateKey = CryptoUtil.encodePrivateKeyToBase64String(keyPair.getPrivate());
 
 		    SpkiFullNodeIdentity result = new SpkiFullNodeIdentity(keyDef);
 		    result.setPrivateKey(encodedPrivateKey);

@@ -1,5 +1,10 @@
 package net.segoia.event.eventbus.peers.test.vo;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
+
 import net.segoia.event.eventbus.peers.EventNode;
 import net.segoia.event.eventbus.peers.GlobalEventNodeAgent;
 import net.segoia.event.eventbus.peers.events.PeerAcceptedEvent;
@@ -10,7 +15,11 @@ import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.events.auth.id.SpkiFullNodeIdentity;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.events.bind.DisconnectFromPeerRequest;
+import net.segoia.event.eventbus.peers.events.session.KeyDef;
+import net.segoia.event.eventbus.peers.security.PrivateIdentityData;
+import net.segoia.event.eventbus.peers.security.SpkiPrivateIdentityData;
 import net.segoia.event.eventbus.services.EventNodeServiceRef;
+import net.segoia.util.crypto.CryptoUtil;
 
 public class ClientServiceTestAgent extends GlobalEventNodeAgent {
     private EventNode serverEventNode;
@@ -68,6 +77,9 @@ public class ClientServiceTestAgent extends GlobalEventNodeAgent {
 			new ServiceAccessIdRequest(new EventNodeServiceRef("TEST_SERVICE", 0)));
 		context.forwardTo(serviceAccessIdRequestEvent, peerId);
 	    }
+	    else {
+		System.out.println("Successfull connect with service access id");
+	    }
 	});
 
 	context.addEventHandler(ServiceAccessIdIssuedEvent.class, (c) -> {
@@ -77,9 +89,33 @@ public class ClientServiceTestAgent extends GlobalEventNodeAgent {
 
 	    /* terminate old connection, start a new one with the obtained service access id */
 	    context.disconnectFromPeer(new DisconnectFromPeerRequest(c.getEvent().from()));
-	    
-	    
-	    
+
+	    List<PrivateIdentityData<?>> ourIdentities = new ArrayList<>();
+
+	    String privateKeyString = serviceAccessIdentity.getPrivateKey();
+	    String publicKeyString = serviceAccessIdentity.getPubKey();
+
+	    KeyDef keyDef = serviceAccessIdentity.getType().getKeyDef();
+
+	    try {
+		PrivateKey privateKey = CryptoUtil.getPrivateKeyFromBase64EncodedString(privateKeyString,
+			keyDef.getAlgorithm());
+		PublicKey publicKey = CryptoUtil.getPublicKeyFromBase64EncodedString(publicKeyString,
+			keyDef.getAlgorithm());
+
+		SpkiPrivateIdentityData spkiPrivateIdentityData = new SpkiPrivateIdentityData(privateKey, publicKey,
+			keyDef.getAlgorithm(), keyDef.getKeySize());
+
+		ourIdentities.add(spkiPrivateIdentityData);
+
+		ConnectToPeerRequest newConnectRequest = new ConnectToPeerRequest(clientTransceiver, ourIdentities);
+		
+		context.registerToPeer(newConnectRequest);
+
+	    } catch (Exception ex) {
+		ex.printStackTrace();
+	    }
+
 	});
     }
 
