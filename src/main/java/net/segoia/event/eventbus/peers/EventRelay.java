@@ -21,7 +21,10 @@ import java.io.UnsupportedEncodingException;
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
-import net.segoia.event.eventbus.peers.events.PeerDataEvent;
+import net.segoia.event.eventbus.peers.core.EventTransceiver;
+import net.segoia.event.eventbus.peers.core.PeerDataEvent;
+import net.segoia.event.eventbus.peers.core.PeerDataListener;
+import net.segoia.event.eventbus.peers.vo.PeerLeavingReason;
 
 /**
  * Implements a certain communication protocol over an {@link EventTransceiver}

@@ -2,8 +2,8 @@ package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.eventbus.Event;
-import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
-import net.segoia.event.eventbus.peers.events.bind.DisconnectFromPeerRequest;
+import net.segoia.event.eventbus.peers.vo.bind.ConnectToPeerRequest;
+import net.segoia.event.eventbus.peers.vo.bind.DisconnectFromPeerRequest;
 
 /**
  * A context for the event node agents that are only aware of the local context

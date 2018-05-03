@@ -1,6 +1,6 @@
 package net.segoia.event.eventbus.peers.security;
 
-import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
+import net.segoia.event.eventbus.peers.vo.comm.EncryptWithPublicCommOperationDef;
 
 public class DecryptWithPrivateOperationContext extends SpkiSpkiCommOperationContext<EncryptWithPublicCommOperationDef> {
     private DecryptOperationWorker privateDecryptWorker;

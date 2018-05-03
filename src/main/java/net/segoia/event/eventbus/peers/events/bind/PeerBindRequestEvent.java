@@ -18,6 +18,7 @@ package net.segoia.event.eventbus.peers.events.bind;
 
 import net.segoia.event.eventbus.CustomEvent;
 import net.segoia.event.eventbus.EventType;
+import net.segoia.event.eventbus.PeerBindRequest;
 
 @EventType("PEER:BIND:REQUEST")
 public class PeerBindRequestEvent extends CustomEvent<PeerBindRequest>{

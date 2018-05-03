@@ -3,7 +3,7 @@ package net.segoia.event.eventbus.agents;
 import java.util.List;
 
 import net.segoia.event.eventbus.peers.GlobalEventNodeAgent;
-import net.segoia.event.eventbus.services.EventNodeServiceDefinition;
+import net.segoia.event.eventbus.vo.services.EventNodeServiceDefinition;
 
 public class GlobalAgentRegisterRequest extends AgentRegisterRequest<GlobalEventNodeAgent> {
 

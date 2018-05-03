@@ -15,15 +15,15 @@ import net.segoia.event.eventbus.peers.LocalAgentEventNodeContext;
 import net.segoia.event.eventbus.peers.LocalEventNodeAgent;
 import net.segoia.event.eventbus.peers.events.NewPeerEvent;
 import net.segoia.event.eventbus.peers.events.PeerLeftEvent;
-import net.segoia.event.eventbus.peers.events.auth.NodeAuth;
-import net.segoia.event.eventbus.peers.events.auth.id.IdentityType;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
-import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
-import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.test.vo.ClientTestEventTransceiver;
 import net.segoia.event.eventbus.peers.test.vo.ServerTestEventTransceiver;
 import net.segoia.event.eventbus.peers.test.vo.ClientServiceTestAgent;
 import net.segoia.event.eventbus.peers.test.vo.TestLocalEventNodeAgent;
+import net.segoia.event.eventbus.peers.vo.auth.NodeAuth;
+import net.segoia.event.eventbus.peers.vo.auth.id.IdentityType;
+import net.segoia.event.eventbus.peers.vo.auth.id.NodeIdentity;
+import net.segoia.event.eventbus.peers.vo.auth.id.SpkiNodeIdentity;
+import net.segoia.event.eventbus.peers.vo.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.util.EBus;
 
 public class EventNodeTest {

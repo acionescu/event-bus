@@ -1,6 +1,6 @@
 package net.segoia.event.eventbus.peers.security;
 
-import net.segoia.event.eventbus.peers.comm.EncryptSymmetricOperationDef;
+import net.segoia.event.eventbus.peers.vo.comm.EncryptSymmetricOperationDef;
 
 public class EncryptSymmetricCommOperationContext extends SymmetricCommOperationContext<EncryptSymmetricOperationDef>{
     private EncryptOperationWorker opWorker;

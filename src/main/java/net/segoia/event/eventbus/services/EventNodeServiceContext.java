@@ -1,6 +1,7 @@
 package net.segoia.event.eventbus.services;
 
 import net.segoia.event.eventbus.peers.EventNodeAgent;
+import net.segoia.event.eventbus.vo.services.EventNodeServiceDefinition;
 
 public class EventNodeServiceContext {
     private EventNodeAgent provider;

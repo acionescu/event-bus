@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.segoia.event.eventbus.peers.EventNodeAgent;
-import net.segoia.event.eventbus.services.EventNodeServiceDefinition;
+import net.segoia.event.eventbus.vo.services.EventNodeServiceDefinition;
 
 public class AgentRegisterRequest<A extends EventNodeAgent> {
     private A agent;

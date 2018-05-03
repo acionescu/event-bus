@@ -14,29 +14,13 @@ import javax.crypto.spec.SecretKeySpec;
 import net.segoia.event.eventbus.peers.EventNodeContext;
 import net.segoia.event.eventbus.peers.PeerContext;
 import net.segoia.event.eventbus.peers.PeerEventContext;
-import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
-import net.segoia.event.eventbus.peers.comm.CommunicationProtocolConfig;
-import net.segoia.event.eventbus.peers.comm.CommunicationProtocolDefinition;
-import net.segoia.event.eventbus.peers.comm.EncryptSymmetricOperationDef;
-import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
-import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
 import net.segoia.event.eventbus.peers.comm.PeerCommManager;
-import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
-import net.segoia.event.eventbus.peers.events.NodeInfo;
-import net.segoia.event.eventbus.peers.events.RequestRejectReason;
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
-import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequest;
+import net.segoia.event.eventbus.peers.core.IdentitiesManager;
+import net.segoia.event.eventbus.peers.core.PrivateIdentityData;
+import net.segoia.event.eventbus.peers.core.PrivateIdentityManager;
+import net.segoia.event.eventbus.peers.core.PublicIdentityManager;
+import net.segoia.event.eventbus.peers.core.PublicIdentityManagerFactory;
 import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequestEvent;
-import net.segoia.event.eventbus.peers.events.auth.id.IdentityType;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
-import net.segoia.event.eventbus.peers.events.auth.id.SharedIdentityType;
-import net.segoia.event.eventbus.peers.events.auth.id.SharedNodeIdentity;
-import net.segoia.event.eventbus.peers.events.auth.id.SpkiFullIdentityType;
-import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
-import net.segoia.event.eventbus.peers.events.session.KeyDef;
-import net.segoia.event.eventbus.peers.events.session.SessionInfo;
-import net.segoia.event.eventbus.peers.events.session.SessionKey;
-import net.segoia.event.eventbus.peers.events.session.SessionKeyData;
 import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerRequestHandlingException;
@@ -46,11 +30,35 @@ import net.segoia.event.eventbus.peers.manager.states.PeerStateContext;
 import net.segoia.event.eventbus.peers.manager.states.server.PeerAcceptedState;
 import net.segoia.event.eventbus.peers.security.rules.PeerEventBlackList;
 import net.segoia.event.eventbus.peers.security.rules.PeerEventRule;
-import net.segoia.event.eventbus.services.EventNodeServiceDefinition;
-import net.segoia.event.eventbus.services.EventNodeServiceRef;
-import net.segoia.event.eventbus.services.NodeIdentityProfile;
-import net.segoia.event.eventbus.services.ServiceContract;
+import net.segoia.event.eventbus.peers.vo.NodeInfo;
+import net.segoia.event.eventbus.peers.vo.RequestRejectReason;
+import net.segoia.event.eventbus.peers.vo.auth.PeerAuthRejected;
+import net.segoia.event.eventbus.peers.vo.auth.ServiceAccessIdRequest;
+import net.segoia.event.eventbus.peers.vo.auth.id.IdentityType;
+import net.segoia.event.eventbus.peers.vo.auth.id.NodeIdentity;
+import net.segoia.event.eventbus.peers.vo.auth.id.SharedIdentityType;
+import net.segoia.event.eventbus.peers.vo.auth.id.SharedNodeIdentity;
+import net.segoia.event.eventbus.peers.vo.auth.id.SpkiFullIdentityType;
+import net.segoia.event.eventbus.peers.vo.auth.id.SpkiNodeIdentity;
+import net.segoia.event.eventbus.peers.vo.comm.CommunicationProtocol;
+import net.segoia.event.eventbus.peers.vo.comm.CommunicationProtocolConfig;
+import net.segoia.event.eventbus.peers.vo.comm.CommunicationProtocolDefinition;
+import net.segoia.event.eventbus.peers.vo.comm.EncryptSymmetricOperationDef;
+import net.segoia.event.eventbus.peers.vo.comm.EncryptWithPublicCommOperationDef;
+import net.segoia.event.eventbus.peers.vo.comm.NodeCommunicationStrategy;
+import net.segoia.event.eventbus.peers.vo.comm.SignCommOperationDef;
+import net.segoia.event.eventbus.peers.vo.security.ChannelCommunicationPolicy;
+import net.segoia.event.eventbus.peers.vo.security.IssueIdentityRequest;
+import net.segoia.event.eventbus.peers.vo.security.PeerChannelSecurityPolicy;
+import net.segoia.event.eventbus.peers.vo.session.KeyDef;
+import net.segoia.event.eventbus.peers.vo.session.SessionInfo;
+import net.segoia.event.eventbus.peers.vo.session.SessionKey;
+import net.segoia.event.eventbus.peers.vo.session.SessionKeyData;
 import net.segoia.event.eventbus.util.JsonUtils;
+import net.segoia.event.eventbus.vo.services.EventNodeServiceDefinition;
+import net.segoia.event.eventbus.vo.services.EventNodeServiceRef;
+import net.segoia.event.eventbus.vo.services.NodeIdentityProfile;
+import net.segoia.event.eventbus.vo.services.ServiceContract;
 import net.segoia.util.crypto.CryptoUtil;
 
 public class EventNodeSecurityManager {
@@ -93,7 +101,7 @@ public class EventNodeSecurityManager {
 
 		    @Override
 		    public DefaultSessionManager build(SharedNodeIdentity identity) {
-			return new DefaultSessionManager(identity.getSecretKey(), identity.getIv());
+			return new DefaultSessionManager(identity);
 		    }
 		});
     }
@@ -599,7 +607,7 @@ public class EventNodeSecurityManager {
 	    /* build a session manager and set it on context */
 	    SharedIdentityType sharedIdentityType = new SharedIdentityType(newSessionKeyDef);
 	    SessionManager sessionManager = sessionManagerBuilders.get(sharedIdentityType)
-		    .build(new SharedNodeIdentity(sharedIdentityType, secretKey, iv));
+		    .build(new SharedNodeIdentity(sharedIdentityType, secretKeyBytes, iv));
 
 	    peerContext.setSessionManager(sessionManager);
 	    peerContext.setSessionKey(sessionKey);
@@ -632,12 +640,11 @@ public class EventNodeSecurityManager {
 	CommDataContext processedSessionData = peerCommManager
 		.processIncomingSessionData(new CommDataContext(signCommOperationOutput));
 
-	SecretKeySpec secretKeySpec = new SecretKeySpec(processedSessionData.getData(), keyDef.getAlgorithm());
 
 	/* build a session manager and set it on context */
 	SharedIdentityType sharedIdentityType = new SharedIdentityType(keyDef);
 	SessionManager sessionManager = sessionManagerBuilders.get(sharedIdentityType)
-		.build(new SharedNodeIdentity(sharedIdentityType, secretKeySpec, ivBytes));
+		.build(new SharedNodeIdentity(sharedIdentityType, processedSessionData.getData(), ivBytes));
 
 	peerContext.setSessionManager(sessionManager);
 

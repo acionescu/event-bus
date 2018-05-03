@@ -1,6 +1,6 @@
 package net.segoia.event.eventbus.peers.exceptions;
 
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
+import net.segoia.event.eventbus.peers.vo.auth.PeerAuthRejected;
 
 public class PeerAuthRequestRejectedException extends Exception {
     /**

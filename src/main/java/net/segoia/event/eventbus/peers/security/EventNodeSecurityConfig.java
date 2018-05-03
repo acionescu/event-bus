@@ -2,7 +2,9 @@ package net.segoia.event.eventbus.peers.security;
 
 import java.util.List;
 
-import net.segoia.event.eventbus.peers.events.auth.NodeAuth;
+import net.segoia.event.eventbus.peers.core.IdentitiesManager;
+import net.segoia.event.eventbus.peers.vo.auth.NodeAuth;
+import net.segoia.event.eventbus.peers.vo.security.EventNodeSecurityPolicy;
 
 public class EventNodeSecurityConfig {
     private NodeAuth nodeAuth;

@@ -1,7 +1,8 @@
 package net.segoia.event.eventbus.peers.security;
 
-import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
-import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
+import net.segoia.event.eventbus.peers.core.PrivateIdentityManager;
+import net.segoia.event.eventbus.peers.vo.comm.EncryptWithPublicCommOperationDef;
+import net.segoia.event.eventbus.peers.vo.comm.SignCommOperationDef;
 
 public interface SpkiPrivateIdentityManager extends PrivateIdentityManager{
 //    public byte[] sign(SignCommOperationContext context) throws Exception;

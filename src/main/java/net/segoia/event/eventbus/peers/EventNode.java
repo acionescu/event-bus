@@ -30,25 +30,24 @@ import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.EventDispatcher;
 import net.segoia.event.eventbus.FilteringEventBus;
+import net.segoia.event.eventbus.PeerBindRequest;
 import net.segoia.event.eventbus.agents.AgentRegisterRequest;
 import net.segoia.event.eventbus.agents.GlobalAgentRegisterRequest;
 import net.segoia.event.eventbus.agents.LocalAgentRegisterRequest;
-import net.segoia.event.eventbus.peers.events.EventNodeInfo;
-import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.events.NodeTerminateEvent;
-import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
 import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequestEvent;
-import net.segoia.event.eventbus.peers.events.bind.DisconnectFromPeerRequest;
 import net.segoia.event.eventbus.peers.events.bind.DisconnectFromPeerRequestEvent;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindRequest;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindRequestEvent;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityConfig;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
+import net.segoia.event.eventbus.peers.vo.NodeInfo;
+import net.segoia.event.eventbus.peers.vo.bind.ConnectToPeerRequest;
+import net.segoia.event.eventbus.peers.vo.bind.DisconnectFromPeerRequest;
 import net.segoia.event.eventbus.services.EventNodeServiceContext;
-import net.segoia.event.eventbus.services.EventNodeServiceDefinition;
-import net.segoia.event.eventbus.services.EventNodeServiceRef;
 import net.segoia.event.eventbus.services.EventNodeServicesManager;
 import net.segoia.event.eventbus.util.EBus;
+import net.segoia.event.eventbus.vo.services.EventNodeServiceDefinition;
+import net.segoia.event.eventbus.vo.services.EventNodeServiceRef;
 
 /**
  * This encapsulates the connection with another event bus

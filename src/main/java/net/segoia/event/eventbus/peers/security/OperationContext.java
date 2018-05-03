@@ -3,6 +3,8 @@ package net.segoia.event.eventbus.peers.security;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.segoia.event.eventbus.peers.vo.OperationDef;
+
 public class OperationContext<D extends OperationDef> {
     private D opDef;
     

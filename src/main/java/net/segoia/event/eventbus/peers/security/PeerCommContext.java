@@ -1,7 +1,7 @@
 package net.segoia.event.eventbus.peers.security;
 
 import net.segoia.event.eventbus.peers.PeerContext;
-import net.segoia.event.eventbus.peers.comm.NodeCommunicationStrategy;
+import net.segoia.event.eventbus.peers.vo.comm.NodeCommunicationStrategy;
 
 public class PeerCommContext {
     private int ourIdentityIndex;

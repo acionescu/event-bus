@@ -7,18 +7,18 @@ import java.util.List;
 
 import net.segoia.event.eventbus.peers.EventNode;
 import net.segoia.event.eventbus.peers.GlobalEventNodeAgent;
+import net.segoia.event.eventbus.peers.core.PrivateIdentityData;
 import net.segoia.event.eventbus.peers.events.PeerAcceptedEvent;
 import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdIssuedEvent;
-import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequest;
 import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequestEvent;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
-import net.segoia.event.eventbus.peers.events.auth.id.SpkiFullNodeIdentity;
-import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
-import net.segoia.event.eventbus.peers.events.bind.DisconnectFromPeerRequest;
-import net.segoia.event.eventbus.peers.events.session.KeyDef;
-import net.segoia.event.eventbus.peers.security.PrivateIdentityData;
 import net.segoia.event.eventbus.peers.security.SpkiPrivateIdentityData;
-import net.segoia.event.eventbus.services.EventNodeServiceRef;
+import net.segoia.event.eventbus.peers.vo.auth.ServiceAccessIdRequest;
+import net.segoia.event.eventbus.peers.vo.auth.id.NodeIdentity;
+import net.segoia.event.eventbus.peers.vo.auth.id.SpkiFullNodeIdentity;
+import net.segoia.event.eventbus.peers.vo.bind.ConnectToPeerRequest;
+import net.segoia.event.eventbus.peers.vo.bind.DisconnectFromPeerRequest;
+import net.segoia.event.eventbus.peers.vo.session.KeyDef;
+import net.segoia.event.eventbus.vo.services.EventNodeServiceRef;
 import net.segoia.util.crypto.CryptoUtil;
 
 public class ClientServiceTestAgent extends GlobalEventNodeAgent {

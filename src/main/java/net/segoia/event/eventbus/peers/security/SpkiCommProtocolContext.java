@@ -1,6 +1,6 @@
 package net.segoia.event.eventbus.peers.security;
 
-import net.segoia.event.eventbus.peers.comm.CommStrategy;
+import net.segoia.event.eventbus.peers.vo.comm.CommStrategy;
 
 public class SpkiCommProtocolContext extends CommProtocolContext {
     private SpkiPrivateIdentityManager ourIdentity;

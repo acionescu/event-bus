@@ -5,19 +5,19 @@ import java.util.ArrayList;
 import net.segoia.event.eventbus.peers.PeerContext;
 import net.segoia.event.eventbus.peers.PeerEventContext;
 import net.segoia.event.eventbus.peers.PeerManager;
-import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdIssuedData;
 import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdIssuedEvent;
-import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequest;
 import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequestEvent;
-import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequestRejectedReason;
 import net.segoia.event.eventbus.peers.events.auth.ServiceAccessIdRequestRjectedEvent;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
 import net.segoia.event.eventbus.peers.exceptions.PeerRequestHandlingException;
 import net.segoia.event.eventbus.peers.exceptions.PeerRequestRejectedException;
 import net.segoia.event.eventbus.peers.manager.states.PeerManagerState;
 import net.segoia.event.eventbus.peers.manager.states.PeerStateContext;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
-import net.segoia.event.eventbus.services.NodeIdentityProfile;
+import net.segoia.event.eventbus.peers.vo.auth.ServiceAccessIdIssuedData;
+import net.segoia.event.eventbus.peers.vo.auth.ServiceAccessIdRequest;
+import net.segoia.event.eventbus.peers.vo.auth.ServiceAccessIdRequestRejectedReason;
+import net.segoia.event.eventbus.peers.vo.auth.id.NodeIdentity;
+import net.segoia.event.eventbus.vo.services.NodeIdentityProfile;
 
 public class PeerAcceptedState extends PeerManagerState {
     public static final String ID = "PeerAcceptedState";

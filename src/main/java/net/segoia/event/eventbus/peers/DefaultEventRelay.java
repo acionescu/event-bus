@@ -16,6 +16,8 @@
  */
 package net.segoia.event.eventbus.peers;
 
+import net.segoia.event.eventbus.peers.core.EventTransceiver;
+
 public class DefaultEventRelay extends EventRelay {
 
     public DefaultEventRelay(String id) {

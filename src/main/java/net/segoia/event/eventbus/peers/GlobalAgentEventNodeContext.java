@@ -3,7 +3,7 @@ package net.segoia.event.eventbus.peers;
 import java.util.Set;
 
 import net.segoia.event.eventbus.Event;
-import net.segoia.event.eventbus.peers.events.bind.ConnectToPeerRequest;
+import net.segoia.event.eventbus.peers.vo.bind.ConnectToPeerRequest;
 
 /**
  * A context that is aware of peer events as well as local events

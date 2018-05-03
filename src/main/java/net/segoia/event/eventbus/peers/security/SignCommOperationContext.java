@@ -1,6 +1,6 @@
 package net.segoia.event.eventbus.peers.security;
 
-import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
+import net.segoia.event.eventbus.peers.vo.comm.SignCommOperationDef;
 
 public class SignCommOperationContext extends SpkiSpkiCommOperationContext<SignCommOperationDef> {
     private SignOperationWorker signWorker;

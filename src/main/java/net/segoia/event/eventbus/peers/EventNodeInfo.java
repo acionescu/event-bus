@@ -14,25 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus;
+package net.segoia.event.eventbus.peers;
 
-/**
- * Dispatches an event to the registered listeners
- * 
- * @author adi
- *
- */
-public interface EventDispatcher {
+public class EventNodeInfo {
+    private EventNode node;
+
+    public EventNodeInfo(EventNode node) {
+	super();
+	this.node = node;
+    }
+
+    /**
+     * @return the node
+     */
+    public EventNode getNode() {
+        return node;
+    }
     
-    void start();
     
-    void stop();
-
-    boolean dispatchEvent(EventContext ec);
-
-    void registerListener(EventContextListener listener);
-
-    void registerListener(EventContextListener listener, int priority);
-
-    void removeListener(EventContextListener listener);
 }

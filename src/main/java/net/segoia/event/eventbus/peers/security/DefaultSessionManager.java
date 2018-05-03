@@ -3,17 +3,20 @@ package net.segoia.event.eventbus.peers.security;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
-import net.segoia.event.eventbus.peers.comm.EncryptSymmetricOperationDef;
+import net.segoia.event.eventbus.peers.vo.auth.id.SharedNodeIdentity;
+import net.segoia.event.eventbus.peers.vo.comm.EncryptSymmetricOperationDef;
 
 public class DefaultSessionManager implements SessionManager {
     private SecretKey secretKey;
     private byte[] iv;
 
-    public DefaultSessionManager(SecretKey secretKey, byte[] iv) {
+    public DefaultSessionManager(SharedNodeIdentity sharedIdentity) {
 	super();
-	this.secretKey = secretKey;
-	this.iv =iv;
+	this.secretKey = new SecretKeySpec(sharedIdentity.getKeyBytes(),
+		sharedIdentity.getType().getKeyDef().getAlgorithm());
+	this.iv = sharedIdentity.getIv();
     }
 
     @Override

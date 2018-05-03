@@ -18,7 +18,7 @@ package net.segoia.event.eventbus.peers.events.register;
 
 import net.segoia.event.eventbus.CustomEvent;
 import net.segoia.event.eventbus.EventType;
-import net.segoia.event.eventbus.peers.events.NodeInfo;
+import net.segoia.event.eventbus.peers.vo.NodeInfo;
 
 @EventType("PEER:RESPONSE:REGISTERED")
 public class PeerRegisteredEvent extends CustomEvent<NodeInfo>{

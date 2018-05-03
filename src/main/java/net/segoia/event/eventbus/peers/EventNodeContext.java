@@ -1,11 +1,11 @@
 package net.segoia.event.eventbus.peers;
 
 import net.segoia.event.eventbus.Event;
-import net.segoia.event.eventbus.peers.events.NodeInfo;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
 import net.segoia.event.eventbus.peers.util.EventNodeHelper;
-import net.segoia.event.eventbus.services.EventNodeServiceDefinition;
-import net.segoia.event.eventbus.services.EventNodeServiceRef;
+import net.segoia.event.eventbus.peers.vo.NodeInfo;
+import net.segoia.event.eventbus.vo.services.EventNodeServiceDefinition;
+import net.segoia.event.eventbus.vo.services.EventNodeServiceRef;
 
 /**
  * Defines an {@link EventNode}'s runtime context

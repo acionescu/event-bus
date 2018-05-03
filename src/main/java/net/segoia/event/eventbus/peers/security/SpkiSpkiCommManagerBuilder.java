@@ -1,7 +1,7 @@
 package net.segoia.event.eventbus.peers.security;
 
-import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
-import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
+import net.segoia.event.eventbus.peers.vo.comm.EncryptWithPublicCommOperationDef;
+import net.segoia.event.eventbus.peers.vo.comm.SignCommOperationDef;
 
 public class SpkiSpkiCommManagerBuilder implements CommManagerBuilder<SpkiCommProtocolContext> {
     private CommManagerConfig config;

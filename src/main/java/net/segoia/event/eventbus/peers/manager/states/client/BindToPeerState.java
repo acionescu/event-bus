@@ -3,11 +3,11 @@ package net.segoia.event.eventbus.peers.manager.states.client;
 import net.segoia.event.eventbus.peers.PeerContext;
 import net.segoia.event.eventbus.peers.PeerEventContext;
 import net.segoia.event.eventbus.peers.PeerManager;
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequest;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequestEvent;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindAccepted;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindAcceptedEvent;
 import net.segoia.event.eventbus.peers.manager.states.PeerManagerState;
+import net.segoia.event.eventbus.peers.vo.auth.PeerAuthRequest;
+import net.segoia.event.eventbus.peers.vo.bind.PeerBindAccepted;
 
 public class BindToPeerState extends PeerManagerState {
 

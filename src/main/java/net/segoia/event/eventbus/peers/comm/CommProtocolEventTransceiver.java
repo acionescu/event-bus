@@ -1,9 +1,9 @@
 package net.segoia.event.eventbus.peers.comm;
 
-import net.segoia.event.eventbus.peers.ChainedEventTransceiver;
-import net.segoia.event.eventbus.peers.EventTransceiver;
 import net.segoia.event.eventbus.peers.PeerContext;
-import net.segoia.event.eventbus.peers.events.PeerDataEvent;
+import net.segoia.event.eventbus.peers.core.ChainedEventTransceiver;
+import net.segoia.event.eventbus.peers.core.EventTransceiver;
+import net.segoia.event.eventbus.peers.core.PeerDataEvent;
 import net.segoia.event.eventbus.peers.security.CommDataContext;
 import net.segoia.event.eventbus.peers.security.CommOperationException;
 import net.segoia.util.crypto.CryptoUtil;

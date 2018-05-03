@@ -1,6 +1,6 @@
 package net.segoia.event.eventbus.peers.security;
 
-import net.segoia.event.eventbus.peers.comm.CommOperationDef;
+import net.segoia.event.eventbus.peers.vo.comm.CommOperationDef;
 
 public class SpkiSpkiCommOperationContext<D extends CommOperationDef>
 	extends SpkiCommOperationContext<D, SpkiPrivateIdentityManager, SpkiPublicIdentityManager> {

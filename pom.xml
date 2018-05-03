@@ -8,7 +8,7 @@
    <name>event-bus</name>
    <description>An event bus framework for event driven programming</description>
    <url>https://github.com/acionescu/event-bus</url>
-    <licenses>
+   <licenses>
       <license>
          <name>The Apache Software License, Version 2.0</name>
          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
@@ -36,7 +36,6 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <additionalparam>-Xdoclint:none</additionalparam>
    </properties>
-  
    <build>
       <sourceDirectory>src/main/java</sourceDirectory>
       <testSourceDirectory>src/test/java</testSourceDirectory>
@@ -126,7 +125,7 @@
          </plugin>
       </plugins>
    </build>
-    <distributionManagement>
+   <distributionManagement>
       <snapshotRepository>
          <id>ossrh</id>
          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -157,6 +156,11 @@
          <groupId>log4j</groupId>
          <artifactId>log4j</artifactId>
          <version>1.2.14</version>
+      </dependency>
+      <dependency>
+         <groupId>net.segoia</groupId>
+         <artifactId>eventbus-commons</artifactId>
+         <version>0.0.1-SNAPSHOT</version>
       </dependency>
    </dependencies>
 </project>

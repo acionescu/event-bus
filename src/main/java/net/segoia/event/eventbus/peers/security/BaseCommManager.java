@@ -3,8 +3,8 @@ package net.segoia.event.eventbus.peers.security;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.segoia.event.eventbus.peers.comm.CommOperationDef;
-import net.segoia.event.eventbus.peers.comm.CommStrategy;
+import net.segoia.event.eventbus.peers.vo.comm.CommOperationDef;
+import net.segoia.event.eventbus.peers.vo.comm.CommStrategy;
 
 public class BaseCommManager<C extends CommProtocolContext> implements CommManager {
     private C commProtocolContext;

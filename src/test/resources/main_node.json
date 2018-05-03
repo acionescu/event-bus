@@ -5,7 +5,7 @@
 			"securityConfig": {
 				"nodeAuth": {
 					"identities": [{
-						"className": "net.segoia.event.eventbus.peers.events.auth.id.PlainNodeIdentity"
+						"className": "net.segoia.event.eventbus.peers.vo.auth.id.PlainNodeIdentity"
 					}]
 				},
 				"securityPolicy":{

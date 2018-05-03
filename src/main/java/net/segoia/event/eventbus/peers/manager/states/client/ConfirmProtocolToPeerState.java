@@ -5,12 +5,12 @@ import net.segoia.event.eventbus.peers.PeerEventContext;
 import net.segoia.event.eventbus.peers.PeerManager;
 import net.segoia.event.eventbus.peers.comm.PeerCommManager;
 import net.segoia.event.eventbus.peers.events.session.PeerSessionStartedEvent;
-import net.segoia.event.eventbus.peers.events.session.SessionInfo;
-import net.segoia.event.eventbus.peers.events.session.SessionKeyData;
-import net.segoia.event.eventbus.peers.events.session.SessionStartedData;
 import net.segoia.event.eventbus.peers.manager.states.PeerManagerState;
 import net.segoia.event.eventbus.peers.security.CommOperationException;
 import net.segoia.event.eventbus.peers.security.EventNodeSecurityManager;
+import net.segoia.event.eventbus.peers.vo.session.SessionInfo;
+import net.segoia.event.eventbus.peers.vo.session.SessionKeyData;
+import net.segoia.event.eventbus.peers.vo.session.SessionStartedData;
 import net.segoia.util.crypto.CryptoUtil;
 
 public class ConfirmProtocolToPeerState extends PeerManagerState {

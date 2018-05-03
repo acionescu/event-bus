@@ -5,12 +5,17 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.segoia.event.eventbus.peers.events.auth.id.IdentityType;
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
-import net.segoia.event.eventbus.peers.events.auth.id.SpkiFullIdentityType;
-import net.segoia.event.eventbus.peers.events.auth.id.SpkiFullNodeIdentity;
-import net.segoia.event.eventbus.peers.events.session.KeyDef;
-import net.segoia.event.eventbus.services.NodeIdentityProfile;
+import net.segoia.event.eventbus.peers.core.IdentitiesManager;
+import net.segoia.event.eventbus.peers.core.IdentitiesRepository;
+import net.segoia.event.eventbus.peers.core.IdentityBuilder;
+import net.segoia.event.eventbus.peers.core.IdentityException;
+import net.segoia.event.eventbus.peers.vo.auth.id.IdentityType;
+import net.segoia.event.eventbus.peers.vo.auth.id.NodeIdentity;
+import net.segoia.event.eventbus.peers.vo.auth.id.SpkiFullIdentityType;
+import net.segoia.event.eventbus.peers.vo.auth.id.SpkiFullNodeIdentity;
+import net.segoia.event.eventbus.peers.vo.security.IssueIdentityRequest;
+import net.segoia.event.eventbus.peers.vo.session.KeyDef;
+import net.segoia.event.eventbus.vo.services.NodeIdentityProfile;
 import net.segoia.util.crypto.CryptoUtil;
 
 public class DefaultIdentitiesManager implements IdentitiesManager {

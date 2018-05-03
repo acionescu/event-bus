@@ -1,7 +1,7 @@
 package net.segoia.event.eventbus.peers.test.vo;
 
+import net.segoia.event.eventbus.PeerBindRequest;
 import net.segoia.event.eventbus.peers.EventNode;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindRequest;
 
 public class ServerTestEventTransceiver extends TestEventTransceiver{
     /**

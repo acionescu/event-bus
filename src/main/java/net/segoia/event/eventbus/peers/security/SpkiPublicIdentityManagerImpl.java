@@ -6,9 +6,10 @@ import java.security.Signature;
 
 import javax.crypto.Cipher;
 
-import net.segoia.event.eventbus.peers.comm.EncryptWithPublicCommOperationDef;
-import net.segoia.event.eventbus.peers.comm.SignCommOperationDef;
-import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
+import net.segoia.event.eventbus.peers.core.IdentityException;
+import net.segoia.event.eventbus.peers.vo.auth.id.SpkiNodeIdentity;
+import net.segoia.event.eventbus.peers.vo.comm.EncryptWithPublicCommOperationDef;
+import net.segoia.event.eventbus.peers.vo.comm.SignCommOperationDef;
 import net.segoia.util.crypto.CryptoUtil;
 
 public class SpkiPublicIdentityManagerImpl implements SpkiPublicIdentityManager {

@@ -3,7 +3,7 @@ package net.segoia.event.eventbus.peers.security;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.segoia.event.eventbus.peers.comm.CommOperationDef;
+import net.segoia.event.eventbus.peers.vo.comm.CommOperationDef;
 
 public class CommManagerConfig {
     private Map<String, CommOperation> txOperations=new HashMap<>();

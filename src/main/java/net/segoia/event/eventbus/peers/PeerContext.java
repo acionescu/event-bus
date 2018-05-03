@@ -2,17 +2,18 @@ package net.segoia.event.eventbus.peers;
 
 import java.util.List;
 
-import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.comm.PeerCommManager;
-import net.segoia.event.eventbus.peers.events.NodeInfo;
-import net.segoia.event.eventbus.peers.events.session.SessionKey;
+import net.segoia.event.eventbus.peers.core.EventTransceiver;
+import net.segoia.event.eventbus.peers.core.PrivateIdentityData;
+import net.segoia.event.eventbus.peers.core.PrivateIdentityManager;
+import net.segoia.event.eventbus.peers.core.PublicIdentityManager;
 import net.segoia.event.eventbus.peers.manager.states.PeerStateContext;
 import net.segoia.event.eventbus.peers.security.PeerCommContext;
-import net.segoia.event.eventbus.peers.security.PrivateIdentityData;
-import net.segoia.event.eventbus.peers.security.PrivateIdentityManager;
-import net.segoia.event.eventbus.peers.security.PublicIdentityManager;
 import net.segoia.event.eventbus.peers.security.SessionManager;
-import net.segoia.event.eventbus.services.NodeIdentityProfile;
+import net.segoia.event.eventbus.peers.vo.NodeInfo;
+import net.segoia.event.eventbus.peers.vo.comm.CommunicationProtocol;
+import net.segoia.event.eventbus.peers.vo.session.SessionKey;
+import net.segoia.event.eventbus.vo.services.NodeIdentityProfile;
 
 public class PeerContext {
     private String peerId;

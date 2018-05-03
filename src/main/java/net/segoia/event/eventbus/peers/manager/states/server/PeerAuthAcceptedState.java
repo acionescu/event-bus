@@ -2,10 +2,10 @@ package net.segoia.event.eventbus.peers.manager.states.server;
 
 import net.segoia.event.eventbus.peers.PeerEventContext;
 import net.segoia.event.eventbus.peers.PeerManager;
-import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
 import net.segoia.event.eventbus.peers.events.auth.PeerProtocolConfirmedEvent;
-import net.segoia.event.eventbus.peers.events.auth.ProtocolConfirmation;
 import net.segoia.event.eventbus.peers.manager.states.PeerManagerState;
+import net.segoia.event.eventbus.peers.vo.auth.ProtocolConfirmation;
+import net.segoia.event.eventbus.peers.vo.comm.CommunicationProtocol;
 
 public class PeerAuthAcceptedState extends PeerManagerState {
 

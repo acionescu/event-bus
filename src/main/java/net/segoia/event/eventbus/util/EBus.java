@@ -25,12 +25,14 @@ import net.segoia.event.conditions.Condition;
 import net.segoia.event.conditions.TrueCondition;
 import net.segoia.event.eventbus.AsyncEventDispatcher;
 import net.segoia.event.eventbus.BlockingEventDispatcher;
+import net.segoia.event.eventbus.DefaultEventsRepository;
 import net.segoia.event.eventbus.DelegatingEventDispatcher;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContextDispatcher;
 import net.segoia.event.eventbus.EventContextListener;
 import net.segoia.event.eventbus.EventDispatcher;
 import net.segoia.event.eventbus.EventHandle;
+import net.segoia.event.eventbus.EventsRepository;
 import net.segoia.event.eventbus.FilteringEventBus;
 import net.segoia.event.eventbus.InternalEventTracker;
 import net.segoia.event.eventbus.builders.DefaultComponentEventBuilder;
@@ -57,6 +59,8 @@ public class EBus {
 	    1000);
 
     static {
+	EventsRepository.instance = new DefaultEventsRepository();
+	
 	/* set if there's any config file */
 
 	File cfgFile = new File(EBus.class.getClassLoader().getResource(jsonConfigFile).getFile());

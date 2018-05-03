@@ -19,6 +19,7 @@ package net.segoia.event.eventbus.peers.events;
 import net.segoia.event.eventbus.CustomEvent;
 import net.segoia.event.eventbus.EventType;
 import net.segoia.event.eventbus.peers.EventNode;
+import net.segoia.event.eventbus.peers.EventNodeInfo;
 
 @EventType("EBUS:REQUEST:TERMINATE")
 public class NodeTerminateEvent extends CustomEvent<EventNodeInfo>{

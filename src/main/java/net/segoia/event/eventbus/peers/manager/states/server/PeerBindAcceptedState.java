@@ -2,20 +2,20 @@ package net.segoia.event.eventbus.peers.manager.states.server;
 
 import net.segoia.event.eventbus.peers.PeerEventContext;
 import net.segoia.event.eventbus.peers.PeerManager;
-import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
-import net.segoia.event.eventbus.peers.events.RequestRejectReason;
-import net.segoia.event.eventbus.peers.events.auth.MessageAuthRejectedReason;
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthAccepted;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthAcceptedEvent;
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejected;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRejectedEvent;
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequest;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthRequestEvent;
-import net.segoia.event.eventbus.peers.events.bind.PeerBindAccepted;
 import net.segoia.event.eventbus.peers.events.bind.PeerBindAcceptedEvent;
 import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
 import net.segoia.event.eventbus.peers.manager.states.PeerManagerState;
+import net.segoia.event.eventbus.peers.vo.RequestRejectReason;
+import net.segoia.event.eventbus.peers.vo.auth.MessageAuthRejectedReason;
+import net.segoia.event.eventbus.peers.vo.auth.PeerAuthAccepted;
+import net.segoia.event.eventbus.peers.vo.auth.PeerAuthRejected;
+import net.segoia.event.eventbus.peers.vo.auth.PeerAuthRequest;
+import net.segoia.event.eventbus.peers.vo.bind.PeerBindAccepted;
+import net.segoia.event.eventbus.peers.vo.comm.CommunicationProtocol;
 
 public class PeerBindAcceptedState extends PeerManagerState{
 

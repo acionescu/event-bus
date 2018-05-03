@@ -3,16 +3,16 @@ package net.segoia.event.eventbus.peers.manager.states.client;
 import net.segoia.event.eventbus.peers.PeerContext;
 import net.segoia.event.eventbus.peers.PeerEventContext;
 import net.segoia.event.eventbus.peers.PeerManager;
-import net.segoia.event.eventbus.peers.comm.CommunicationProtocol;
-import net.segoia.event.eventbus.peers.events.auth.PeerAuthAccepted;
 import net.segoia.event.eventbus.peers.events.auth.PeerAuthAcceptedEvent;
 import net.segoia.event.eventbus.peers.events.auth.PeerProtocolConfirmedEvent;
-import net.segoia.event.eventbus.peers.events.auth.ProtocolConfirmation;
 import net.segoia.event.eventbus.peers.events.session.PeerSessionStartedEvent;
-import net.segoia.event.eventbus.peers.events.session.SessionStartedData;
 import net.segoia.event.eventbus.peers.exceptions.PeerAuthRequestRejectedException;
 import net.segoia.event.eventbus.peers.exceptions.PeerCommunicationNegotiationFailedException;
 import net.segoia.event.eventbus.peers.manager.states.PeerManagerState;
+import net.segoia.event.eventbus.peers.vo.auth.PeerAuthAccepted;
+import net.segoia.event.eventbus.peers.vo.auth.ProtocolConfirmation;
+import net.segoia.event.eventbus.peers.vo.comm.CommunicationProtocol;
+import net.segoia.event.eventbus.peers.vo.session.SessionStartedData;
 
 public class AuthToPeerState extends PeerManagerState{
 

@@ -3,6 +3,9 @@ package net.segoia.event.eventbus.services;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.segoia.event.eventbus.vo.services.EventNodePublicServiceDesc;
+import net.segoia.event.eventbus.vo.services.EventNodeServiceRef;
+
 public class EventNodeServicesManager {
     private Map<EventNodeServiceRef, EventNodeServiceContext> services = new HashMap<>();
 

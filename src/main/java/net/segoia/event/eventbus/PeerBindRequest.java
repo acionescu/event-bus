@@ -14,17 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.peers.events.bind;
+package net.segoia.event.eventbus;
+
 
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.conditions.LooseEventMatchCondition;
 import net.segoia.event.eventbus.constants.Events;
 import net.segoia.event.eventbus.peers.EventNode;
-import net.segoia.event.eventbus.peers.EventTransceiver;
+import net.segoia.event.eventbus.peers.core.EventTransceiver;
 
 public class PeerBindRequest {
     private transient EventTransceiver transceiver;
-
+	
     /**
      * On what kind of events this node wants to listed </br>
      * If left null, it will attempt to listen on all events </br>

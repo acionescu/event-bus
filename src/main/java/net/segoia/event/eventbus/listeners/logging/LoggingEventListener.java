@@ -21,6 +21,7 @@ import net.segoia.event.eventbus.EventContextListener;
 import net.segoia.event.eventbus.EventTypeConfig;
 import net.segoia.util.logging.Logger;
 import net.segoia.util.logging.LoggerFactory;
+import net.segoia.util.logging.LoggingLevel;
 import net.segoia.util.logging.MasterLogManager;
 
 public class LoggingEventListener implements EventContextListener {
@@ -70,7 +71,7 @@ public class LoggingEventListener implements EventContextListener {
 	    out = ec.getEvent().toString();
 	}
 	System.out.println("Logging event " + ec.getEvent().getEt());
-	return logger.trace(etc.getLoggingLevel(), out, null);
+	return logger.trace(LoggingLevel.valueOf(etc.getLoggingLevel()), out, null);
     }
 
     @Override

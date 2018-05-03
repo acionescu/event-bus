@@ -1,7 +1,7 @@
 package net.segoia.event.eventbus.peers.test.vo;
 
-import net.segoia.event.eventbus.peers.AbstractEventTransceiver;
-import net.segoia.event.eventbus.peers.PeerLeavingReason;
+import net.segoia.event.eventbus.peers.core.AbstractEventTransceiver;
+import net.segoia.event.eventbus.peers.vo.PeerLeavingReason;
 
 public abstract class TestEventTransceiver extends AbstractEventTransceiver {
     /**

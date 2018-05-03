@@ -3,9 +3,10 @@ package net.segoia.event.eventbus.peers.security;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.segoia.event.eventbus.peers.events.auth.id.NodeIdentity;
-import net.segoia.event.eventbus.peers.events.auth.id.SpkiNodeIdentity;
-import net.segoia.event.eventbus.services.NodeIdentityProfile;
+import net.segoia.event.eventbus.peers.core.IdentitiesRepository;
+import net.segoia.event.eventbus.peers.vo.auth.id.NodeIdentity;
+import net.segoia.event.eventbus.peers.vo.auth.id.SpkiNodeIdentity;
+import net.segoia.event.eventbus.vo.services.NodeIdentityProfile;
 
 public class InMemoryIdentitiesRepository implements IdentitiesRepository {
     private Map<Class<?>, IssuedIdentityManager<?>> identityManagers;
