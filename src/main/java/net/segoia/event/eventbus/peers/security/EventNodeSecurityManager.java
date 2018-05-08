@@ -178,13 +178,31 @@ public class EventNodeSecurityManager {
 	config.addTxOperation(EncryptSymmetricOperationDef.TYPE, new EncryptSymmetricCommOperation());
 	config.addRxOperation(EncryptSymmetricOperationDef.TYPE, new DecryptSymmetricCommOperation());
 
+	NestedOperationDataSerializer defaultDataSerializer = new NestedOperationDataSerializer((o) -> {
+	    return o.getData();
+	});
+
+	defaultDataSerializer.addSerializer(SignCommOperationOutput.class, (o) -> {
+
+	    try {
+		return JsonUtils.toJson(o).getBytes("UTF-8");
+	    } catch (UnsupportedEncodingException e) {
+
+		e.printStackTrace();
+	    }
+	    return null;
+	});
+
 	/* add tx operation context builders */
 	config.addTxOpContextBuilder(SignCommOperationDef.TYPE,
 		new SpkiCommOperationContextBuilder<SignCommOperationDef>() {
 
 		    @Override
 		    public OperationContext buildContext(SignCommOperationDef def, SpkiCommProtocolContext context) {
-			return new SignCommOperationContext(def, context.getOurIdentity(), context.getPeerIdentity());
+			SignCommOperationContext oc = new SignCommOperationContext(def, context.getOurIdentity(),
+				context.getPeerIdentity());
+			oc.setDefaultSerializer(defaultDataSerializer);
+			return oc;
 		    }
 
 		});
@@ -195,8 +213,10 @@ public class EventNodeSecurityManager {
 		    @Override
 		    public OperationContext buildContext(EncryptWithPublicCommOperationDef def,
 			    SpkiCommProtocolContext context) {
-			return new EncryptWithPublicOperationContext(def, context.getOurIdentity(),
-				context.getPeerIdentity());
+			EncryptWithPublicOperationContext oc = new EncryptWithPublicOperationContext(def,
+				context.getOurIdentity(), context.getPeerIdentity());
+			oc.setDefaultSerializer(defaultDataSerializer);
+			return oc;
 		    }
 		});
 
@@ -223,6 +243,7 @@ public class EventNodeSecurityManager {
 				    SignCommOperationOutput.class);
 			    return signOperationOutput;
 			});
+			rc.setDefaultSerializer(defaultDataSerializer);
 			return rc;
 		    }
 		});
@@ -233,8 +254,10 @@ public class EventNodeSecurityManager {
 		    @Override
 		    public OperationContext buildContext(EncryptWithPublicCommOperationDef def,
 			    SpkiCommProtocolContext context) {
-			return new DecryptWithPrivateOperationContext(def, context.getOurIdentity(),
-				context.getPeerIdentity());
+			DecryptWithPrivateOperationContext oc = new DecryptWithPrivateOperationContext(def,
+				context.getOurIdentity(), context.getPeerIdentity());
+			oc.setDefaultSerializer(defaultDataSerializer);
+			return oc;
 		    }
 		});
 
@@ -246,7 +269,10 @@ public class EventNodeSecurityManager {
 		    @Override
 		    public OperationContext<EncryptSymmetricOperationDef> buildContext(EncryptSymmetricOperationDef def,
 			    CombinedCommProtocolContext context) {
-			return new EncryptSymmetricCommOperationContext(def, context.getSharedIdentityManager());
+			EncryptSymmetricCommOperationContext oc = new EncryptSymmetricCommOperationContext(def,
+				context.getSharedIdentityManager());
+			oc.setDefaultSerializer(defaultDataSerializer);
+			return oc;
 		    }
 		});
 
@@ -256,7 +282,10 @@ public class EventNodeSecurityManager {
 		    @Override
 		    public OperationContext<EncryptSymmetricOperationDef> buildContext(EncryptSymmetricOperationDef def,
 			    CombinedCommProtocolContext context) {
-			return new DecryptSymmetricCommOperationContext(def, context.getSharedIdentityManager());
+			DecryptSymmetricCommOperationContext oc = new DecryptSymmetricCommOperationContext(def,
+				context.getSharedIdentityManager());
+			oc.setDefaultSerializer(defaultDataSerializer);
+			return oc;
 		    }
 		});
 
@@ -379,13 +408,12 @@ public class EventNodeSecurityManager {
 	if (privateIdentityData != null) {
 	    return privateIdentityData;
 	}
-	
+
 	List<PrivateIdentityData<?>> ourAvailableIdentities = peerContext.getOurAvailableIdentities();
-	
-	if(ourAvailableIdentities != null) {
+
+	if (ourAvailableIdentities != null) {
 	    privateIdentityData = ourAvailableIdentities.get(pcc.getOurIdentityIndex());
-	}
-	else {
+	} else {
 	    privateIdentityData = privateIdentities.get(pcc.getOurIdentityIndex());
 	}
 	peerContext.setOurIdentityManager(privateIdentityData);
@@ -460,15 +488,15 @@ public class EventNodeSecurityManager {
 	    return CommunicationProtocol.buildPlainProtocol();
 	}
 
-	
-	List<? extends NodeIdentity<? extends IdentityType>> localIdentities = securityConfig.getNodeAuth().getIdentities();
+	List<? extends NodeIdentity<? extends IdentityType>> localIdentities = securityConfig.getNodeAuth()
+		.getIdentities();
 
 	NodeInfo ourNodeInfo = peerContext.getOurNodeInfo();
 	/* if we a different node info is specified, then use that */
 	if (ourNodeInfo != null) {
 	    localIdentities = ourNodeInfo.getNodeAuth().getIdentities();
 	}
-	
+
 	/* see if we can match a local tx strategy with a peer rx strategy */
 
 	List<StrategyIdentitiesPair> localAsTxStrategyIdentitiesPairs = getMatchingCommStrategy(
@@ -639,7 +667,6 @@ public class EventNodeSecurityManager {
 
 	CommDataContext processedSessionData = peerCommManager
 		.processIncomingSessionData(new CommDataContext(signCommOperationOutput));
-
 
 	/* build a session manager and set it on context */
 	SharedIdentityType sharedIdentityType = new SharedIdentityType(keyDef);
