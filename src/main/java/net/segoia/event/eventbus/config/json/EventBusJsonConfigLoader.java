@@ -18,13 +18,10 @@ package net.segoia.event.eventbus.config.json;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.ref.Reference;
-import java.lang.ref.ReferenceQueue;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

@@ -21,6 +21,7 @@ import org.junit.Test;
 import junit.framework.Assert;
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.conditions.StrictEventMatchCondition;
+import net.segoia.event.eventbus.EBusVM;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventBusConfig;
 import net.segoia.event.eventbus.EventContext;
@@ -30,7 +31,6 @@ import net.segoia.event.eventbus.FilteringEventBus;
 import net.segoia.event.eventbus.config.json.EventBusJsonConfig;
 import net.segoia.event.eventbus.constants.Events;
 import net.segoia.event.eventbus.listeners.logging.LoggingEventListener;
-import net.segoia.event.eventbus.util.EBus;
 import net.segoia.util.logging.Log4jLoggerFactory;
 import net.segoia.util.logging.LoggingLevel;
 
@@ -38,7 +38,7 @@ public class EventBusLoaderTest {
 
     @Test
     public void testLoadFromJson() {
-	FilteringEventBus bus = EBus.instance();
+	FilteringEventBus bus = EBusVM.getInstance().getSystemBus();
 	EventBusConfig busConfig = bus.getConfig();
 	EventTypeConfig defEventConfig = busConfig.getDefaultEventConfig();
 
@@ -123,7 +123,7 @@ public class EventBusLoaderTest {
 	    
 	});
 	
-	EBus.instance().registerListener(new StrictEventMatchCondition("tlc","TEST:TEST:ECHO"), tl);
+	EBusVM.getInstance().getSystemBus().registerListener(new StrictEventMatchCondition("tlc","TEST:TEST:ECHO"), tl);
 	
 	
 	eh1.post();
