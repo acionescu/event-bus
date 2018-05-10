@@ -18,7 +18,6 @@ package net.segoia.event.eventbus;
 
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -39,10 +38,7 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
     private boolean running;
     private boolean gracefullStop;
 
-    /**
-     * The future for the last event submitted for processing
-     */
-    private Future<?> lastFuture;
+  
 
     private Object idleSignal = new Object();
 
@@ -112,7 +108,7 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 			    }
 
 			    /* once we have an event, delegate it to the nested dispatcher in a worker thread */
-			    lastFuture = threadPool.submit(new Runnable() {
+			    threadPool.submit(new Runnable() {
 
 				@Override
 				public void run() {

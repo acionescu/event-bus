@@ -27,21 +27,6 @@ import net.segoia.event.eventbus.util.JsonUtils;
 
 public class DefaultEventsRepository extends EventsRepository {
 
-    public synchronized void checkLoaded() {
-	if (!isLoaded) {
-	    load();
-	}
-    }
-
-    public synchronized boolean checkLoaded(String eventType) {
-	if (!loadedForEventType.contains(eventType)) {
-	    load();
-	    loadedForEventType.add(eventType);
-	    return false;
-	}
-	return true;
-    }
-
     public final synchronized void load() {
 	try {
 	    Field f = ClassLoader.class.getDeclaredField("classes");
@@ -75,31 +60,6 @@ public class DefaultEventsRepository extends EventsRepository {
 	}
     }
 
-    public Class<Event> getEventClass(String eventType) {
-	checkLoaded();
-	Class<?> c = eventTypes.get(eventType);
-	if (c == null) {
-	    if (!checkLoaded(eventType)) {
-		c = eventTypes.get(eventType);
-		if (c == null) {
-		    return Event.class;
-		}
-	    } else {
-		return Event.class;
-	    }
-	}
-	return (Class<Event>) c;
-    }
-
-    public String getEventType(Class<?> c) {
-	String t = classToEt.get(c);
-	if (t == null) {
-	    processClass(c);
-	    t = classToEt.get(c);
-	}
-	return t;
-    }
-
     @Override
     public Event fromJson(String json) {
 	JsonObject o = JsonUtils.fromJson(json, JsonObject.class);
@@ -117,9 +77,4 @@ public class DefaultEventsRepository extends EventsRepository {
 	return JsonUtils.toJson(event);
     }
 
-    @Override
-    public void mapEvent(String eventType, Class<?> c) {
-	eventTypes.put(eventType, c);
-	classToEt.put(c, eventType);
-    }
 }

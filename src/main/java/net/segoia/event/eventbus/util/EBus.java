@@ -30,13 +30,15 @@ public class EBus {
     private static EBusVM ebusVm;
     private static EventNode mainNode;
 
-    public static void initialize(EBusVM ebvm) {
+    public static synchronized void initialize(EBusVM ebvm) {
 	EBusVM.setInstance(ebvm);
 	ebusVm = ebvm;
     }
 
-    public static void initialize() {
-	initialize(new DefaultEBusVM());
+    public static synchronized void initialize() {
+	if(ebusVm == null) {
+	    initialize(new DefaultEBusVM());
+	}
     }
 
     static {
