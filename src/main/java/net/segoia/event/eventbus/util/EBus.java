@@ -16,6 +16,10 @@
  */
 package net.segoia.event.eventbus.util;
 
+import java.security.Security;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import net.segoia.event.eventbus.EBusVM;
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventDispatcher;
@@ -36,13 +40,19 @@ public class EBus {
     }
 
     public static synchronized void initialize() {
-	if(ebusVm == null) {
+	if (ebusVm == null) {
 	    initialize(new DefaultEBusVM());
 	}
     }
 
     static {
 	initialize();
+
+	if (Security.getProvider("BC") == null) {
+	    System.out.println("Bouncy Castle provider is NOT available");
+	    
+	    Security.addProvider(new BouncyCastleProvider());
+	}
     }
 
     public static NodeManager loadNode(String file) {

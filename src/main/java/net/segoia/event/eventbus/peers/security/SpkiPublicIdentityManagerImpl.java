@@ -21,6 +21,8 @@ import java.security.Signature;
 
 import javax.crypto.Cipher;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import net.segoia.event.eventbus.peers.core.IdentityException;
 import net.segoia.event.eventbus.peers.vo.auth.id.SpkiNodeIdentity;
 import net.segoia.event.eventbus.peers.vo.comm.EncryptWithPublicCommOperationDef;
@@ -81,7 +83,7 @@ public class SpkiPublicIdentityManagerImpl implements SpkiPublicIdentityManager 
 
     @Override
     public VerifySignatureOperationWorker buildVerifySignatureWorker(SignCommOperationDef opDef) throws Exception{
-	Signature sig = Signature.getInstance(opDef.getHashingAlgorithm());
+	Signature sig = Signature.getInstance(opDef.getHashingAlgorithm(),BouncyCastleProvider.PROVIDER_NAME);
 	sig.initVerify(publicKey);
 	return new DefaultVerifySignatureOperationWorker(sig);
     }

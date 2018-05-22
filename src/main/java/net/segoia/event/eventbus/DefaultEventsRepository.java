@@ -66,10 +66,14 @@ public class DefaultEventsRepository extends EventsRepository {
 	String cet = o.get("et").getAsString();
 
 	Class<Event> eclass = getEventClass(cet);
+	try {
+	    Event e = JsonUtils.fromJson(json, eclass);
+	    return e;
+	} catch (Throwable t) {
+	    System.err.println("Failed creating obj from json: " + eclass);
+	    throw t;
+	}
 
-	Event e = JsonUtils.fromJson(json, eclass);
-
-	return e;
     }
 
     @Override

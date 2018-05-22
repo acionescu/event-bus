@@ -45,9 +45,12 @@ import net.segoia.event.eventbus.peers.vo.comm.SignCommOperationDef;
 
 public class JsonUtils {
     public static Gson gs;
+    public static GsonBuilder gsonBuilder;
 
     static {
-	GsonBuilder gsonBuilder = new GsonBuilder();
+	gsonBuilder = new GsonBuilder();
+	
+	gsonBuilder.disableHtmlEscaping();
 
 	gsonBuilder.registerTypeAdapter(IdentityType.class, new JsonDeserializer<IdentityType>() {
 
@@ -193,6 +196,7 @@ public class JsonUtils {
 	try {
 	    return gs.fromJson(json, classOfT);
 	} catch (Exception e) {
+	    System.err.println("Failed processing json: "+json);
 	    throw e;
 	}
     }

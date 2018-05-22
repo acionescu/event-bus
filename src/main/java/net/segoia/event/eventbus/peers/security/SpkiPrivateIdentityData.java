@@ -22,6 +22,8 @@ import java.security.Signature;
 
 import javax.crypto.Cipher;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import net.segoia.event.eventbus.peers.core.PrivateIdentityData;
 import net.segoia.event.eventbus.peers.vo.auth.id.SpkiNodeIdentity;
 import net.segoia.event.eventbus.peers.vo.comm.EncryptWithPublicCommOperationDef;
@@ -62,7 +64,8 @@ public class SpkiPrivateIdentityData extends PrivateIdentityData<SpkiNodeIdentit
 
     @Override
     public SignOperationWorker buildSignWorker(SignCommOperationDef opDef) throws Exception {
-	Signature sig = Signature.getInstance(opDef.getHashingAlgorithm());
+	Signature sig = Signature.getInstance(opDef.getHashingAlgorithm(),BouncyCastleProvider.PROVIDER_NAME);
+	System.out.println("using signature "+sig.getClass());
 	sig.initSign(privateKey);
 	//TODO: reuse the signature for the same algorithm;
 	return new DefaultSignOperationWorker(sig);

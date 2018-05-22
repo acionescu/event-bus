@@ -93,7 +93,6 @@ public class DefaultEventNode extends EventNode{
  		if (event.from() == null) {
  		    event.addRelay(getId());
  		}
- 		System.out.println("handling event locally "+ec.getEvent().getEt());
  		/* dispatch this further only if this event is meant for us */
  		return super.dispatchEvent(ec);
  	    }
