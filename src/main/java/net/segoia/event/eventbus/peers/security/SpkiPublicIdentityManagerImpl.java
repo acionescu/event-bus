@@ -76,7 +76,7 @@ public class SpkiPublicIdentityManagerImpl implements SpkiPublicIdentityManager 
 
     @Override
     public EncryptOperationWorker buildEncryptPublicWorker(EncryptWithPublicCommOperationDef opDef) throws Exception {
-	Cipher cipher = Cipher.getInstance(opDef.getTransformation());
+	Cipher cipher = Cipher.getInstance(opDef.getTransformation(),BouncyCastleProvider.PROVIDER_NAME);
 	cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 	return new CipherEncryptOperationWorker(cipher);
     }
