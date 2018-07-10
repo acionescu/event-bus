@@ -37,6 +37,7 @@ import net.segoia.event.eventbus.config.json.EventBusJsonConfig;
 import net.segoia.event.eventbus.config.json.EventBusJsonConfigLoader;
 import net.segoia.event.eventbus.config.json.EventListenerJsonConfig;
 import net.segoia.event.eventbus.peers.EventBusNodeConfig;
+import net.segoia.event.eventbus.peers.EventNode;
 import net.segoia.event.eventbus.peers.NodeManager;
 
 public class DefaultEBusVM extends EBusVM {
@@ -53,6 +54,7 @@ public class DefaultEBusVM extends EBusVM {
 
     protected void init() {
 	EventsRepository.instance = new DefaultEventsRepository();
+	helper = new DefaultEventNodeHelper();
     }
 
     @Override
@@ -161,8 +163,13 @@ public class DefaultEBusVM extends EBusVM {
 
 	try {
 	    NodeManager nm = EventBusJsonConfigLoader.load(new FileReader(nodeFile), NodeManager.class);
+	    EventNode node = nm.getNode();
+	    EventBusNodeConfig config = node.getConfig();
+	    if(config.getHelper() == null) {
+		config.setHelper(helper);
+	    }
 	    if (init) {
-		nm.getNode().lazyInit();
+		node.lazyInit();
 	    }
 	    return nm;
 	} catch (FileNotFoundException e) {

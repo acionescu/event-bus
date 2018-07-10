@@ -17,6 +17,7 @@
 package net.segoia.event.eventbus.peers.security;
 
 import java.nio.charset.Charset;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 import net.segoia.util.crypto.CryptoUtil;
@@ -41,6 +42,15 @@ public class DefaultCryptoHelper implements CryptoHelper {
     @Override
     public String base64Encode(byte[] input) {
 	return new String(Base64.getEncoder().encode(input), Charset.forName("UTF-8"));
+    }
+
+    @Override
+    public String sha256(String input) {
+	try {
+	    return CryptoUtil.computeHash(input, "SHA-256");
+	} catch (NoSuchAlgorithmException e) {
+	    throw new RuntimeException("Can't compute hash",e);
+	}
     }
 
 }
