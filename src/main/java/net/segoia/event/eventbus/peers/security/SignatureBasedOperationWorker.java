@@ -1,5 +1,5 @@
 /**
- * eventbus-commons - Core classes for net.segoia.event-bus framework
+ * event-bus - An event bus framework for event driven programming
  * Copyright (C) 2016  Adrian Cristian Ionescu - https://github.com/acionescu
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
