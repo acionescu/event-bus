@@ -77,7 +77,7 @@ public class DefaultEBusVM extends EBusVM {
 		FilteringEventBus bus = (FilteringEventBus) Class.forName(ebusImpl).newInstance();
 		bus.setConfig(ebusJsonConfig);
 
-		AsyncEventDispatcher mainNodeDispatcher = new AsyncEventDispatcher(new EventContextDispatcher(), 1000);
+//		AsyncEventDispatcher mainNodeDispatcher = new AsyncEventDispatcher(new EventContextDispatcher(), 1000);
 		bus.setEventDispatcher(
 			new DelegatingEventDispatcher(new BlockingEventDispatcher(), mainLoopDispatcher));
 		// mainNodeDispatcher.start();

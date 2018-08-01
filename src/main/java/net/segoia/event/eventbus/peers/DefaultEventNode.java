@@ -16,6 +16,7 @@
  */
 package net.segoia.event.eventbus.peers;
 
+import net.segoia.event.conditions.Condition;
 import net.segoia.event.eventbus.BlockingEventDispatcher;
 import net.segoia.event.eventbus.EBusVM;
 import net.segoia.event.eventbus.Event;
@@ -100,5 +101,10 @@ public class DefaultEventNode extends EventNode{
  	}
 
      }
+
+    @Override
+    protected FilteringEventBus spawnEventBus(Condition cond) {
+	return spawnEventBus(cond, new BlockingEventDispatcher());
+    }
 
 }
