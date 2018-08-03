@@ -3,7 +3,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>net.segoia</groupId>
    <artifactId>event-bus</artifactId>
-   <version>0.0.1-SNAPSHOT</version>
+   <version>0.0.1-old</version>
    <packaging>jar</packaging>
    <name>event-bus</name>
    <description>An event bus framework for event driven programming</description>
