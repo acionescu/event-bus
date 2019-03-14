@@ -197,6 +197,7 @@ public class JsonUtils {
 	    return gs.fromJson(json, classOfT);
 	} catch (Exception e) {
 	    System.err.println("Failed processing json: "+json);
+	    e.printStackTrace();
 	    throw e;
 	}
     }
