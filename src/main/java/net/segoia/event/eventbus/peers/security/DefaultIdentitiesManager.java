@@ -31,6 +31,7 @@ import net.segoia.event.eventbus.peers.vo.auth.id.SpkiFullIdentityType;
 import net.segoia.event.eventbus.peers.vo.auth.id.SpkiFullNodeIdentity;
 import net.segoia.event.eventbus.peers.vo.security.IssueIdentityRequest;
 import net.segoia.event.eventbus.peers.vo.session.KeyDef;
+import net.segoia.event.eventbus.vo.security.IdsLinkData;
 import net.segoia.event.eventbus.vo.services.NodeIdentityProfile;
 import net.segoia.util.crypto.CryptoUtil;
 
@@ -90,6 +91,17 @@ public class DefaultIdentitiesManager implements IdentitiesManager {
     @Override
     public NodeIdentityProfile getIdentityProfile(String identityKey) {
 	return identitiesRepository.getIdentityProfile(identityKey);
+    }
+
+    @Override
+    public void storeIdsLinkData(IdsLinkData data) {
+	identitiesRepository.storeIdsLinkData(data);
+	
+    }
+
+    @Override
+    public IdsLinkData getIdsLinkData(String idsLinkKey) {
+	return identitiesRepository.getIdsLinkData(idsLinkKey);
     }
 
 }
