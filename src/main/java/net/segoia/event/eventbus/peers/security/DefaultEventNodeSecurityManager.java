@@ -17,13 +17,9 @@
 package net.segoia.event.eventbus.peers.security;
 
 import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.crypto.SecretKey;
 
 import net.segoia.event.eventbus.peers.PeerContext;
 import net.segoia.event.eventbus.peers.core.PublicIdentityManager;
@@ -39,7 +35,6 @@ import net.segoia.event.eventbus.peers.vo.auth.id.SpkiNodeIdentity;
 import net.segoia.event.eventbus.peers.vo.session.KeyDef;
 import net.segoia.event.eventbus.peers.vo.session.SessionKey;
 import net.segoia.event.eventbus.util.JsonUtils;
-import net.segoia.util.crypto.CryptoUtil;
 
 public class DefaultEventNodeSecurityManager extends EventNodeSecurityManager {
 
@@ -128,57 +123,7 @@ public class DefaultEventNodeSecurityManager extends EventNodeSecurityManager {
 	identityRoles.put(IdentityRole.PEER_AUTH, new IdentityRole(IdentityRole.PEER_AUTH, null));
     }
 
-    @Override
-    public SessionKey generateNewSessionKey(PeerContext peerContext) throws PeerSessionException {
-	// String channel = peerContext.getCommunicationChannel();
-	// PeerChannelSecurityPolicy localChannelPolicy = securityConfig.getSecurityPolicy().getChannelPolicy(channel);
-	// ChannelSessionPolicy sessionPolicy = localChannelPolicy.getCommunicationPolicy().getSessionPolicy();
-
-	SharedIdentityType settledSharedIdentityType = (SharedIdentityType) peerContext.getPeerCommContext()
-		.getTxStrategy().getSharedIdentityType();
-
-	/*
-	 * Get session key definition
-	 */
-	// KeyDef sessionKeyDef = sessionPolicy.getSessionKeyDef();
-	KeyDef sessionKeyDef = settledSharedIdentityType.getKeyDef();
-
-	int maxSupportedKeySize = sessionKeyDef.getKeySize();
-
-	PublicIdentityManager peerIdentityManager = peerContext.getPeerIdentityManager();
-	if (peerIdentityManager != null) {
-	    maxSupportedKeySize = peerIdentityManager.getMaxSupportedEncryptedDataBlockSize();
-	}
-
-	try {
-	    SecretKey secretKey = CryptoUtil.generateSecretkey(sessionKeyDef.getAlgorithm(), maxSupportedKeySize);
-	    KeyDef newSessionKeyDef = new KeyDef(sessionKeyDef.getAlgorithm(), maxSupportedKeySize);
-	    byte[] secretKeyBytes = secretKey.getEncoded();
-	    SessionKey sessionKey = new SessionKey(peerContext.getNodeContext().generateSessionId(), secretKeyBytes,
-		    newSessionKeyDef);
-
-	    /* generate an initialization vector */
-	    SecureRandom sr = new SecureRandom();
-	    byte[] iv = new byte[maxSupportedKeySize / 8];
-	    sr.nextBytes(iv);
-	    sessionKey.setIv(iv);
-
-	    /* build a session manager and set it on context */
-	    SharedIdentityType sharedIdentityType = new SharedIdentityType(newSessionKeyDef);
-	    SessionManager sessionManager = sessionManagerBuilders.get(sharedIdentityType)
-		    .build(new SharedNodeIdentity(sharedIdentityType, secretKeyBytes, iv));
-
-	    peerContext.setSessionManager(sessionManager);
-	    peerContext.setSessionKey(sessionKey);
-	    return sessionKey;
-
-	} catch (NoSuchAlgorithmException e) {
-	    throw new PeerSessionException("Failed to generate session key with algorithm "
-		    + sessionKeyDef.getAlgorithm() + " and size " + maxSupportedKeySize, e);
-	}
-
-    }
-
+    
     @Override
     protected void initDeserializers() {
 	deserializers = new HashMap<>();

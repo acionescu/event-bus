@@ -18,7 +18,10 @@ package net.segoia.event.eventbus.peers.security;
 
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Base64;
+
+import javax.crypto.SecretKey;
 
 import net.segoia.util.crypto.CryptoUtil;
 
@@ -49,8 +52,29 @@ public class DefaultCryptoHelper implements CryptoHelper {
 	try {
 	    return CryptoUtil.computeHash(input, "SHA-256");
 	} catch (NoSuchAlgorithmException e) {
-	    throw new RuntimeException("Can't compute hash",e);
+	    throw new RuntimeException("Can't compute hash", e);
 	}
+    }
+
+    @Override
+    public byte[] generateSecretKey(String algorithm, int keySize) {
+	SecretKey secretKey;
+	try {
+	    secretKey = CryptoUtil.generateSecretkey(algorithm, keySize);
+	    byte[] secretKeyBytes = secretKey.getEncoded();
+	    return secretKeyBytes;
+	} catch (NoSuchAlgorithmException e) {
+	    throw new RuntimeException("Can't generate secret key for algoritm " + algorithm + " with size " + keySize);
+	}
+
+    }
+
+    @Override
+    public byte[] generateIv(int size) {
+	SecureRandom sr = new SecureRandom();
+	byte[] iv = new byte[size];
+	sr.nextBytes(iv);
+	return iv;
     }
 
 }
