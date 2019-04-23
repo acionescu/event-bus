@@ -31,6 +31,7 @@ import net.segoia.event.eventbus.peers.vo.auth.id.SpkiFullIdentityType;
 import net.segoia.event.eventbus.peers.vo.auth.id.SpkiFullNodeIdentity;
 import net.segoia.event.eventbus.peers.vo.security.IssueIdentityRequest;
 import net.segoia.event.eventbus.peers.vo.session.KeyDef;
+import net.segoia.event.eventbus.vo.security.IdentityLinkFullData;
 import net.segoia.event.eventbus.vo.security.IdsLinkData;
 import net.segoia.event.eventbus.vo.services.NodeIdentityProfile;
 import net.segoia.util.crypto.CryptoUtil;
@@ -102,6 +103,22 @@ public class DefaultIdentitiesManager implements IdentitiesManager {
     @Override
     public IdsLinkData getIdsLinkData(String idsLinkKey) {
 	return identitiesRepository.getIdsLinkData(idsLinkKey);
+    }
+
+    @Override
+    public void storeIdentityLinkFullData(IdentityLinkFullData data) {
+	throw new UnsupportedOperationException();
+	
+    }
+
+    @Override
+    public IdentityLinkFullData getIdentityLinkFullData(String idsLinkKey) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean removeIdentityLinkFullData(String identityKey) {
+	throw new UnsupportedOperationException();
     }
 
 }
