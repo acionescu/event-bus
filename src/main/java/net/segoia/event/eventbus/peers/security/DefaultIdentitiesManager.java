@@ -104,6 +104,12 @@ public class DefaultIdentitiesManager implements IdentitiesManager {
     public IdsLinkData getIdsLinkData(String idsLinkKey) {
 	return identitiesRepository.getIdsLinkData(idsLinkKey);
     }
+    
+    @Override
+    public void removeIdsLinkData(String idsLinkKey) {
+	identitiesRepository.removeIdsLinkData(idsLinkKey);
+	
+    }
 
     @Override
     public void storeIdentityLinkFullData(IdentityLinkFullData data) {
@@ -120,5 +126,7 @@ public class DefaultIdentitiesManager implements IdentitiesManager {
     public boolean removeIdentityLinkFullData(String identityKey) {
 	throw new UnsupportedOperationException();
     }
+
+   
 
 }
