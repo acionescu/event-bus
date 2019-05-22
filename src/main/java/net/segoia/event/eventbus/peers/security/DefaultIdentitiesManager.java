@@ -33,6 +33,7 @@ import net.segoia.event.eventbus.peers.vo.security.IssueIdentityRequest;
 import net.segoia.event.eventbus.peers.vo.session.KeyDef;
 import net.segoia.event.eventbus.vo.security.IdentityLinkFullData;
 import net.segoia.event.eventbus.vo.security.IdsLinkData;
+import net.segoia.event.eventbus.vo.security.NodeIdLinkData;
 import net.segoia.event.eventbus.vo.services.NodeIdentityProfile;
 import net.segoia.util.crypto.CryptoUtil;
 
@@ -110,6 +111,12 @@ public class DefaultIdentitiesManager implements IdentitiesManager {
 	identitiesRepository.removeIdsLinkData(idsLinkKey);
 	
     }
+    
+
+    @Override
+    public Map<String, NodeIdLinkData> getAllLinksForIdKey(String idKey) {
+	return identitiesRepository.getAllLinksForIdKey(idKey);
+    }
 
     @Override
     public void storeIdentityLinkFullData(IdentityLinkFullData data) {
@@ -126,6 +133,7 @@ public class DefaultIdentitiesManager implements IdentitiesManager {
     public boolean removeIdentityLinkFullData(String identityKey) {
 	throw new UnsupportedOperationException();
     }
+
 
    
 
