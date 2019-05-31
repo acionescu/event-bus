@@ -16,9 +16,12 @@
  */
 package net.segoia.event.eventbus.listeners.logging;
 
+
+import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.EventContextListener;
 import net.segoia.event.eventbus.EventTypeConfig;
+import net.segoia.event.eventbus.util.JsonUtils;
 import net.segoia.util.logging.Logger;
 import net.segoia.util.logging.LoggerFactory;
 import net.segoia.util.logging.LoggingLevel;
@@ -64,8 +67,12 @@ public class LoggingEventListener implements EventContextListener {
 
 	String out = null;
 	if (printAsJson) {
-
-	    out = ec.getEvent().toJson();
+	    if(etc.isLogAsBareEventOn()) {
+		out = JsonUtils.toJson(ec.getEvent(), Event.class);
+	    }
+	    else {
+		out = ec.getEvent().toJson();
+	    }
 
 	} else {
 	    out = ec.getEvent().toString();

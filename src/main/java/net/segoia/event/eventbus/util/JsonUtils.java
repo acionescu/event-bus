@@ -205,6 +205,10 @@ public class JsonUtils {
     public static String toJson(Object obj) {
 	return gs.toJson(obj);
     }
+    
+    public static String toJson(Object obj, Class<?> clazz) {
+	return gs.toJson(obj, clazz);
+    }
 
     public static Gson gs() {
 	return gs;
