@@ -118,6 +118,7 @@ public class DefaultEventNode extends EventNode {
 	executorService.schedule(() -> {
 	    try {
 		postInternally(event);
+		postToExtraBusses(event);
 	    } catch (Throwable t) {
 		getConfig().getLogger().error("Failed to schedule event " + event.getEt(), t);
 	    }

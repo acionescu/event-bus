@@ -17,6 +17,7 @@
 package net.segoia.event.eventbus.util;
 
 import java.security.Security;
+import java.util.Properties;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -43,6 +44,7 @@ public class EBus {
 	if (ebusVm == null) {
 	    initialize(new DefaultEBusVM());
 	}
+	
     }
 
     static {
@@ -55,6 +57,13 @@ public class EBus {
 	}
     }
 
+    private static Class getClass(String classname) throws ClassNotFoundException {
+	    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+	    if(classLoader == null) 
+	        classLoader = DefaultEBusVM.class.getClassLoader();
+	      return (classLoader.loadClass(classname));
+	}
+    
     public static NodeManager loadNode(String file) {
 	return ebusVm.loadNode(file, true);
     }
@@ -120,5 +129,9 @@ public class EBus {
 
     public static void waitToProcessAllOnMainLoop(int sleep) {
 	ebusVm.waitToProcessAllOnMainLoop(sleep);
+    }
+    
+    public static FilteringEventBus getSystemBus() {
+	return ebusVm.getSystemBus();
     }
 }

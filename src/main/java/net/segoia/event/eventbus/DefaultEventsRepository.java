@@ -65,8 +65,12 @@ public class DefaultEventsRepository extends EventsRepository {
 	JsonObject o = JsonUtils.fromJson(json, JsonObject.class);
 	String cet = o.get("et").getAsString();
 
-	Class<Event> eclass = getEventClass(cet);
+	Class<? extends Event> eclass = getEventClass(cet);
 	try {
+	    if(o.get("data") != null && Event.class.equals(eclass)) {
+		eclass=CustomJsonEvent.class;
+	    }
+	    
 	    Event e = JsonUtils.fromJson(json, eclass);
 	    return e;
 	} catch (Throwable t) {
