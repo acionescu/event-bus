@@ -65,7 +65,6 @@ public class SpkiPrivateIdentityData extends PrivateIdentityData<SpkiNodeIdentit
     @Override
     public SignOperationWorker buildSignWorker(SignCommOperationDef opDef) throws Exception {
 	Signature sig = Signature.getInstance(opDef.getHashingAlgorithm(),BouncyCastleProvider.PROVIDER_NAME);
-	System.out.println("using signature "+sig.getClass());
 	sig.initSign(privateKey);
 	//TODO: reuse the signature for the same algorithm;
 	return new DefaultSignOperationWorker(sig);

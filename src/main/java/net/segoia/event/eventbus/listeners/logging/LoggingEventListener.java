@@ -61,7 +61,13 @@ public class LoggingEventListener implements EventContextListener {
 	EventTypeConfig etc = ec.getConfigForEventType(true);
 
 	if (!etc.isLoggingOn()) {
-
+	    return false;
+	}
+	
+	LoggingLevel loggingLevel = LoggingLevel.valueOf(etc.getLoggingLevel());
+	
+	if(!logger.isLogLevelAllowed(loggingLevel)) {
+	    /* we don't want to spend resources preparing logging for this event if it's not allowed */
 	    return false;
 	}
 
@@ -77,8 +83,8 @@ public class LoggingEventListener implements EventContextListener {
 	} else {
 	    out = ec.getEvent().toString();
 	}
-	System.out.println("Logging event " + ec.getEvent().getEt());
-	return logger.trace(LoggingLevel.valueOf(etc.getLoggingLevel()), out, null);
+	
+	return logger.trace(loggingLevel, out, null);
     }
 
     @Override

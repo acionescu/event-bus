@@ -51,7 +51,7 @@ public class EBus {
 	initialize();
 
 	if (Security.getProvider("BC") == null) {
-	    System.out.println("Bouncy Castle provider is NOT available");
+	    ebusVm.getLogger().info("Bouncy Castle provider is NOT available. Adding it.");
 	    
 	    Security.addProvider(new BouncyCastleProvider());
 	}

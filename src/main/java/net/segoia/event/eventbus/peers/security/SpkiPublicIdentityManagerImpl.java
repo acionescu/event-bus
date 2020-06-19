@@ -27,12 +27,18 @@ import net.segoia.event.eventbus.peers.core.IdentityException;
 import net.segoia.event.eventbus.peers.vo.auth.id.SpkiNodeIdentity;
 import net.segoia.event.eventbus.peers.vo.comm.EncryptWithPublicCommOperationDef;
 import net.segoia.event.eventbus.peers.vo.comm.SignCommOperationDef;
+import net.segoia.event.eventbus.peers.vo.session.KeyDef;
+import net.segoia.event.eventbus.vo.security.PublicKeyInfo;
 import net.segoia.util.crypto.CryptoUtil;
 
 public class SpkiPublicIdentityManagerImpl implements SpkiPublicIdentityManager {
     private PublicKey publicKey;
     private SpkiNodeIdentity identity;
     private String identityKey;
+    
+    public SpkiPublicIdentityManagerImpl(String publicKey, String algorithm, int keySize) {
+	this(new SpkiNodeIdentity(publicKey, algorithm, keySize));
+    }
 
     public SpkiPublicIdentityManagerImpl(SpkiNodeIdentity identity) {
 	this.identity = identity;

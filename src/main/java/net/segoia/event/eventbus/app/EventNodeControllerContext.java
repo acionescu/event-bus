@@ -18,6 +18,7 @@ package net.segoia.event.eventbus.app;
 
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.peers.GlobalAgentEventNodeContext;
+import net.segoia.event.eventbus.peers.util.EventNodeLogger;
 import net.segoia.event.eventbus.util.EBus;
 
 public class EventNodeControllerContext {
@@ -53,5 +54,7 @@ public class EventNodeControllerContext {
         return peerId;
     }
     
-    
+    public EventNodeLogger logger() {
+	return globalContext.getLogger();
+    }
 }
