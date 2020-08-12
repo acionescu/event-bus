@@ -61,23 +61,35 @@ public class DefaultEventsRepository extends EventsRepository {
     }
 
     @Override
+    public Class<? extends Event> getEventClassFromJson(String json) {
+	JsonObject o = JsonUtils.fromJson(json, JsonObject.class);
+	String cet = o.get("et").getAsString();
+
+	Class<? extends Event> eclass = getEventClass(cet);
+	if (Event.class.equals(eclass) && o.get("data") != null) {
+	    eclass = CustomJsonEvent.class;
+	}
+	return eclass;
+    }
+
+    @Override
     public Event fromJson(String json) {
 	JsonObject o = JsonUtils.fromJson(json, JsonObject.class);
 	String cet = o.get("et").getAsString();
 
 	Class<? extends Event> eclass = getEventClass(cet);
 	try {
-	    if(o.get("data") != null && Event.class.equals(eclass)) {
-		eclass=CustomJsonEvent.class;
+	    if (o.get("data") != null && Event.class.equals(eclass)) {
+		eclass = CustomJsonEvent.class;
 	    }
-	    
+
 	    Event e = JsonUtils.fromJson(json, eclass);
 	    return e;
 	} catch (Throwable t) {
-	    System.err.println("Failed creating obj from json: " + eclass);
+	    System.err.println("Failed creating obj " + eclass + "from json: " + json + " error: " + t);
+	    t.printStackTrace();
 	    throw t;
 	}
-
     }
 
     @Override

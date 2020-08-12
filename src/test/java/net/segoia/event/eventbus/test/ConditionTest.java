@@ -38,7 +38,7 @@ public class ConditionTest {
 			LooseEventMatchCondition.build("STATUS-APP", null)),
 		new NotCondition(LooseEventMatchCondition.build("STATUS-APP", "REQUEST")));
 
-	EventContext ec = new EventContext(new PeerRegisterRequestEvent("bla", new TrueCondition()), null);
+	EventContext ec = new EventContext(new PeerRegisterRequestEvent("bla", new TrueCondition()));
 	
 	Assert.assertFalse(LooseEventMatchCondition.build("STATUS-APP", "REQUEST").test(ec));
 	

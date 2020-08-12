@@ -170,7 +170,7 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 	open = false;
 	try {
 	    /* this is a hack to escape waiting on an empty queue */
-	    eventQueue.putLast(new EventContext(null, null));
+	    eventQueue.putLast(new EventContext(null));
 	} catch (InterruptedException e) {
 	    e.printStackTrace();
 	}
@@ -219,7 +219,7 @@ public class AsyncEventDispatcher extends EventDispatcherWrapper {
 	running = false;
 	try {
 	    /* this is a hack to escape waiting on an empty queue */
-	    eventQueue.putLast(new EventContext(null, null));
+	    eventQueue.putLast(new EventContext(null));
 	} catch (InterruptedException e) {
 	    e.printStackTrace();
 	}

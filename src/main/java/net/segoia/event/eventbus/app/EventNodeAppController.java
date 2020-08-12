@@ -16,23 +16,14 @@
  */
 package net.segoia.event.eventbus.app;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.eventbus.Event;
-import net.segoia.event.eventbus.EventContext;
-import net.segoia.event.eventbus.FilteringEventProcessor;
-import net.segoia.event.eventbus.PassthroughCustomEventContextListenerFactory;
+import net.segoia.event.eventbus.EventNodeGenericController;
 import net.segoia.event.eventbus.peers.CustomEventHandler;
 
-public abstract class EventNodeAppController<C extends EventNodeControllerContext> {
+public abstract class EventNodeAppController<C extends EventNodeControllerContext>
+	extends EventNodeGenericController<C> {
     private EventNodeAppControllerConfig config = new EventNodeAppControllerConfig();
-    protected C controllerContext;
-    private FilteringEventProcessor eventsProcessor = new FilteringEventProcessor(
-	    new PassthroughCustomEventContextListenerFactory());
-    
-    private Map<String, EventNodeAppController<? extends EventNodeControllerContext>> nestedAppControllers=new HashMap<>();
 
     public EventNodeAppController() {
 	super();
@@ -55,13 +46,6 @@ public abstract class EventNodeAppController<C extends EventNodeControllerContex
 
     }
 
-    protected abstract void registerEventHandlers();
-
-    public void init(C controllerContext) {
-	this.controllerContext = controllerContext;
-	registerEventHandlers();
-    }
-
     protected void sendEventToClient(Event event) {
 	controllerContext.sendToClient(event);
     }
@@ -69,7 +53,7 @@ public abstract class EventNodeAppController<C extends EventNodeControllerContex
     protected void postEvent(Event event) {
 	controllerContext.postEvent(event);
     }
-    
+
     protected void sendToClientAndPost(Event event) {
 	controllerContext.sendToClient(event);
 	controllerContext.postEvent(event);
@@ -83,14 +67,6 @@ public abstract class EventNodeAppController<C extends EventNodeControllerContex
 	this.config = config;
     }
 
-    public void processEvent(EventContext ec) {
-	eventsProcessor.processEvent(ec);
-	
-	for(EventNodeAppController nac : nestedAppControllers.values()) {
-	    nac.processEvent(ec);
-	}
-    }
-
     protected <E extends Event> void addEventHandler(Class<E> eventClass, CustomEventHandler<E> handler) {
 	eventsProcessor.addEventHandler(eventClass, handler);
     }
@@ -98,24 +74,17 @@ public abstract class EventNodeAppController<C extends EventNodeControllerContex
     protected <E extends Event> void addEventHandler(CustomEventHandler<E> handler) {
 	eventsProcessor.addEventHandler(handler);
     }
-    
+
     protected <E extends Event> void addEventHandler(CustomEventHandler<E> handler, int priority) {
-   	eventsProcessor.addEventHandler(handler,priority);
-       }
+	eventsProcessor.addEventHandler(handler, priority);
+    }
 
     protected void addEventHandler(String eventType, CustomEventHandler<Event> handler) {
 	eventsProcessor.addEventHandler(eventType, handler);
     }
-    
+
     protected <E extends Event> void addEventHandler(Condition cond, CustomEventHandler<E> handler) {
 	eventsProcessor.addEventHandler(cond, handler);
     }
-    
-    public void addNestedController(String id, EventNodeAppController<? extends EventNodeControllerContext> controller) {
-	nestedAppControllers.put(id, controller);
-    }
-    
-    public void removeNestedController(String id) {
-	nestedAppControllers.remove(id);
-    }
+
 }
