@@ -27,6 +27,7 @@ public class SpkiPrivateIdentityDataLoader implements PrivateIdentityDataLoader<
     private SpkiIdentityDef indentityDef;
 
     private SpkiPrivateIdentityData data;
+    private Exception loadException;
 
     @Override
     public void load() {
@@ -37,7 +38,7 @@ public class SpkiPrivateIdentityDataLoader implements PrivateIdentityDataLoader<
 	    data = new SpkiPrivateIdentityData(keyPair.getPrivate(), keyPair.getPublic(), indentityDef.getAlgorithm(),
 		    indentityDef.getKeySize());
 	} catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e) {
-
+	    loadException=e;
 	}
     }
 
@@ -53,4 +54,9 @@ public class SpkiPrivateIdentityDataLoader implements PrivateIdentityDataLoader<
 	return data;
     }
 
+    public Exception getLoadException() {
+        return loadException;
+    }
+
+    
 }

@@ -14,13 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.app;
+package net.segoia.event.eventbus.listeners.core;
 
-import net.segoia.event.eventbus.CustomEventContext;
-import net.segoia.event.eventbus.Event;
-
-public interface GenericEventHandler<E extends Event, C extends CustomEventContext<E>> {
-
-    void handleEvent(C context);
+public class AgentsLoaderListener {
 
 }

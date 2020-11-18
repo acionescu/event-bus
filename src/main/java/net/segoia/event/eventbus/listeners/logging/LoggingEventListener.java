@@ -16,7 +16,6 @@
  */
 package net.segoia.event.eventbus.listeners.logging;
 
-
 import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.EventContextListener;
@@ -32,6 +31,7 @@ public class LoggingEventListener implements EventContextListener {
     private LoggerFactory loggerFactory;
     private String defaultLoggerName = LoggingEventListener.class.getSimpleName();
     private boolean printAsJson;
+    private String logLevel;
 
     public LoggingEventListener() {
 	super();
@@ -50,6 +50,16 @@ public class LoggingEventListener implements EventContextListener {
 	    logger = MasterLogManager.getLogger(defaultLoggerName);
 	}
 
+	if (logLevel != null) {
+	    try {
+		LoggingLevel ll = LoggingLevel.valueOf(logLevel);
+		if (ll != null) {
+		    logger.setLogLevel(ll);
+		}
+	    } catch (Exception e) {
+		e.printStackTrace();
+	    }
+	}
     }
 
     @Override
@@ -61,29 +71,31 @@ public class LoggingEventListener implements EventContextListener {
 	EventTypeConfig etc = ec.getConfigForEventType(true);
 
 	if (!etc.isLoggingOn()) {
+//	    System.out.println("logging is not on for event: "+ec.getEvent());
 	    return false;
 	}
-	
+
 	LoggingLevel loggingLevel = LoggingLevel.valueOf(etc.getLoggingLevel());
-	
-	if(!logger.isLogLevelAllowed(loggingLevel)) {
+
+	if (!logger.isLogLevelAllowed(loggingLevel)) {
+//	    System.out.println(loggingLevel+" log level not allowed: "+ec.getEvent());
 	    /* we don't want to spend resources preparing logging for this event if it's not allowed */
 	    return false;
 	}
-
-	String out = null;
+	
+	Event event = ec.getEvent();
+	String out = event.getClass().getSimpleName()+":";
 	if (printAsJson) {
-	    if(etc.isLogAsBareEventOn()) {
-		out = JsonUtils.toJson(ec.getEvent(), Event.class);
-	    }
-	    else {
-		out = ec.getEvent().toJson();
+	    if (etc.isLogAsBareEventOn()) {
+		out += JsonUtils.toJson(event, Event.class);
+	    } else {
+		out += event.toJson();
 	    }
 
 	} else {
-	    out = ec.getEvent().toString();
+	    out += event.toString();
 	}
-	
+
 	return logger.trace(loggingLevel, out, null);
     }
 

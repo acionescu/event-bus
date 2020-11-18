@@ -20,8 +20,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import net.segoia.util.data.ListMap;
-import net.segoia.util.data.ListTreeMapFactory;
+import net.segoia.eventbus.util.data.ListMap;
+import net.segoia.eventbus.util.data.ListTreeMapFactory;
 
 /**
  * This dispatcher will call the {@link EventContext#visitListener(EventContextListener)} method sequentially for all

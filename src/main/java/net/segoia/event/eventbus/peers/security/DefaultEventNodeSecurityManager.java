@@ -16,27 +16,81 @@
  */
 package net.segoia.event.eventbus.peers.security;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import net.segoia.event.eventbus.peers.PeerContext;
+import net.segoia.event.eventbus.peers.EventBusNodeConfig;
+import net.segoia.event.eventbus.peers.core.IdentitiesManager;
 import net.segoia.event.eventbus.peers.core.PublicIdentityManager;
 import net.segoia.event.eventbus.peers.core.PublicIdentityManagerFactory;
-import net.segoia.event.eventbus.peers.exceptions.PeerSessionException;
 import net.segoia.event.eventbus.peers.manager.states.server.PeerAcceptedState;
 import net.segoia.event.eventbus.peers.security.rules.PeerEventBlackList;
 import net.segoia.event.eventbus.peers.security.rules.PeerEventRule;
 import net.segoia.event.eventbus.peers.security.rules.PeerRuleEngine;
 import net.segoia.event.eventbus.peers.vo.auth.id.SharedIdentityType;
 import net.segoia.event.eventbus.peers.vo.auth.id.SharedNodeIdentity;
+import net.segoia.event.eventbus.peers.vo.auth.id.SpkiFullIdentityType;
+import net.segoia.event.eventbus.peers.vo.auth.id.SpkiFullNodeIdentity;
 import net.segoia.event.eventbus.peers.vo.auth.id.SpkiNodeIdentity;
+import net.segoia.event.eventbus.peers.vo.security.IssueIdentityRequest;
 import net.segoia.event.eventbus.peers.vo.session.KeyDef;
-import net.segoia.event.eventbus.peers.vo.session.SessionKey;
 import net.segoia.event.eventbus.util.JsonUtils;
+import net.segoia.util.crypto.CryptoUtil;
 
 public class DefaultEventNodeSecurityManager extends EventNodeSecurityManager {
+
+    private static Map<Class<?>, IdentityGenerator<PrivateIdentityDataLoader<?>>> identityGenerators = new HashMap<>();
+
+    static {
+	identityGenerators.put(SpkiPrivateIdentityDataLoader.class,
+		new IdentityGenerator<PrivateIdentityDataLoader<?>>() {
+
+		    @Override
+		    public void generateIdentity(PrivateIdentityDataLoader<?> loader,
+			    EventNodeSecurityManager securityManager) throws Exception {
+			SpkiPrivateIdentityDataLoader idl = (SpkiPrivateIdentityDataLoader) loader;
+			SpkiIdentityDef identityDef = idl.getIndentityDef();
+
+			IdentitiesManager identitiesManager = securityManager.getSecurityConfig()
+				.getIdentitiesManager();
+			securityManager.getLogger().info("Generating identity for name "+identityDef.getName());
+			SpkiFullNodeIdentity newIdentity = (SpkiFullNodeIdentity) identitiesManager
+				.issueIdentity(new IssueIdentityRequest(new SpkiFullIdentityType(
+					new KeyDef(identityDef.getAlgorithm(), identityDef.getKeySize()))));
+
+			/* check if target path exists */
+			File targetPath = new File(identityDef.getPath());
+			if (!targetPath.exists()) {
+			    securityManager.getLogger().info("Generating path for identity "+identityDef.getName()+" -> "+identityDef.getPath());
+			    boolean created = targetPath.mkdirs();
+			}
+
+			securityManager.getLogger().info("Saving identity "+identityDef.getName() +" path "+targetPath.getAbsolutePath());
+			CryptoUtil.saveKey(newIdentity.getPrivateKey().getBytes("UTF-8"),
+				new File(targetPath, identityDef.getName()).getAbsolutePath(),false);
+			CryptoUtil.saveKey(newIdentity.getPubKey().getBytes("UTF-8"),
+				new File(targetPath, identityDef.getName() + ".pub").getAbsolutePath(),false);
+			
+			securityManager.getLogger().info("Identity "+identityDef.getName()+" generated successfully.");
+
+//		    try {
+//			CryptoUtil.generateAndSaveKeyPair(identityDef.getAlgorithm(), identityDef.getKeySize(), identityDef.getPath(), identityDef.getName());
+//		    } catch (NoSuchAlgorithmException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		    } catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		    }
+		    }
+
+		});
+
+    }
 
     public DefaultEventNodeSecurityManager() {
 	super();
@@ -48,10 +102,44 @@ public class DefaultEventNodeSecurityManager extends EventNodeSecurityManager {
 	// TODO Auto-generated constructor stub
     }
 
+    public DefaultEventNodeSecurityManager(EventBusNodeConfig nodeConfig) {
+	super(nodeConfig);
+	// TODO Auto-generated constructor stub
+    }
+
     @Override
     protected void init() {
 	setCryptoHelper(new DefaultCryptoHelper());
 	super.init();
+    }
+
+    @Override
+    protected void handleNoIdentity() {
+	EventNodeSecurityConfig securityConfig = getSecurityConfig();
+	List<PrivateIdentityDataLoader<?>> identityLoaders = securityConfig.getIdentityLoaders();
+
+	boolean generated=false;
+	/* if we have at least an identity loader, we try to generate an identity for it */
+	if (!identityLoaders.isEmpty()) {
+	    for(PrivateIdentityDataLoader<?> idLoader : identityLoaders) {
+	    IdentityGenerator identityGenerator = identityGenerators.get(idLoader.getClass());
+	    if (identityGenerator != null) {
+		try {
+		    identityGenerator.generateIdentity(idLoader, this);
+		    generated=true;
+		    break;
+		} catch (Exception e) {
+		    getLogger().error("Failed to ganerate identity for loader "+idLoader,e);
+		}
+	    }
+	    }
+	}
+	
+	if(generated) {
+	    /* reload identities */
+	    getLogger().info("Reloading identities");
+	    loadIdentities();
+	}
     }
 
     @Override
@@ -123,7 +211,6 @@ public class DefaultEventNodeSecurityManager extends EventNodeSecurityManager {
 	identityRoles.put(IdentityRole.PEER_AUTH, new IdentityRole(IdentityRole.PEER_AUTH, null));
     }
 
-    
     @Override
     protected void initDeserializers() {
 	deserializers = new HashMap<>();

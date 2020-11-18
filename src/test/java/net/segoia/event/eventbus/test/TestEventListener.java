@@ -26,7 +26,7 @@ import net.segoia.event.eventbus.EventContext;
 import net.segoia.event.eventbus.EventHandle;
 import net.segoia.event.eventbus.EventContextListener;
 import net.segoia.event.eventbus.constants.Events;
-import net.segoia.util.data.ListMap;
+import net.segoia.eventbus.util.data.ListMap;
 
 public class TestEventListener implements EventContextListener {
     /**

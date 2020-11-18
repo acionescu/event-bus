@@ -43,7 +43,7 @@ public class EventBusLoaderTest {
 	EventTypeConfig defEventConfig = busConfig.getDefaultEventConfig();
 
 	Assert.assertTrue(defEventConfig.isLoggingOn());
-	Assert.assertEquals(LoggingLevel.INFO, defEventConfig.getLoggingLevel());
+	Assert.assertEquals(LoggingLevel.INFO.toString(), defEventConfig.getLoggingLevel());
 
 	EventBusJsonConfig ejsc = (EventBusJsonConfig) busConfig;
 

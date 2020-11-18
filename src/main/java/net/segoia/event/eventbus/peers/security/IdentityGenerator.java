@@ -14,13 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.app;
+package net.segoia.event.eventbus.peers.security;
 
-import net.segoia.event.eventbus.CustomEventContext;
-import net.segoia.event.eventbus.Event;
+public interface IdentityGenerator<L extends PrivateIdentityDataLoader<?>> {
 
-public interface GenericEventHandler<E extends Event, C extends CustomEventContext<E>> {
-
-    void handleEvent(C context);
-
+    public void generateIdentity(L loader, EventNodeSecurityManager securityManager) throws Exception;
 }

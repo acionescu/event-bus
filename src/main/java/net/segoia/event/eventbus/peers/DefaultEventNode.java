@@ -81,7 +81,7 @@ public class DefaultEventNode extends EventNode {
 
     @Override
     protected EventNodeSecurityManager buildSecurityManager(EventNodeSecurityConfig securityConfig) {
-	return new DefaultEventNodeSecurityManager(securityConfig);
+	return new DefaultEventNodeSecurityManager(config);
     }
 
     class EventNodeDispatcher extends BlockingEventDispatcher {

@@ -28,6 +28,7 @@ import net.segoia.event.eventbus.util.JsonUtils;
 public class DefaultEventsRepository extends EventsRepository {
 
     public final synchronized void load() {
+	System.out.println("Loading events repository");
 	try {
 	    Field f = ClassLoader.class.getDeclaredField("classes");
 	    f.setAccessible(true);

@@ -19,6 +19,10 @@ package net.segoia.event.eventbus.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
 import java.util.Map;
 
 import net.segoia.event.conditions.Condition;
@@ -161,16 +165,36 @@ public class DefaultEBusVM extends EBusVM {
 
     @Override
     public NodeManager loadNode(String file, boolean init) {
-	File nodeFile = new File(EBus.class.getClassLoader().getResource(file).getFile());
+	File nodeFile = new File(file);
+	Reader nodeFileReader = null;
+	if (!nodeFile.exists()) {
+	    /* try to load file from classpath */
+	    InputStream fileStream = EBus.class.getClassLoader().getResourceAsStream(file);
+
+	    if (fileStream != null) {
+		nodeFileReader = new InputStreamReader(fileStream);
+	    }
+
+	} else {
+	    try {
+		nodeFileReader = new FileReader(nodeFile);
+	    } catch (FileNotFoundException e) {
+		e.printStackTrace();
+	    }
+	}
+
+	if (nodeFileReader == null) {
+	    throw new RuntimeException("Couldn't find node file " + file);
+	}
 
 	try {
-	    NodeManager nm = EventBusJsonConfigLoader.load(new FileReader(nodeFile), NodeManager.class);
+	    NodeManager nm = EventBusJsonConfigLoader.load(nodeFileReader, NodeManager.class);
 	    setUpNewNode(nm);
 	    if (init) {
 		nm.getNode().lazyInit();
 	    }
 	    return nm;
-	} catch (FileNotFoundException e) {
+	} catch (Exception e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
