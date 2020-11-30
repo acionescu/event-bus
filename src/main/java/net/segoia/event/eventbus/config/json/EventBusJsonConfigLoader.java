@@ -40,10 +40,12 @@ import com.google.gson.stream.JsonWriter;
 import net.segoia.event.conditions.AndCondition;
 import net.segoia.event.conditions.Condition;
 import net.segoia.event.conditions.ConditionWrapper;
+import net.segoia.event.conditions.FalseCondition;
 import net.segoia.event.conditions.LooseEventMatchCondition;
 import net.segoia.event.conditions.NotCondition;
 import net.segoia.event.conditions.OrCondition;
 import net.segoia.event.conditions.StrictEventMatchCondition;
+import net.segoia.event.conditions.TrueCondition;
 
 public class EventBusJsonConfigLoader {
     private static Map<String, JsonDeserializer<?>> jsonDeserializers = new HashMap<String, JsonDeserializer<?>>();
@@ -158,6 +160,26 @@ public class EventBusJsonConfigLoader {
 
 		return new ConditionWrapper(refId + "-ref", refId);
 
+	    }
+	});
+	
+	/* true */
+	jsonDeserializers.put("true", new JsonDeserializer<Condition>() {
+
+	    @Override
+	    public Condition deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+		    throws JsonParseException {
+		return new TrueCondition();
+	    }
+	});
+	
+	/* false */
+	jsonDeserializers.put("false", new JsonDeserializer<Condition>() {
+
+	    @Override
+	    public Condition deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+		    throws JsonParseException {
+		return new FalseCondition();
 	    }
 	});
 
