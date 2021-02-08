@@ -14,13 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.segoia.event.eventbus.app;
+package net.segoia.event.eventbus.annotations;
 
-import net.segoia.event.eventbus.CustomEventContext;
-import net.segoia.event.eventbus.Event;
+import java.lang.annotation.ElementType;
 
-public interface GenericEventHandler<E extends Event, C extends CustomEventContext<E>> {
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    void handleEvent(C context);
+import net.segoia.event.eventbus.CustomEvent;
+import net.segoia.event.eventbus.EventType;
 
+/**
+ * Defines a an object type that can be used as data in a {@link CustomEvent}
+ * @author adi
+ *
+ */
+
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.SOURCE)
+public @interface EventDataType {
+    EventType[] value() default {};
 }
