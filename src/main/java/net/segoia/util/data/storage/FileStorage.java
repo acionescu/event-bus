@@ -17,12 +17,16 @@
 package net.segoia.util.data.storage;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Default file storage
@@ -40,6 +44,17 @@ public class FileStorage extends AbstractStorage {
      * Characters not allowed in a path ( these characters can't appear before the last path separator )
      */
     private static final char[] forbiddenPathCharacters = new char[] { '.' };
+    
+    private static final char[] forbiddenFileNameChars;
+    
+    static {
+	if(File.separatorChar != PATH_SEPARATOR) {
+	    forbiddenFileNameChars= new char[] {File.separatorChar, PATH_SEPARATOR};
+	}
+	else {
+	    forbiddenFileNameChars= new char[] {PATH_SEPARATOR};
+	}
+    }
 
     public FileStorage(File root) {
 	super();
@@ -54,8 +69,8 @@ public class FileStorage extends AbstractStorage {
 	initRoot();
     }
 
-    public FileStorage(FileStorage parent, String root) {
-	this(parent, new File(parent.root, root));
+    public FileStorage(FileStorage parent, String root) throws StorageException {
+	this(parent, parent.getFileForKey(root));
     }
 
     public FileStorage(String path) {
@@ -131,7 +146,15 @@ public class FileStorage extends AbstractStorage {
 
 	return new File(root, key);
     }
+    
+    private boolean isValidPath(String path) {
+	return containsPathChars(path, Storage.PATH_SEPARATOR, forbiddenPathCharacters);
+    }
 
+    private boolean isValidFileName(String name) {
+	return !containsChars(name, forbiddenFileNameChars);
+    }
+    
     @Override
     public OutputStream create(String key) throws StorageEntityExistsException, StorageException {
 	File candidate = getFileForKey(key);
@@ -231,12 +254,12 @@ public class FileStorage extends AbstractStorage {
     }
 
     @Override
-    public Storage createStorage(String key) {
+    public Storage createStorage(String key) throws StorageException {
 	return new FileStorage(this, key);
     }
 
     @Override
-    public Storage createStorageHierarchy(String... keys) {
+    public Storage createStorageHierarchy(String... keys) throws StorageException {
 	Storage parent = this;
 	for (String key : keys) {
 	    parent = parent.createStorage(key);
@@ -329,15 +352,113 @@ public class FileStorage extends AbstractStorage {
 	    String rootPath = root.getCanonicalPath();
 	    
 	    /* test that the key is actually under the root file - because we're paranoid */
-	    if(!filePath.startsWith(rootPath)) {
-		throw new StorageException("Key "+key +" is not relative to "+rootPath);
+	    if (!filePath.startsWith(rootPath)) {
+		throw new StorageException("Key " + key + " is not relative to " + rootPath);
 	    }
 	    /* return relative path */
-	    return filePath.substring(rootPath.length());
-	    
+	    String relPath = filePath.substring(rootPath.length());
+	    if(relPath.isEmpty()) {
+		return PATH_SEPARATOR_STRING;
+	    }
+	    return relPath;
+
 	} catch (Exception e) {
 	    throw new StorageException(this.root + " Failed getting path for key " + key, e);
 	}
 
+    }
+
+    @Override
+    public boolean move(String sourceKey, String destStorageKey) throws StorageException {
+	File sourceFile = getFileForKey(sourceKey);
+	File destFile = getFileForKey(destStorageKey);
+	if (!destFile.isDirectory()) {
+	    throw new StorageException("Destination path is not a directory");
+	}
+
+	if (!destFile.exists()) {
+	    throw new StorageException("Destination path doesn't exist");
+	}
+
+	Path sourcePath = sourceFile.toPath();
+	Path destPath = new File(destFile,sourceFile.getName()).toPath();
+
+	try {
+	    if (sourceFile.isFile()) {
+		/* move a regular file */
+
+		Files.move(sourcePath, destPath);
+
+	    } else if (sourceFile.isDirectory()) {
+		moveDirectory(sourcePath, destPath);
+
+	    }
+	    return true;
+	} catch (IOException e) {
+	    throw new StorageException("Move failed", e);
+	}
+    }
+
+    protected boolean moveDirectory(Path source, Path dest) throws IOException {
+//	if(dest.equals(source.getParent())) {
+	/* if this is simply a rename, then use simple move */
+	Files.move(source, dest);
+	return true;
+//	}
+//	/* otherwise, we have to move files first */
+
+    }
+
+    @Override
+    public StorageEntityInfo[] listEntities(StorageFilter filter) {
+	if(filter == null) {
+	    return listEntities();
+	}
+	
+	FileFilter fileFilter = (f)->{
+	    StorageEntityInfo storageInfo = getStorageInfo(f);
+	    return filter.test(storageInfo);
+	};
+	
+	File[] files = root.listFiles(fileFilter);
+	
+	StorageEntityInfo[] result = new StorageEntityInfo[files.length];
+	int index = 0;
+	for (File f : files) {
+	    result[index] = getStorageInfo(f);
+	    index++;
+	}
+	return result;
+    }
+
+    @Override
+    public boolean rename(String key, String newName) throws StorageException {
+	File fileForKey = getFileForKey(key);
+	
+	try {
+	    if(fileForKey.getCanonicalPath().equals(root.getCanonicalPath())) {
+	        throw new StorageException("Can't move root directory");
+	    }
+	} catch (IOException e) {
+	    throw new StorageException("Rename failed",e);
+	}
+	
+	if(!isValidFileName(newName)) {
+	    throw new StorageException("Invalid filename "+newName);
+	}
+	
+	File destFile = new File(fileForKey.getParent(), newName);
+	
+	if(destFile.exists()) {
+	    throw new StorageException("Destination file already exists");
+	}
+	
+	try {
+	    Files.move(fileForKey.toPath(), destFile.toPath());
+	} catch (IOException e) {
+	    throw new StorageException("Rename failed",e);
+	}
+	
+	return true;
     }
 }
